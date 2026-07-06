@@ -9,7 +9,7 @@
     "dev:server": "pnpm --filter server dev",
     "dev:client": "pnpm --filter client dev",
     "build": "pnpm --filter client build",
-    "test": "pnpm --filter server test",
+    "test": "pnpm --filter server test && pnpm --filter client test",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -23,12 +23,6 @@
     "pnpm": ">=9"
   },
   "packageManager": "pnpm@9.15.0",
-  "pnpm": {
-    "overrides": {
-      "ws": ">=8.21.0",
-      "fast-uri": ">=3.1.2"
-    }
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.5.0",
