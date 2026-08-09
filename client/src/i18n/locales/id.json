@@ -395,6 +395,18 @@
       "note": "Dapur MBG mengandalkan pendapatan pasif yang pasti tiap putaran; Warkop-Cafe mengandalkan sewa besar saat lawan mendarat di sana. Satu usaha per lahan — pilihannya permanen."
     }
   },
+  "sellConfirm": {
+    "title": "Jual properti?",
+    "invested": "Nilai investasi",
+    "refund": "Dibayar bank ({{rate}}%)",
+    "losesHeading": "Kamu juga kehilangan",
+    "loseDevelopment": "{{name}} — semua tingkat yang kamu bangun dibongkar",
+    "loseBusiness": "{{business}} ({{tier}}) — seluruh usahanya dibongkar",
+    "losePriceBoost": "Pengali harga ×{{mult}} yang kamu beli di Kantor Hukum",
+    "loseRegionSet": "Bonus set {{region}} — sewa petak {{region}} lainnya turun dari ×{{mult}}",
+    "loseTransportRung": "Satu tingkat tangga transportasi — {{count}} transportasi sisanya turun dari sewa {{before}} ke {{after}}",
+    "permanent": "Petak kembali ke pasar dengan harga dasarnya. Ini tidak bisa dibatalkan."
+  },
   "lawOffice": {
     "title": "⚖️ Kantor Hukum",
     "intro": "Pilih satu tindakan hukum, atau lewati.",

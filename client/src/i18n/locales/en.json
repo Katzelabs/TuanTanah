@@ -395,6 +395,18 @@
       "note": "Dapur MBG leans on guaranteed passive income each lap; Warkop-Cafe leans on steep rent when a rival lands on it. One business per plot — the choice is permanent."
     }
   },
+  "sellConfirm": {
+    "title": "Sell property?",
+    "invested": "Invested value",
+    "refund": "Bank pays back ({{rate}}%)",
+    "losesHeading": "You also give up",
+    "loseDevelopment": "{{name}} — every tier you built is torn down",
+    "loseBusiness": "{{business}} ({{tier}}) — the whole business is torn down",
+    "losePriceBoost": "The ×{{mult}} price boost you bought at the Law Office",
+    "loseRegionSet": "The {{region}} set bonus — your other {{region}} tiles drop back from ×{{mult}} rent",
+    "loseTransportRung": "A rung on the transport ladder — your {{count}} remaining transports drop from {{before}} to {{after}} rent",
+    "permanent": "The tile goes back on the market at its base price. This can't be undone."
+  },
   "lawOffice": {
     "title": "⚖️ Law Office",
     "intro": "Choose one legal action, or skip.",

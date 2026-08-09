@@ -32,6 +32,7 @@ import { Badge, Button, Card, Modal } from '@/components/ui/index.js'
 import { tileValue } from '@/features/game/lib/tileValue.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 import { Row } from './Row.js'
+import { SellConfirmModal } from './SellConfirmModal.js'
 import { SpecialTileInfo } from './SpecialTileInfo.js'
 
 type TFunc = ReturnType<typeof useTranslation>['t']
@@ -549,31 +550,23 @@ export function PropertyModal({
         </Button>
       )}
 
-      {canSell &&
-        (confirming ? (
-          <div className="mt-5 space-y-2">
-            <Card
-              flat
-              tone="accent"
-              className="px-3 py-2 text-center text-xs font-semibold text-ink"
-            >
-              {t('property.sellConfirm', {
-                name: tileName(t, tileId),
-                refund: formatRupiah(refund),
-              })}
-            </Card>
-            <Button block variant="danger" onClick={handleSell}>
-              {t('property.confirmSell')}
-            </Button>
-            <Button block variant="ghost" size="sm" onClick={() => setConfirming(false)}>
-              {t('common.cancel')}
-            </Button>
-          </div>
-        ) : (
+      {canSell && (
+        <>
+          <SellConfirmModal
+            tileId={tileId}
+            tile={tile}
+            state={state}
+            refund={refund}
+            open={confirming}
+            onConfirm={handleSell}
+            onCancel={() => setConfirming(false)}
+            t={t}
+          />
           <Button block variant="danger" className="mt-5" onClick={() => setConfirming(true)}>
             {t('property.sellBack', { refund: formatRupiah(refund) })}
           </Button>
-        ))}
+        </>
+      )}
 
       {/* Owned by someone else: jump into a deal (buy or swap) with the owner. */}
       {(ownable || isLand) && owner && owner.id !== me?.id && onNegotiate && (

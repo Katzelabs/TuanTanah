@@ -1,6 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { backdrop, modalPanel } from '@/lib/motion.js'
+
+// Body scroll stays locked while any modal is open, so an inner confirm dialog
+// closing doesn't hand scrolling back while its parent modal is still up.
+let openCount = 0
+let overflowBeforeLock = ''
 
 export interface ModalProps {
   open: boolean
@@ -30,18 +35,39 @@ export function Modal({
   dismissable = true,
   className = '',
 }: ModalProps) {
+  const backdropRef = useRef<HTMLDivElement>(null)
+
+  // Reference-counted scroll lock, keyed on `open` alone so a re-render (which
+  // changes an inline `onClose` identity) can't unbalance the count.
   useEffect(() => {
     if (!open) return
+    if (openCount === 0) {
+      overflowBeforeLock = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+    }
+    openCount += 1
+    return () => {
+      openCount -= 1
+      if (openCount === 0) document.body.style.overflow = overflowBeforeLock
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !dismissable) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && dismissable) onClose()
+      if (e.key !== 'Escape') return
+      // Only the visually top-most modal reacts. Same z-index throughout, so
+      // paint order follows DOM order and the last backdrop in the document is
+      // the one on top — that's what lets a confirm dialog nested inside another
+      // modal dismiss on its own instead of closing both. Mount order can't be
+      // used here: React runs child effects before parent ones, so a nested
+      // dialog registers *before* the modal it sits on.
+      const backdrops = document.querySelectorAll('[data-modal-backdrop]')
+      if (backdrops[backdrops.length - 1] !== backdropRef.current) return
+      onClose()
     }
     document.addEventListener('keydown', onKey)
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
-    }
+    return () => document.removeEventListener('keydown', onKey)
   }, [open, dismissable, onClose])
 
   return (
@@ -49,6 +75,8 @@ export function Modal({
       {open && (
         <motion.div
           {...backdrop}
+          ref={backdropRef}
+          data-modal-backdrop=""
           className="fixed inset-0 z-modal flex items-center justify-center bg-ink/40 p-4"
           onClick={dismissable ? onClose : undefined}
           role="dialog"
