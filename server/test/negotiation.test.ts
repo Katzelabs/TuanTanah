@@ -1,4 +1,4 @@
-import { SALES_DEAL_BONUS_RATE } from '@tuan-tanah/shared'
+import { SALES_TRANSACTION_BONUS_RATE } from '@tuan-tanah/shared'
 import type { NegotiationDeal } from '@tuan-tanah/shared'
 import { describe, expect, it } from 'vitest'
 import { hasRentImmunity, tickEffects, tickLapEffects } from '../src/engine/effects.js'
@@ -352,11 +352,31 @@ describe('applyDeal', () => {
     expect(to.cash).toBe(8_000_000)
   })
 
-  it('awards the Sales bonus on a deal it initiates', () => {
+  it("pays a bystander Sales a commission on other players' tile deals", () => {
+    const { state, players } = makeGame(3, { cash: 10_000_000, roles: [null, null, 'sales'] })
+    const [buyer, seller, salesPlayer] = [players[0]!, players[1]!, players[2]!]
+    salesPlayer.cash = 0
+    own(state, 2, seller.id)
+    const bankBefore = state.bank
+    applyDeal(
+      state,
+      deal({
+        type: 'cash_for_property',
+        fromPlayerId: buyer.id,
+        toPlayerId: seller.id,
+        requestTileId: 2,
+        cashAmount: 2_000_000,
+      }),
+    )
+    const bonus = Math.round(2_000_000 * SALES_TRANSACTION_BONUS_RATE)
+    expect(salesPlayer.cash).toBe(bonus)
+    expect(state.bank).toBe(bankBefore - bonus)
+  })
+
+  it('pays no commission when Sales is a participant in the deal', () => {
     const { state, players } = makeGame(2, { cash: 10_000_000, roles: ['sales'] })
     const [salesPlayer, seller] = [players[0]!, players[1]!]
     own(state, 2, seller.id)
-    const bankBefore = state.bank
     applyDeal(
       state,
       deal({
@@ -367,10 +387,9 @@ describe('applyDeal', () => {
         cashAmount: 4_000_000,
       }),
     )
-    const bonus = Math.round(4_000_000 * SALES_DEAL_BONUS_RATE)
-    // Paid 4jt for the tile, then earned the bonus back from the bank.
-    expect(salesPlayer.cash).toBe(10_000_000 - 4_000_000 + bonus)
-    expect(state.bank).toBe(bankBefore - bonus)
+    // Paid 4jt for the tile, no bonus back — participants never earn the cut.
+    expect(salesPlayer.cash).toBe(10_000_000 - 4_000_000)
+    expect(salesPlayer.roleBonusThisLap).toBe(0)
   })
 })
 

@@ -3,7 +3,6 @@ import {
   AFK_FINE_STEP,
   AFK_MAX_STRIKES,
   HOUSE_TIERS,
-  KONTRAKTOR_CUT_RATE,
   LAHAN_LAND_PRICE,
   landTier,
   PROPERTY_TIERS,
@@ -24,7 +23,7 @@ import type {
 } from '@tuan-tanah/shared'
 import { getTileDef, ownsFullRegion } from './board.js'
 import { EngineError } from './index.js'
-import { investorCut } from './roles.js'
+import { applyRentRoleBonuses } from './roles.js'
 import { advanceTurn } from './turn.js'
 import { logKey, uid } from './util.js'
 
@@ -183,49 +182,6 @@ function creditTo(state: GameState, creditorId: string | null, amount: RupiahAmo
   else state.bank += amount
 }
 
-/** Investor role skims a cut (from the bank) of rent paid between two other players. */
-export function applyInvestorCut(
-  state: GameState,
-  payerId: string,
-  ownerId: string,
-  amount: RupiahAmount,
-): void {
-  for (const inv of state.players) {
-    if (inv.role !== 'investor' || inv.isEliminated) continue
-    if (inv.id === payerId || inv.id === ownerId) continue
-    const cut = investorCut(amount)
-    if (cut <= 0) continue
-    inv.cash += cut
-    state.bank -= cut
-    logKey(state, 'elimination.investorCut', { name: inv.name, amount: rpP(cut) }, inv.id)
-  }
-}
-
-/**
- * Kontraktor role skims a cut of rent paid on a tile they built on (the cut is
- * taken from the owner's rent income, not the bank). No-op if the tile has no
- * builder, the builder is gone, or the builder now owns the tile.
- */
-export function applyBuilderCut(
-  state: GameState,
-  ownerId: string,
-  tileId: TileId | undefined,
-  amount: RupiahAmount,
-): void {
-  if (tileId === undefined) return
-  const tile = state.tiles[tileId]
-  if (!tile || tile.builderId === null || tile.builderId === ownerId) return
-  const builder = state.players.find((p) => p.id === tile.builderId)
-  if (!builder || builder.isEliminated) return
-  const owner = state.players.find((p) => p.id === ownerId)
-  if (!owner) return
-  const cut = Math.round(amount * KONTRAKTOR_CUT_RATE)
-  if (cut <= 0) return
-  owner.cash -= cut
-  builder.cash += cut
-  logKey(state, 'elimination.builderCut', { name: builder.name, amount: rpP(cut) }, builder.id)
-}
-
 /**
  * The single primitive for every forced payment (rent, tax, fines, interest).
  * Pays immediately when affordable; otherwise records a pending debt (or
@@ -245,8 +201,7 @@ export function charge(
     player.cash -= amount
     creditTo(state, creditorId, amount)
     if (type === 'rent' && creditorId) {
-      applyInvestorCut(state, player.id, creditorId, amount)
-      applyBuilderCut(state, creditorId, tileId, amount)
+      applyRentRoleBonuses(state, player.id, creditorId, amount, tileId)
     }
     logKey(state, 'elimination.paid', { name: player.name, amount: rpP(amount), reason }, player.id)
     return
@@ -293,8 +248,7 @@ function payOwed(state: GameState, debt: PendingDebt): void {
   debtor.cash -= debt.amount
   creditTo(state, debt.creditorId, debt.amount)
   if (debt.type === 'rent' && debt.creditorId) {
-    applyInvestorCut(state, debt.debtorId, debt.creditorId, debt.amount)
-    applyBuilderCut(state, debt.creditorId, debt.tileId, debt.amount)
+    applyRentRoleBonuses(state, debt.debtorId, debt.creditorId, debt.amount, debt.tileId)
   }
   state.pendingDebts = state.pendingDebts.filter((d) => d.id !== debt.id)
   logKey(

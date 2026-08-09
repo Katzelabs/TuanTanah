@@ -261,7 +261,7 @@ interface RoomSettings {
 
 type Role =
   | 'pengusaha'
-  | 'politisi'
+  | 'pengacara'
   | 'freelancer'
   | 'investor'
   | 'kontraktor'

@@ -121,7 +121,7 @@ export function performMetaAction(
       if (state.turn.hasRolled) {
         throw new EngineError('actions.workAfterRoll')
       }
-      const salary = salaryFor(player)
+      const salary = salaryFor(state, player)
       player.cash += salary
       state.bank -= salary
       state.turn.hasRolled = true // forgoes movement; lets the player end their turn
@@ -138,8 +138,7 @@ export function performMetaAction(
 
     case 'lobby': {
       const target = requireTargetPlayer(state, player.id, req.targetId)
-      let cost: number = META_ACTION_COSTS.lobby
-      if (player.role === 'politisi') cost = Math.round(cost * 0.5) // Politisi: lobby 50% off
+      const cost: number = META_ACTION_COSTS.lobby
       payToBank(state, player, cost)
       state.activeEffects.push({
         id: uid(),

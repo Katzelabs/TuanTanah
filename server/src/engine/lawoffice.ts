@@ -11,6 +11,7 @@ import {
   LAW_OFFICE_PRICE_MULT_MAX,
   LAW_OFFICE_PRICE_MULT_MIN,
   LAW_OFFICE_TRANSFER_RATE,
+  PENGACARA_LAW_DISCOUNT_MULTIPLIER,
   REGIONS,
   rpP,
   tileP,
@@ -26,6 +27,7 @@ import type {
 import { getTileDef } from './board.js'
 import { tileValue } from './elimination.js'
 import { buyTile, EngineError, requireTurn, sendToJail } from './index.js'
+import { applyPengacaraLawCut } from './roles.js'
 import { logKey, uid } from './util.js'
 
 /** Guard a Kantor Hukum action: must be the current player, standing on the tile. */
@@ -33,6 +35,11 @@ function requireLawOffice(state: GameState, playerId: string): Player {
   const player = requireTurn(state, playerId)
   if (!state.turn.pendingLawOffice) throw new EngineError('core.notAtLawOffice')
   return player
+}
+
+/** A law-office fee for a player — Pengacara pays half (their passive discount). */
+function lawFeeFor(player: Player, base: RupiahAmount): RupiahAmount {
+  return Math.round(base * (player.role === 'pengacara' ? PENGACARA_LAW_DISCOUNT_MULTIPLIER : 1))
 }
 
 /** Kantor Hukum: buy any unowned buyable tile remotely (normal price). */
@@ -169,6 +176,8 @@ function resolveAuction(state: GameState): void {
       { name: owner.name, tile: tileP(auction.tileId), amount: rpP(bid) },
       owner.id,
     )
+    // A defended bid is bank-bound legal spending — the Pengacara skims it.
+    applyPengacaraLawCut(state, owner.id, bid)
   }
 }
 
@@ -179,16 +188,20 @@ export function lawOfficeJail(state: GameState, playerId: string, targetPlayerId
   const target = state.players.find((p) => p.id === targetPlayerId)
   if (!target || target.isEliminated) throw new EngineError('core.invalidTarget')
   if (target.inJail) throw new EngineError('core.alreadyInJail')
-  if (player.cash < LAW_OFFICE_JAIL_FEE) throw new EngineError('core.notEnoughCashBribe')
+  // Pejabat can't be jailed — reject up front so the bribe isn't wasted.
+  if (target.role === 'pejabat') throw new EngineError('roles.cannotJailPejabat')
+  const fee = lawFeeFor(player, LAW_OFFICE_JAIL_FEE)
+  if (player.cash < fee) throw new EngineError('core.notEnoughCashBribe')
 
-  player.cash -= LAW_OFFICE_JAIL_FEE
-  state.bank += LAW_OFFICE_JAIL_FEE
+  player.cash -= fee
+  state.bank += fee
   logKey(
     state,
     'core.jailBribe',
-    { name: player.name, amount: rpP(LAW_OFFICE_JAIL_FEE), target: target.name },
+    { name: player.name, amount: rpP(fee), target: target.name },
     player.id,
   )
+  applyPengacaraLawCut(state, player.id, fee)
   sendToJail(state, target)
   state.turn.pendingLawOffice = false
 }
@@ -199,20 +212,22 @@ export function lawOfficeFreepass(state: GameState, playerId: string, pass: Pass
   if (pass !== 'rent_free' && pass !== 'tax_free' && pass !== 'jail_free') {
     throw new EngineError('core.invalidPassType')
   }
-  if (player.cash < LAW_OFFICE_FREEPASS_PRICE) {
+  const price = lawFeeFor(player, LAW_OFFICE_FREEPASS_PRICE)
+  if (player.cash < price) {
     throw new EngineError('core.notEnoughCashFreepass')
   }
-  player.cash -= LAW_OFFICE_FREEPASS_PRICE
-  state.bank += LAW_OFFICE_FREEPASS_PRICE
+  player.cash -= price
+  state.bank += price
   player.ownedCards.push({ id: uid(), type: pass })
   state.turn.pendingLawOffice = false
   const label = pass.replace('_', '-')
   logKey(
     state,
     'core.boughtFreepass',
-    { name: player.name, pass: label, amount: rpP(LAW_OFFICE_FREEPASS_PRICE) },
+    { name: player.name, pass: label, amount: rpP(price) },
     player.id,
   )
+  applyPengacaraLawCut(state, player.id, price)
 }
 
 /**
@@ -246,10 +261,11 @@ export function lawOfficePriceUpgrade(
   if (def.type !== 'property' && def.type !== 'transport' && def.type !== 'buildable_land') {
     throw new EngineError('core.tileNotUpgradable')
   }
-  const cost = Math.round(tileValue(state, tile) * multiplier)
+  const cost = lawFeeFor(player, tileValue(state, tile) * multiplier)
   if (player.cash < cost) throw new EngineError('core.notEnoughCashPriceUpgrade')
   player.cash -= cost
   state.bank += cost
+  applyPengacaraLawCut(state, player.id, cost)
   // A property upgrade boosts every tile the player owns in that region; transport and
   // Lahan Kosong (which have no region) only boost the single selected tile.
   if (def.type === 'property' && def.region) {

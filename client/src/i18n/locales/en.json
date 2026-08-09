@@ -462,43 +462,43 @@
     "roles": {
       "pengusaha": {
         "name": "Entrepreneur",
-        "ability": "Build & upgrade tiles 20% cheaper"
+        "ability": "Earns +50% on own rent & passive income (max Rp 2jt per lap)"
       },
-      "politisi": {
-        "name": "Politician",
-        "ability": "Lobby costs 50% less"
+      "pengacara": {
+        "name": "Lawyer",
+        "ability": "Law office 50% cheaper + earns 50% of others' legal fees (max Rp 2jt per lap)"
       },
       "freelancer": {
         "name": "Freelancer",
-        "ability": "Salary 1.5× when passing GO"
+        "ability": "High GO salary + hustle winnings ×2"
       },
       "investor": {
         "name": "Investor",
-        "ability": "Earn 5% from every rent paid to others"
+        "ability": "Earns 15% of rent paid between other players (max Rp 2jt per lap)"
       },
       "kontraktor": {
         "name": "Contractor",
-        "ability": "Build on others' property for 30% cut"
+        "ability": "Builds 50% cheaper + earns 30% of others' build spending (max Rp 2jt per lap)"
       },
       "ojol_driver": {
         "name": "Ojol Driver",
-        "ability": "Never pay travel/movement tax"
+        "ability": "Pays 50% less tax + earns +50% on own transport rent (max Rp 2jt per lap)"
       },
       "influencer": {
         "name": "Influencer",
-        "ability": "Once per game: viral boost 3× for 3 turns"
+        "ability": "GO salary grows Rp 500rb every round, up to Rp 7jt"
       },
       "pejabat": {
         "name": "Official",
-        "ability": "Once per game: block any kejadian card"
+        "ability": "Highest salary and can never be jailed"
       },
       "rentenir": {
         "name": "Loan Shark",
-        "ability": "Force one player per round to take pinjol, earns the interest"
+        "ability": "Lends pinjol for interest + earns 50% of others' loan interest (max Rp 2jt per lap)"
       },
       "sales": {
         "name": "Sales",
-        "ability": "Buy property 25% cheaper + earn 15% bank bonus on initiated deals"
+        "ability": "Buys property 20% cheaper + earns 50% of others' tile deals (max Rp 1.5jt per lap)"
       }
     },
     "tiers": {

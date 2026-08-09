@@ -18,7 +18,6 @@ export const log: MessageMap = {
       '{{name}} will share {{percent}}% of passive income with {{beneficiary}} for {{laps}} lap(s)',
     'negotiation.playerLoan': '{{name}} borrowed {{amount}} from {{lender}} at {{rate}}%/lap',
     'negotiation.cashGift': '{{name}} gave {{amount}} to {{to}}',
-    'negotiation.salesBonus': '{{name}} earned a {{amount}} Sales bonus on the deal',
   },
   id: {
     'negotiation.proposed': '{{name}} mengajukan {{deal}} kepada {{to}}',
@@ -38,7 +37,6 @@ export const log: MessageMap = {
     'negotiation.playerLoan':
       '{{name}} meminjam {{amount}} dari {{lender}} dengan bunga {{rate}}%/putaran',
     'negotiation.cashGift': '{{name}} memberi {{amount}} kepada {{to}}',
-    'negotiation.salesBonus': '{{name}} mendapat bonus Sales {{amount}} dari kesepakatan ini',
   },
 }
 

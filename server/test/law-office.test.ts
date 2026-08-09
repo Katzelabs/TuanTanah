@@ -2,6 +2,7 @@ import {
   LAW_OFFICE_FREEPASS_PRICE,
   LAW_OFFICE_JAIL_FEE,
   LAW_OFFICE_TRANSFER_RATE,
+  PENGACARA_LAW_CUT_RATE,
 } from '@tuan-tanah/shared'
 import { describe, expect, it } from 'vitest'
 import {
@@ -84,6 +85,33 @@ describe('Kantor Hukum (law_office)', () => {
   it('rejects jailing yourself', () => {
     const { state, players } = atLawOffice()
     expect(() => lawOfficeJail(state, players[0]!.id, players[0]!.id)).toThrow(EngineError)
+  })
+
+  it('rejects jailing a Pejabat (their bribe would be wasted)', () => {
+    const { state, players } = makeGame(2, { cash: 1_000_000_000, roles: [null, 'pejabat'] })
+    state.currentPlayerIndex = 0
+    state.turn.pendingLawOffice = true
+    expect(() => lawOfficeJail(state, players[0]!.id, players[1]!.id)).toThrow(EngineError)
+  })
+
+  it('charges a Pengacara half price for law-office fees', () => {
+    const { state, players } = makeGame(2, { cash: 1_000_000_000, roles: ['pengacara'] })
+    state.currentPlayerIndex = 0
+    state.turn.pendingLawOffice = true
+    const lawyer = players[0]!
+    const cash = lawyer.cash
+    lawOfficeFreepass(state, lawyer.id, 'tax_free')
+    expect(lawyer.cash).toBe(cash - Math.round(LAW_OFFICE_FREEPASS_PRICE * 0.5))
+  })
+
+  it("pays a bystander Pengacara a cut of another player's legal fees", () => {
+    const { state, players } = makeGame(2, { cash: 1_000_000_000, roles: [null, 'pengacara'] })
+    state.currentPlayerIndex = 0
+    state.turn.pendingLawOffice = true
+    const [payer, lawyer] = [players[0]!, players[1]!]
+    lawyer.cash = 0
+    lawOfficeFreepass(state, payer.id, 'tax_free')
+    expect(lawyer.cash).toBe(Math.round(LAW_OFFICE_FREEPASS_PRICE * PENGACARA_LAW_CUT_RATE))
   })
 
   it('buys a free-pass card into inventory', () => {

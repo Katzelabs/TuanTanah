@@ -57,7 +57,14 @@ import {
   hasRentImmunity,
   tickLapEffects,
 } from './effects.js'
-import { buildCostMultiplier, buyPriceMultiplier, salaryFor, taxMultiplier } from './roles.js'
+import {
+  applyKontraktorBuildCut,
+  applySalesTransactionCut,
+  buildCostMultiplier,
+  buyPriceMultiplier,
+  salaryFor,
+  taxMultiplier,
+} from './roles.js'
 import { advanceTurn, collectPassiveIncome, startTurn } from './turn.js'
 import { renderErrorEn } from './messages.js'
 import { defaultRng, logKey, pushLog, shuffle, uid, type Rng } from './util.js'
@@ -151,6 +158,7 @@ export function addPlayer(state: GameState, name: string): Player {
     usedAbility: false,
     forcedLoanRound: 0,
     metaActionsUsed: [],
+    roleBonusThisLap: 0,
     owesLapInterest: false,
     afkStrikes: 0,
   }
@@ -260,6 +268,7 @@ export function startGame(state: GameState, playerId: string, rng: Rng = default
     p.ownedCards = []
     p.isEliminated = false
     p.usedAbility = false
+    p.roleBonusThisLap = 0
   }
   state.kejadianDeck = shuffle(
     KEJADIAN_CARDS.map((c) => c.id),
@@ -417,13 +426,15 @@ function movePlayer(
   const passedGo = oldPos + steps >= BOARD_SIZE
   player.position = (oldPos + steps) % BOARD_SIZE
   if (passedGo) {
-    const salary = salaryFor(player)
+    const salary = salaryFor(state, player)
     player.cash += salary
     state.bank -= salary
     logKey(state, 'core.passedGo', { name: player.name, amount: rpP(salary) }, player.id)
-    // A new lap: refresh the meta-action allowance, and mark loan interest due
-    // (charged at the start of their next turn, off the movement/debt path).
+    // A new lap: refresh the meta-action allowance and the role-bonus cap, and
+    // mark loan interest due (charged at the start of their next turn, off the
+    // movement/debt path).
     player.metaActionsUsed = []
+    player.roleBonusThisLap = 0
     if (player.loans.length > 0) player.owesLapInterest = true
     // Passive income pays once per lap, before resolving the tile they land on
     // so the cash is on hand if they owe rent there.
@@ -579,6 +590,12 @@ function resolveRinjani(state: GameState, lander: Player): void {
 }
 
 export function sendToJail(state: GameState, player: Player): void {
+  // Pejabat passive: connections keep them out of jail entirely (three-doubles,
+  // jail_go tile, korupsi bust, law-office bribes — every path lands here).
+  if (player.role === 'pejabat') {
+    logKey(state, 'roles.pejabatNoJail', { name: player.name }, player.id)
+    return
+  }
   if (consumeOwnedCard(player, 'jail_free')) {
     logKey(state, 'core.jailFreePass', { name: player.name }, player.id)
     return
@@ -700,6 +717,8 @@ export function buyTile(state: GameState, player: Player, tileId: TileId): void 
     { name: player.name, tile: tileP(tileId), amount: rpP(price) },
     player.id,
   )
+  // Sales passive: a bystander Sales earns a commission on this purchase.
+  applySalesTransactionCut(state, [player.id], price)
 }
 
 export function buyProperty(state: GameState, playerId: string, tileId: TileId): void {
@@ -712,10 +731,10 @@ export function buyProperty(state: GameState, playerId: string, tileId: TileId):
 }
 
 /**
- * Develop a property tile one tier along its House or Property track. The owner
- * builds on their own tile; a Kontraktor may instead build on another player's
- * tile (recording `builderId` so they earn a rent cut). The first build on a
- * tile picks + locks its track. Costs region buyPrice × the tier's buildCostMult.
+ * Develop an owned property tile one tier along its House or Property track.
+ * The first build on a tile picks + locks its track. Costs region buyPrice ×
+ * the tier's buildCostMult (Kontraktor builds at a discount, and a bystander
+ * Kontraktor skims a cut of what other players spend here).
  */
 export function upgradeProperty(
   state: GameState,
@@ -730,10 +749,7 @@ export function upgradeProperty(
   }
   const tile = state.tiles[tileId]
   if (!tile || tile.ownerId === null) throw new EngineError('core.tileNotOwned')
-
-  const isOwn = tile.ownerId === player.id
-  const isKontraktorBuild = !isOwn && player.role === 'kontraktor'
-  if (!isOwn && !isKontraktorBuild) throw new EngineError('core.notYourTile')
+  if (tile.ownerId !== player.id) throw new EngineError('core.notYourTile')
 
   // Optional room rule: the tile owner must own the whole region before building.
   if (state.settings.requireFullRegionToBuild && !ownsFullRegion(state, tile.ownerId, def.region)) {
@@ -771,35 +787,19 @@ export function upgradeProperty(
   state.bank += cost
   tile.track = activeTrack
   tile.tier = nextTier
-  if (isKontraktorBuild) tile.builderId = player.id
-
-  if (isKontraktorBuild) {
-    const owner = state.players.find((p) => p.id === tile.ownerId)
-    logKey(
-      state,
-      'core.kontraktorBuilt',
-      {
-        name: player.name,
-        tier: tierP(activeTrack!, nextTier),
-        owner: owner?.name ?? 'a',
-        tile: tileP(tileId),
-        amount: rpP(cost),
-      },
-      player.id,
-    )
-  } else {
-    logKey(
-      state,
-      'core.upgradedTile',
-      {
-        name: player.name,
-        tile: tileP(tileId),
-        tier: tierP(activeTrack!, nextTier),
-        amount: rpP(cost),
-      },
-      player.id,
-    )
-  }
+  logKey(
+    state,
+    'core.upgradedTile',
+    {
+      name: player.name,
+      tile: tileP(tileId),
+      tier: tierP(activeTrack!, nextTier),
+      amount: rpP(cost),
+    },
+    player.id,
+  )
+  // Kontraktor passive: a bystander Kontraktor skims a cut of this build spend.
+  applyKontraktorBuildCut(state, player.id, cost)
 }
 
 /** Sell an owned tile back to the bank for a partial refund (SELL_REFUND_RATE of invested value). */
@@ -825,6 +825,8 @@ export function sellProperty(state: GameState, playerId: string, tileId: TileId)
     { name: player.name, tile: tileP(tileId), amount: rpP(refund) },
     player.id,
   )
+  // Sales passive: a bystander Sales earns a commission on this sale.
+  applySalesTransactionCut(state, [player.id], refund)
   // If this covered a pending debt, settle it (and advance off an eliminated turn).
   settleIfAble(state, playerId)
 }
@@ -969,6 +971,8 @@ export function buildLahan(
       player.id,
     )
   }
+  // Kontraktor passive: a bystander Kontraktor skims a cut of this build spend.
+  applyKontraktorBuildCut(state, player.id, cost)
 }
 
 /**

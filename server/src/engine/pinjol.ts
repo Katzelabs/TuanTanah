@@ -14,6 +14,7 @@ import type { GameState, Player, RupiahAmount } from '@tuan-tanah/shared'
 import { getTileDef } from './board.js'
 import { charge, settleIfAble } from './elimination.js'
 import { EngineError, requireDebtorOrTurn, requireTurn } from './index.js'
+import { applyRentenirInterestCut } from './roles.js'
 import { logKey, uid } from './util.js'
 
 /** Sum of the buy price of every tile the player owns (property value only). */
@@ -193,6 +194,8 @@ export function chargeInterest(state: GameState, player: Player): RupiahAmount {
       if (lender) lender.cash += loan.interestPerLap
       else state.bank += loan.interestPerLap
       loan.interestPaid += loan.interestPerLap
+      // Rentenir passive: skims a cut of interest others pay (not on own loans).
+      applyRentenirInterestCut(state, player.id, loan.lenderId, loan.interestPerLap)
     }
     player.cash -= total
     logKey(state, 'pinjol.paidInterest', { name: player.name, amount: rpP(total) }, player.id)

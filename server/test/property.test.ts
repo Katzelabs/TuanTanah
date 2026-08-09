@@ -1,4 +1,10 @@
-import { PROPERTY_TIERS, REGIONS, SELL_REFUND_RATE } from '@tuan-tanah/shared'
+import {
+  KONTRAKTOR_BUILD_CUT_RATE,
+  PROPERTY_TIERS,
+  REGIONS,
+  SALES_TRANSACTION_BONUS_RATE,
+  SELL_REFUND_RATE,
+} from '@tuan-tanah/shared'
 import { describe, expect, it } from 'vitest'
 import {
   buyTile,
@@ -27,7 +33,16 @@ describe('buyTile', () => {
     const { state, players } = makeGame(2, { cash: 5_000_000, roles: ['sales'] })
     const p = players[0]!
     buyTile(state, p, 1)
-    expect(p.cash).toBe(5_000_000 - Math.round(PAPUA.buyPrice * 0.75))
+    expect(p.cash).toBe(5_000_000 - Math.round(PAPUA.buyPrice * 0.8))
+  })
+
+  it('pays a bystander Sales a commission on another player buying a tile', () => {
+    const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'sales'] })
+    const [buyer, seller] = [players[0]!, players[1]!]
+    seller.cash = 0
+    buyTile(state, buyer, 1)
+    expect(seller.cash).toBe(Math.round(PAPUA.buyPrice * SALES_TRANSACTION_BONUS_RATE))
+    expect(seller.roleBonusThisLap).toBe(seller.cash)
   })
 
   it('rejects an already-owned tile', () => {
@@ -70,14 +85,33 @@ describe('upgradeProperty', () => {
     expect(state.tiles[1]!.tier).toBe(3)
   })
 
-  it('charges a Pengusaha 20% less to build', () => {
-    const { state, players } = makeGame(2, { cash: 10_000_000, roles: ['pengusaha'] })
+  it('charges a Kontraktor 50% less to build', () => {
+    const { state, players } = makeGame(2, { cash: 10_000_000, roles: ['kontraktor'] })
     const p = players[0]!
     state.currentPlayerIndex = 0
     own(state, 1, p.id)
     upgradeProperty(state, p.id, 1, 'property')
-    const cost = Math.round(PAPUA.buyPrice * PROPERTY_TIERS[0]!.buildCostMult * 0.8)
+    const cost = Math.round(PAPUA.buyPrice * PROPERTY_TIERS[0]!.buildCostMult * 0.5)
     expect(p.cash).toBe(10_000_000 - cost)
+  })
+
+  it("pays a bystander Kontraktor a cut of another player's build spend", () => {
+    const { state, players } = makeGame(2, { cash: 10_000_000, roles: [null, 'kontraktor'] })
+    const [builder, contractor] = [players[0]!, players[1]!]
+    contractor.cash = 0
+    state.currentPlayerIndex = 0
+    own(state, 1, builder.id)
+    upgradeProperty(state, builder.id, 1, 'property')
+    const cost = Math.round(PAPUA.buyPrice * PROPERTY_TIERS[0]!.buildCostMult)
+    expect(contractor.cash).toBe(Math.round(cost * KONTRAKTOR_BUILD_CUT_RATE))
+  })
+
+  it("rejects building on another player's tile", () => {
+    const { state, players } = makeGame(2, { cash: 10_000_000, roles: ['kontraktor'] })
+    const p = players[0]!
+    state.currentPlayerIndex = 0
+    own(state, 1, players[1]!.id)
+    expect(() => upgradeProperty(state, p.id, 1, 'property')).toThrow(EngineError)
   })
 
   it('rejects switching tracks once locked', () => {

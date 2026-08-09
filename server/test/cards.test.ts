@@ -2,6 +2,7 @@ import {
   BANJIR_DURATION_ROUNDS,
   BANJIR_TIER_DROP,
   DOLLAR_NAIK_CASH_RATE,
+  FREELANCER_HUSTLE_WIN_MULTIPLIER,
   GO_TILE_ID,
   INVESTASI_ASING_BONUS,
   LAW_OFFICE_TILE_ID,
@@ -44,12 +45,20 @@ describe('drawHustle', () => {
     expect(p.ownedCards[0]!.type).toBe('jail_free')
   })
 
+  it('doubles hustle winnings for the Freelancer', () => {
+    const { state, players } = makeGame(2, { cash: 0, roles: ['freelancer', null] })
+    const p = players[0]!
+    state.hustleDeck = ['dropshipper'] // earn 1jt
+    drawHustle(state, p)
+    expect(p.cash).toBe(1_000_000 * FREELANCER_HUSTLE_WIN_MULTIPLIER)
+  })
+
   it('the advance-to-GO card moves the player to GO and pays pass-GO salary', () => {
     const { state, players } = makeGame(2, { cash: 0, roles: ['ojol_driver', null] })
     const p = players[0]!
     p.position = 35 // mid-board: advancing to GO wraps and passes GO
     state.hustleDeck = ['advance_go']
-    const salary = salaryFor(p)
+    const salary = salaryFor(state, p)
     expect(salary).toBeGreaterThan(0)
     drawHustle(state, p)
     expect(p.position).toBe(GO_TILE_ID)
@@ -63,7 +72,7 @@ describe('drawHustle', () => {
     state.hustleDeck = ['advance_go']
     drawHustle(state, p)
     expect(p.position).toBe(GO_TILE_ID)
-    expect(p.cash).toBe(salaryFor(p))
+    expect(p.cash).toBe(salaryFor(state, p))
   })
 
   it('the advance-to-Law-Office card moves the player to Kantor Hukum and opens its menu', () => {

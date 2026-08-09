@@ -1,10 +1,13 @@
 import {
   INVESTOR_RENT_CUT_RATE,
-  KONTRAKTOR_CUT_RATE,
+  OJOL_TRANSPORT_BONUS_RATE,
+  PENGUSAHA_INCOME_BONUS_RATE,
   PROPERTY_TIERS,
   REGION_SET_VALUE_MULTIPLIER,
   REGIONS,
+  ROLE_BONUS_CAP,
   TRANSPORT_BUY_PRICE,
+  TRANSPORT_TILE_IDS,
 } from '@tuan-tanah/shared'
 import { describe, expect, it } from 'vitest'
 import {
@@ -102,16 +105,45 @@ describe('charge', () => {
     expect(state.bank).toBe(bankBefore - cut)
   })
 
-  it('applies the builder cut on rent (from the owner)', () => {
-    const { state, players } = makeGame(3, { cash: 5_000_000, roles: [null, null, 'kontraktor'] })
-    const [payer, owner, builder] = [players[0]!, players[1]!, players[2]!]
+  it('pays the Pengusaha a landlord bonus on rent they collect', () => {
+    const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'pengusaha'] })
+    const [payer, owner] = [players[0]!, players[1]!]
     owner.cash = 0
-    builder.cash = 0
-    own(state, 1, owner.id, { track: 'property', tier: 1, builderId: builder.id })
+    own(state, 1, owner.id, { track: 'property', tier: 1 })
     charge(state, payer, 1_000_000, owner.id, 'rent', 'rent', 1)
-    const cut = Math.round(1_000_000 * KONTRAKTOR_CUT_RATE)
-    expect(builder.cash).toBe(cut)
-    expect(owner.cash).toBe(1_000_000 - cut)
+    const bonus = Math.round(1_000_000 * PENGUSAHA_INCOME_BONUS_RATE)
+    expect(owner.cash).toBe(1_000_000 + bonus)
+    expect(owner.roleBonusThisLap).toBe(bonus)
+  })
+
+  it('pays the Ojol Driver a bonus on rent from their own transport tile', () => {
+    const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'ojol_driver'] })
+    const [payer, owner] = [players[0]!, players[1]!]
+    owner.cash = 0
+    const transportTile = TRANSPORT_TILE_IDS[0]!
+    own(state, transportTile, owner.id)
+    charge(state, payer, 1_000_000, owner.id, 'rent', 'rent', transportTile)
+    expect(owner.cash).toBe(1_000_000 + Math.round(1_000_000 * OJOL_TRANSPORT_BONUS_RATE))
+  })
+
+  it('pays the Ojol Driver no bonus on non-transport rent', () => {
+    const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'ojol_driver'] })
+    const [payer, owner] = [players[0]!, players[1]!]
+    owner.cash = 0
+    own(state, 1, owner.id, { track: 'property', tier: 1 })
+    charge(state, payer, 1_000_000, owner.id, 'rent', 'rent', 1)
+    expect(owner.cash).toBe(1_000_000)
+  })
+
+  it('clamps the investor cut to the per-lap cap', () => {
+    const { state, players } = makeGame(3, { cash: 50_000_000, roles: [null, null, 'investor'] })
+    const [payer, owner, investor] = [players[0]!, players[1]!, players[2]!]
+    investor.cash = 0
+    investor.roleBonusThisLap = ROLE_BONUS_CAP - 100_000
+    charge(state, payer, 10_000_000, owner.id, 'rent', 'rent', 1)
+    // 15% of 10jt = 1.5jt, but only 100k of cap headroom remains this lap.
+    expect(investor.cash).toBe(100_000)
+    expect(investor.roleBonusThisLap).toBe(ROLE_BONUS_CAP)
   })
 
   it('opens a pending debt when unaffordable but the player owns property', () => {

@@ -8,7 +8,6 @@ import {
   PLAYER_LOAN_MAX_RATE,
   REGIONS,
   rpP,
-  SALES_DEAL_BONUS_RATE,
   tileP,
   TRANSPORT_BUY_PRICE,
 } from '@tuan-tanah/shared'
@@ -23,6 +22,7 @@ import type {
 import { getTileDef } from './board.js'
 import { settleIfAble } from './elimination.js'
 import { EngineError } from './index.js'
+import { applySalesTransactionCut } from './roles.js'
 import { logKey, uid } from './util.js'
 
 function findPlayer(state: GameState, id: string): Player | undefined {
@@ -414,13 +414,7 @@ export function applyDeal(state: GameState, deal: NegotiationDeal): void {
     }
   }
 
-  // Sales role earns a 15% bank bonus on deals it initiates.
-  if (from.role === 'sales') {
-    const bonus = Math.round(dealValue(deal) * SALES_DEAL_BONUS_RATE)
-    if (bonus > 0) {
-      from.cash += bonus
-      state.bank -= bonus
-      logKey(state, 'negotiation.salesBonus', { name: from.name, amount: rpP(bonus) }, from.id)
-    }
-  }
+  // Sales passive: a bystander Sales earns a commission on other players'
+  // tile deals (the deal's participants never earn it).
+  applySalesTransactionCut(state, [from.id, to.id], dealValue(deal))
 }

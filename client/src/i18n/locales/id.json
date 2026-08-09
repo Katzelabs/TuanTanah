@@ -462,43 +462,43 @@
     "roles": {
       "pengusaha": {
         "name": "Pengusaha",
-        "ability": "Bangun & tingkatkan tile 20% lebih murah"
+        "ability": "Dapat +50% dari sewa & pendapatan pasif sendiri (maks Rp 2jt per putaran)"
       },
-      "politisi": {
-        "name": "Politisi",
-        "ability": "Biaya lobi 50% lebih murah"
+      "pengacara": {
+        "name": "Pengacara",
+        "ability": "Kantor hukum 50% lebih murah + dapat 50% dari biaya hukum pemain lain (maks Rp 2jt per putaran)"
       },
       "freelancer": {
         "name": "Freelancer",
-        "ability": "Gaji 1,5× saat melewati GO"
+        "ability": "Gaji GO tinggi + kemenangan hustle ×2"
       },
       "investor": {
         "name": "Investor",
-        "ability": "Dapat 5% dari setiap sewa yang dibayar ke pemain lain"
+        "ability": "Dapat 15% dari sewa antar pemain lain (maks Rp 2jt per putaran)"
       },
       "kontraktor": {
         "name": "Kontraktor",
-        "ability": "Bangun di properti pemain lain untuk potongan 30%"
+        "ability": "Bangun 50% lebih murah + dapat 30% dari biaya pembangunan pemain lain (maks Rp 2jt per putaran)"
       },
       "ojol_driver": {
         "name": "Ojol Driver",
-        "ability": "Tidak pernah bayar pajak perjalanan/perpindahan"
+        "ability": "Bayar pajak 50% lebih murah + dapat +50% dari sewa transportasi sendiri (maks Rp 2jt per putaran)"
       },
       "influencer": {
         "name": "Influencer",
-        "ability": "Sekali per permainan: viral boost 3× selama 3 giliran"
+        "ability": "Gaji GO naik Rp 500rb setiap ronde, sampai Rp 7jt"
       },
       "pejabat": {
         "name": "Pejabat",
-        "ability": "Sekali per permainan: blokir kartu kejadian apa pun"
+        "ability": "Gaji tertinggi dan tidak pernah bisa dipenjara"
       },
       "rentenir": {
         "name": "Rentenir",
-        "ability": "Paksa satu pemain per ronde mengambil pinjol, dapat bunganya"
+        "ability": "Meminjamkan pinjol berbunga + dapat 50% dari bunga pinjol pemain lain (maks Rp 2jt per putaran)"
       },
       "sales": {
         "name": "Sales",
-        "ability": "Beli properti 25% lebih murah + dapat bonus bank 15% atas kesepakatan yang diajukan"
+        "ability": "Beli properti 20% lebih murah + dapat 50% dari transaksi tile pemain lain (maks Rp 1,5jt per putaran)"
       }
     },
     "tiers": {

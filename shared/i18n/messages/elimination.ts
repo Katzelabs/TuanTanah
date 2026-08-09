@@ -2,8 +2,6 @@ import type { MessageMap } from '../params.js'
 
 export const log: MessageMap = {
   en: {
-    'elimination.investorCut': '{{name}} earned {{amount}} investor cut on rent',
-    'elimination.builderCut': '{{name}} earned {{amount}} builder cut on rent',
     'elimination.paid': '{{name}} paid {{amount}} — {{reason}}',
     'elimination.owesDebt':
       '{{name}} owes {{amount}} ({{reason}}) and must sell property or take a pinjol',
@@ -17,8 +15,6 @@ export const log: MessageMap = {
     'elimination.winsLastStanding': '🏆 {{name}} wins — is the last player standing!',
   },
   id: {
-    'elimination.investorCut': '{{name}} mendapat {{amount}} komisi investor dari sewa',
-    'elimination.builderCut': '{{name}} mendapat {{amount}} komisi kontraktor dari sewa',
     'elimination.paid': '{{name}} membayar {{amount}} — {{reason}}',
     'elimination.owesDebt':
       '{{name}} berutang {{amount}} ({{reason}}) dan harus menjual properti atau mengambil pinjol',

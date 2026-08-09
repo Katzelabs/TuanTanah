@@ -283,20 +283,28 @@ Can't pay → take pinjol (up to 3 loans)
 
 ---
 
-### 🎭 All 10 Roles
+### 🎭 All 10 Roles (Passive v3)
 
-| #   | Role        | Salary (GO) | Passive Ability                                                   |
-| --- | ----------- | ----------- | ----------------------------------------------------------------- |
-| 1   | Pengusaha   | Rp 3 juta   | Upgrade 2 tiers per turn                                          |
-| 2   | Politisi    | Rp 4 juta   | Lobby costs 50% less                                              |
-| 3   | Freelancer  | Rp 3 juta   | Salary 1.5× when passing GO                                       |
-| 4   | Investor    | Rp 2.5 juta | Earn 5% from every rent paid to others                            |
-| 5   | Kontraktor  | Rp 3 juta   | Build on others' property for 30% cut                             |
-| 6   | Ojol Driver | Rp 1.5 juta | Never pay travel/movement tax                                     |
-| 7   | Influencer  | Rp 2 juta   | Once per game: viral boost 3× for 3 turns                         |
-| 8   | Pejabat     | Rp 5 juta   | Once per game: block any kejadian card                            |
-| 9   | Rentenir    | Rp 3.5 juta | Force one player per round to take pinjol, earns the interest     |
-| 10  | Sales       | Rp 2.5 juta | Buy property 25% cheaper + earn 15% bank bonus on initiated deals |
+Every role taxes a different stream of the economy. All "bonus money" passives are paid by
+the bank and capped **per lap** (the cap resets when the player passes GO, like the
+meta-action allowance): **Rp 2 juta/lap** for every role except Sales (**Rp 1.5 juta/lap**).
+
+| #   | Role        | Salary (GO)        | Passive                                                                                   |
+| --- | ----------- | ------------------ | ----------------------------------------------------------------------------------------- |
+| 1   | Pengusaha   | Rp 3 juta          | +50% on own rent & passive income (capped)                                                |
+| 2   | Pengacara   | Rp 4.5 juta        | Law-office actions 50% cheaper + earns 50% of others' legal fees (capped)                 |
+| 3   | Freelancer  | Rp 4.5 juta        | High GO salary + hustle winnings ×2 (losses stay normal)                                  |
+| 4   | Investor    | Rp 3 juta          | Earns 15% of rent paid between other players (capped)                                     |
+| 5   | Kontraktor  | Rp 3 juta          | Builds 50% cheaper + earns 30% of others' build spending (capped)                         |
+| 6   | Ojol Driver | Rp 3 juta          | Pays 50% less tax + earns +50% on own transport-tile rent (capped)                        |
+| 7   | Influencer  | Rp 3 juta → 7 juta | GO salary grows Rp 500rb every round, hard-capped at Rp 7 juta (late-game earner)         |
+| 8   | Pejabat     | Rp 5 juta          | Highest fixed salary and can never be jailed (jail tile, korupsi busts, force-jail)       |
+| 9   | Rentenir    | Rp 4 juta          | Lends pinjol directly (earns full interest) + earns 50% of others' loan interest (capped) |
+| 10  | Sales       | Rp 3 juta          | Buys property 20% cheaper + earns 50% of others' tile buys/sells/deals (capped 1.5jt)     |
+
+Active abilities are unchanged in this pass (Influencer viral boost and Pejabat kejadian
+block, once per game; Rentenir force-loan once per round). A per-lap active ability for
+every role is planned as phase 2.
 
 Room master can enable/disable any role before game starts. Players pick first come first served in lobby. No duplicate roles.
 

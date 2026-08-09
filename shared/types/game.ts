@@ -10,7 +10,7 @@ export type GamePhase = 'lobby' | 'playing' | 'ended'
 
 export type Role =
   | 'pengusaha'
-  | 'politisi'
+  | 'pengacara'
   | 'freelancer'
   | 'investor'
   | 'kontraktor'
@@ -98,6 +98,9 @@ export interface Player {
   // at META_ACTIONS_PER_LAP, no repeats; reset when the player passes GO.
   // Pinjol/Negosiasi are unlimited and not tracked here.
   metaActionsUsed: MetaActionType[]
+  // Role-passive bonus money received this lap, counted against the role's
+  // per-lap cap (ROLE_BONUS_CAP / SALES_BONUS_CAP); reset when passing GO.
+  roleBonusThisLap: RupiahAmount
   // Set when the player passes GO; pinjol interest is then charged once at the
   // start of their next turn (keeps interest off the movement/debt path).
   owesLapInterest: boolean

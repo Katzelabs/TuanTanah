@@ -9,6 +9,7 @@ import type { GameState, Player, RupiahAmount } from '@tuan-tanah/shared'
 import { getTileDef, ownsFullRegion } from './board.js'
 import { applyPassiveMultiplier, effectiveTier, tickEffects } from './effects.js'
 import { chargeInterest } from './pinjol.js'
+import { applyPassiveIncomeRoleBonus } from './roles.js'
 import { logKey } from './util.js'
 import { rpP } from '@tuan-tanah/shared'
 
@@ -47,6 +48,8 @@ export function collectPassiveIncome(state: GameState, player: Player): RupiahAm
     state.bank -= total
     logKey(state, 'turn.passiveIncome', { name: player.name, amount: rpP(total) }, player.id)
     payRevenueShares(state, player, total)
+    // Pengusaha passive: +50% landlord bonus on passive income (capped per lap).
+    applyPassiveIncomeRoleBonus(state, player, total)
   }
   return total
 }

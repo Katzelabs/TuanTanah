@@ -25,8 +25,6 @@ export const log: MessageMap = {
     'core.rentImmune': '{{name}} is immune from rent on {{tile}}',
     'core.rentFreePass': '{{name}} used a rent-free pass on {{tile}}',
     'core.boughtTile': '{{name}} bought {{tile}} for {{amount}}',
-    'core.kontraktorBuilt':
-      "{{name}} built {{tier}} on {{owner}}'s {{tile}} for {{amount}} (earns a rent cut)",
     'core.upgradedTile': '{{name}} upgraded {{tile}} to {{tier}} for {{amount}}',
     'core.soldTile': '{{name}} sold {{tile}} back to the bank for {{amount}}',
     'core.downgradedLand': '{{name}} downgraded {{tier}} on {{tile}} for {{amount}}',
@@ -73,8 +71,6 @@ export const log: MessageMap = {
     'core.rentImmune': '{{name}} kebal dari sewa di {{tile}}',
     'core.rentFreePass': '{{name}} menggunakan kartu bebas sewa di {{tile}}',
     'core.boughtTile': '{{name}} membeli {{tile}} seharga {{amount}}',
-    'core.kontraktorBuilt':
-      '{{name}} membangun {{tier}} di {{tile}} milik {{owner}} seharga {{amount}} (mendapat potongan sewa)',
     'core.upgradedTile': '{{name}} meningkatkan {{tile}} ke {{tier}} seharga {{amount}}',
     'core.soldTile': '{{name}} menjual {{tile}} kembali ke bank seharga {{amount}}',
     'core.downgradedLand':

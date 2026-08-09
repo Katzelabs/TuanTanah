@@ -1,4 +1,4 @@
-import { PINJOL_INTEREST_RATE, REGIONS } from '@tuan-tanah/shared'
+import { PINJOL_INTEREST_RATE, REGIONS, RENTENIR_INTEREST_CUT_RATE } from '@tuan-tanah/shared'
 import { describe, expect, it } from 'vitest'
 import { EngineError, repayPinjol } from '../src/engine/index.js'
 import {
@@ -42,13 +42,24 @@ describe('chargeInterest', () => {
     expect(chargeInterest(state, p)).toBe(expected)
   })
 
-  it('routes interest to a Rentenir lender', () => {
+  it('routes interest to a Rentenir lender (no extra skim on own loans)', () => {
     const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'rentenir'] })
     const [borrower, rentenir] = [players[0]!, players[1]!]
     rentenir.cash = 0
     borrower.loans = [loan(5_000_000, rentenir.id)]
     chargeInterest(state, borrower)
     expect(rentenir.cash).toBe(Math.round(5_000_000 * PINJOL_INTEREST_RATE))
+    expect(rentenir.roleBonusThisLap).toBe(0)
+  })
+
+  it("pays a bystander Rentenir a cut of another player's bank-loan interest", () => {
+    const { state, players } = makeGame(2, { cash: 5_000_000, roles: [null, 'rentenir'] })
+    const [borrower, shark] = [players[0]!, players[1]!]
+    shark.cash = 0
+    borrower.loans = [loan(5_000_000, null)] // bank loan
+    chargeInterest(state, borrower)
+    const interest = Math.round(5_000_000 * PINJOL_INTEREST_RATE)
+    expect(shark.cash).toBe(Math.round(interest * RENTENIR_INTEREST_CUT_RATE))
   })
 
   it('opens a pending debt when the player cannot cover interest', () => {

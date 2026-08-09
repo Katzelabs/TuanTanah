@@ -108,7 +108,7 @@ describe('startTurn upkeep', () => {
     // rng 0.4 → both dice are 3 (sum 6); from tile 39 this wraps past GO and
     // pays salary + one lap of passive income.
     p.position = 39
-    const salary = salaryFor(p)
+    const salary = salaryFor(state, p)
     rollDice(state, p.id, () => 0.4)
     expect(p.cash).toBe(1_000_000 + salary + passive)
   })

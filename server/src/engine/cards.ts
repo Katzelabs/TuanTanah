@@ -8,6 +8,7 @@ import {
   DEMO_BURUH_DURATION_ROUNDS,
   DEMO_BURUH_PASSIVE_MULTIPLIER,
   DOLLAR_NAIK_CASH_RATE,
+  FREELANCER_HUSTLE_WIN_MULTIPLIER,
   GEMPA_DURATION_ROUNDS,
   GEMPA_RENT_MULTIPLIER,
   hustleP,
@@ -74,14 +75,25 @@ export function drawHustle(
   const card = HUSTLE_BY_ID.get(id)!
   switch (card.kind) {
     case 'earn': {
-      player.cash += card.amount
-      state.bank -= card.amount
+      // Freelancer passive: hustle winnings are doubled (losses stay normal).
+      const isFreelancer = player.role === 'freelancer'
+      const amount = isFreelancer ? card.amount * FREELANCER_HUSTLE_WIN_MULTIPLIER : card.amount
+      player.cash += amount
+      state.bank -= amount
       logKey(
         state,
         'cards.hustleEarn',
-        { name: player.name, card: hustleP(id), amount: rpP(card.amount) },
+        { name: player.name, card: hustleP(id), amount: rpP(amount) },
         player.id,
       )
+      if (isFreelancer) {
+        logKey(
+          state,
+          'roles.freelancerHustle',
+          { name: player.name, amount: rpP(amount - card.amount) },
+          player.id,
+        )
+      }
       break
     }
     case 'cost': {
