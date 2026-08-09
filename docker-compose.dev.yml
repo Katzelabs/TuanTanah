@@ -14,7 +14,11 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:16-alpine
+    # Major version tracks the shared platform Postgres on the VPS (pg17) so dev and
+    # prod can't diverge. Plain image — this project doesn't use pgvector.
+    # Bumping from 16 needs a volume reset: `docker compose -f docker-compose.dev.yml down -v`
+    # (the local archive is throwaway data).
+    image: postgres:17-alpine
     ports:
       - '5432:5432'
     environment:
@@ -23,6 +27,11 @@ services:
       - POSTGRES_DB=tuan_tanah
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tuan -d tuan_tanah']
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
 volumes:

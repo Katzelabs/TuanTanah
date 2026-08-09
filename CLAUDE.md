@@ -64,6 +64,9 @@ client/src/
   features/      # game (page+Board+modals), lobby, home; auth/social/matchmaking (seams)
   components/ui/ # shared design-system primitives (+ a few cross-feature widgets)
   hooks/ lib/ sound/ i18n/ store/   # shared infra; store/ backs lobby AND game
+
+infra/           # VPS platform stack: shared Postgres + backups, provisioning
+                 #   scripts, the external `platform` Docker network (see its README)
 ```
 
 Cross-directory client imports use the `@/` alias (→ `client/src`); same-directory
@@ -108,6 +111,8 @@ UI building blocks: a neobrutalist design system under `components/ui/`, framer-
 `rooms/store.ts` defines a `GameStore` interface with two implementations chosen at startup: `RedisStore` if `REDIS_URL` is set and reachable, else `MemoryStore` (in-memory Map — no Docker needed for local dev). State survives restarts only with Redis. Rooms have a TTL (`ROOM_TTL_HOURS`, default 24h).
 
 `server/src/persistence/` persists **final game history** (game row + per-player standings) on game-over via `persistGameResult`, called from `realtime/gameOver.ts`. It's a self-hosted **Postgres** archive accessed through **Kysely** (`persistence/db.ts` client, `schema.ts` types, `migrations/` + a `pnpm --filter server migrate` CLI). It's optional: with `DATABASE_URL` blank, `getDb()` returns null and persistence silently no-ops — and a persistence failure never disrupts a live game (wrapped in try/catch, never throws). This is durable archival only — live game state lives in Redis/memory, not Postgres.
+
+In production Postgres is **not** part of this project's compose stack: it lives in the shared platform stack (`infra/`) alongside every other project on the VPS, reached over an external `platform` Docker network with a per-project database + owning role. Redis stays in-stack (hot path, must not be shared). `make deploy` runs migrations between build and restart. See `infra/README.md` and the `devops` skill.
 
 ## Implementation status
 

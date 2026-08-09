@@ -1,8 +1,20 @@
+# Tuan Tanah production stack. Postgres is NOT here — it lives in the shared
+# platform stack (see infra/README.md) and is reached over the external `platform`
+# network via DATABASE_URL in .env. Redis stays in-stack because it holds live game
+# state (hot path) and must not be shared.
+#
+#   make deploy    # pull, build, migrate, restart
+name: tuantanah
+
 services:
   web:
     build:
       context: .
       dockerfile: client/Dockerfile
+      args:
+        # Vite bakes VITE_* at build time, so this must be a build arg — setting it
+        # only in `environment:` would have no effect on the shipped bundle.
+        VITE_PUBLIC_URL: ${VITE_PUBLIC_URL:-}
     ports:
       - '80:80'
       - '443:443'
@@ -16,22 +28,42 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
     build:
       context: .
       dockerfile: server/Dockerfile
+    # DATABASE_URL, CORS_ORIGINS, ROOM_TTL_HOURS come from .env — deliberately not
+    # overridden here so the shared-Postgres connection string stays in one place.
     env_file: .env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgres://${POSTGRES_USER:-tuan}:${POSTGRES_PASSWORD:-tuan}@postgres:5432/${POSTGRES_DB:-tuan_tanah}
       - NODE_ENV=production
       - PORT=3000
+      # Always the in-stack Redis; overriding here stops a stale localhost value
+      # in .env from silently falling back to the in-memory store.
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      # `default` for redis/web, `platform` for the shared Postgres.
+      - default
+      - platform
     restart: unless-stopped
 
   redis:
@@ -39,20 +71,22 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-tuan}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-tuan}
-      - POSTGRES_DB=${POSTGRES_DB:-tuan_tanah}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
     restart: unless-stopped
 
 volumes:
   redis_data:
-  postgres_data:
   caddy_data:
   caddy_config:
+
+networks:
+  default:
+  # Owned by the platform stack. Create it once with `docker network create platform`
+  # (or `make -C infra net`) before the first deploy.
+  platform:
+    external: true
+    name: platform

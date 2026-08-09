@@ -10,10 +10,11 @@ client/dist/
 server/dist/
 *.tsbuildinfo
 
-# env
+# env — every real env file (root, infra/, per-environment) stays local; only the
+# checked-in *.env.example templates are tracked.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # logs
 logs/

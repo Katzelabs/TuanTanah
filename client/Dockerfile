@@ -14,6 +14,13 @@ COPY shared ./shared
 COPY client ./client
 # VITE_SERVER_URL is intentionally left unset: in prod the client talks to the
 # backend same-origin through Caddy, so the socket connects to its own host.
+#
+# VITE_PUBLIC_URL *is* environment-specific (it's baked into index.html for
+# og:/twitter: share previews), so it arrives as a build arg — Vite reads env at
+# build time, so a runtime `environment:` entry would never reach the bundle.
+# This is also why prod and staging need separate image builds.
+ARG VITE_PUBLIC_URL=""
+ENV VITE_PUBLIC_URL=$VITE_PUBLIC_URL
 RUN pnpm --filter @tuan-tanah/client build
 
 FROM caddy:2-alpine
