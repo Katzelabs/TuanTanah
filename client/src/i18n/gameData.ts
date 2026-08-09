@@ -12,6 +12,7 @@ import {
   type PropertyTrack,
   type Role,
   type TileId,
+  type TileType,
 } from '@tuan-tanah/shared'
 import type { TFunction } from 'i18next'
 
@@ -24,6 +25,11 @@ import type { TFunction } from 'i18next'
 
 export function tileName(t: TFunction, id: TileId): string {
   return t(`data.tiles.${id}`, { defaultValue: BOARD[id]?.name ?? String(id) })
+}
+
+/** Short label for a tile's kind ("Tax", "Law office") — the tile-modal subtitle. */
+export function tileTypeLabel(t: TFunction, type: TileType): string {
+  return t(`tileInfo.type.${type}`, { defaultValue: t('property.tile') })
 }
 
 export function roleName(t: TFunction, role: Role): string {

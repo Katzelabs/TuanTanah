@@ -2,6 +2,7 @@ import {
   BOARD,
   PINJOL_AMOUNTS,
   PINJOL_BORROW_LIMIT_MULTIPLE,
+  PINJOL_INTEREST_RATE,
   PINJOL_MAX_LOANS,
   REGIONS,
   type GameState,
@@ -56,7 +57,11 @@ export function PinjolModal({ open, onClose }: { open: boolean; onClose: () => v
   return (
     <Modal open={open} onClose={onClose} title={t('pinjol.title')} size="sm">
       <div className="text-xs text-ink-muted">
-        {t('pinjol.terms', { maxLoans: PINJOL_MAX_LOANS, limit: formatRupiah(limit) })}
+        {t('pinjol.terms', {
+          rate: Math.round(PINJOL_INTEREST_RATE * 100),
+          maxLoans: PINJOL_MAX_LOANS,
+          limit: formatRupiah(limit),
+        })}
       </div>
 
       {/* Loan size */}

@@ -1,6 +1,32 @@
-import { META_ACTIONS_PER_LAP, type MetaActionType, type TurnState } from '@tuan-tanah/shared'
+import {
+  JUDOL_JACKPOT_MULTIPLIER,
+  JUDOL_WIN_MULT_MAX,
+  JUDOL_WIN_MULT_MIN,
+  KORUPSI_STEAL_AMOUNT,
+  META_ACTIONS_PER_LAP,
+  SABOTAGE_DURATION_ROUNDS,
+  type MetaActionType,
+  type TurnState,
+} from '@tuan-tanah/shared'
 import { useTranslation } from 'react-i18next'
 import { Button, Tooltip } from '@/components/ui/index.js'
+import { JUDOL_ODDS, KORUPSI_ODDS } from '@/features/game/lib/odds.js'
+import { formatRupiah } from '@/store/gameStore.js'
+
+// Odds and stakes quoted in the action tooltips, all derived from the shared
+// constants so the copy can't drift from what the engine rolls. One object for
+// every action — i18next ignores the values a given description doesn't use.
+const TOOLTIP_VALUES = {
+  judolWinPercent: JUDOL_ODDS.winPercent,
+  judolMinMult: JUDOL_WIN_MULT_MIN,
+  judolMaxMult: JUDOL_WIN_MULT_MAX,
+  judolJackpotPercent: JUDOL_ODDS.jackpotPercent,
+  judolJackpotMult: JUDOL_JACKPOT_MULTIPLIER,
+  korupsiSuccessPercent: KORUPSI_ODDS.successPercent,
+  korupsiBustPercent: KORUPSI_ODDS.bustPercent,
+  korupsiSteal: formatRupiah(KORUPSI_STEAL_AMOUNT),
+  sabotageRounds: SABOTAGE_DURATION_ROUNDS,
+}
 
 export type MetaTarget = 'none' | 'player' | 'tile'
 
@@ -49,7 +75,11 @@ export function MetaActionBar({ turn, used, pendingAction, onPick }: Props) {
           return (
             <Tooltip
               key={def.action}
-              content={alreadyUsed ? t('meta.alreadyUsed') : t(`meta.descriptions.${def.action}`)}
+              content={
+                alreadyUsed
+                  ? t('meta.alreadyUsed')
+                  : t(`meta.descriptions.${def.action}`, TOOLTIP_VALUES)
+              }
               className="w-full"
             >
               <Button

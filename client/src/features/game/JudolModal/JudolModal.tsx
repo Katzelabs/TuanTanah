@@ -1,7 +1,14 @@
-import { JUDOL_PRESET_DEPOSITS, type RupiahAmount } from '@tuan-tanah/shared'
+import {
+  JUDOL_JACKPOT_MULTIPLIER,
+  JUDOL_PRESET_DEPOSITS,
+  JUDOL_WIN_MULT_MAX,
+  JUDOL_WIN_MULT_MIN,
+  type RupiahAmount,
+} from '@tuan-tanah/shared'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Card, Modal } from '@/components/ui/index.js'
+import { JUDOL_ODDS } from '@/features/game/lib/odds.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 
 const JUTA = 1_000_000
@@ -27,7 +34,15 @@ export function JudolModal({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Modal open={open} onClose={onClose} title={t('judol.title')} size="sm">
-      <div className="text-xs text-ink-muted">{t('judol.terms')}</div>
+      <div className="text-xs text-ink-muted">
+        {t('judol.terms', {
+          winPercent: JUDOL_ODDS.winPercent,
+          minMult: JUDOL_WIN_MULT_MIN,
+          maxMult: JUDOL_WIN_MULT_MAX,
+          jackpotPercent: JUDOL_ODDS.jackpotPercent,
+          jackpotMult: JUDOL_JACKPOT_MULTIPLIER,
+        })}
+      </div>
 
       {/* Preset deposits */}
       <div className={labelClass}>{t('judol.deposit')}</div>

@@ -82,7 +82,7 @@
     "leaveConfirm": "Leave the game? You'll forfeit your properties and can't rejoin.",
     "surrender": "Surrender",
     "surrenderConfirm": "Surrender and spectate? You'll be eliminated and forfeit your properties, but you can stay and watch the rest of the game.",
-    "payBail": "Pay bail (Rp 1 million)",
+    "payBail": "Pay bail ({{amount}})",
     "rollForDoubles": "Roll for doubles",
     "rollDice": "Roll dice",
     "rollAgain": "Roll again (doubles!)",
@@ -161,7 +161,7 @@
   },
   "pinjol": {
     "title": "🏦 Pinjol — Take a loan",
-    "terms": "10% interest/lap · max {{maxLoans}} loans · borrow up to {{limit}}",
+    "terms": "{{rate}}% interest/lap · max {{maxLoans}} loans · borrow up to {{limit}}",
     "lender": "Lender",
     "bank": "Bank",
     "notEnoughToLend": "Not enough cash to lend",
@@ -189,7 +189,7 @@
   },
   "judol": {
     "title": "🎰 Judol — Online gambling",
-    "terms": "10% win → x3–x5 · 1% jackpot → x10 · lose your deposit otherwise",
+    "terms": "{{winPercent}}% win → x{{minMult}}–x{{maxMult}} · {{jackpotPercent}}% jackpot → x{{jackpotMult}} · lose your deposit otherwise",
     "deposit": "Deposit",
     "custom": "Custom amount",
     "notEnoughCash": "Not enough cash",
@@ -210,12 +210,12 @@
     "negotiate": "🤝 Negotiate",
     "chooseBeforeRolling": "Choose before rolling — skips your move",
     "descriptions": {
-      "judol": "Gamble a deposit — 10% chance to win x3–x5, with a 1% jackpot x10; lose it otherwise.",
+      "judol": "Gamble a deposit — {{judolWinPercent}}% chance to win x{{judolMinMult}}–x{{judolMaxMult}}, with a {{judolJackpotPercent}}% jackpot x{{judolJackpotMult}}; lose it otherwise.",
       "work": "Skip your move and collect your salary instead. Choose before rolling.",
       "hustle": "Draw a Hustle card — a risky side gig with a random payoff.",
       "lobby": "Pay to make a rival skip their next turn.",
-      "sabotage": "Pay to halve the rent a rival collects on a chosen tile for 2 rounds.",
-      "korupsi": "Gamble for a quick payout — 30% you steal Rp 7 juta from the bank, 70% you're jailed and fined."
+      "sabotage": "Pay to halve the rent a rival collects on a chosen tile for {{sabotageRounds}} rounds.",
+      "korupsi": "Gamble for a quick payout — {{korupsiSuccessPercent}}% you steal {{korupsiSteal}} from the bank, {{korupsiBustPercent}}% you're jailed and fined."
     }
   },
   "ability": {
@@ -300,7 +300,6 @@
     "votedForPost": ". Waiting for the others…"
   },
   "property": {
-    "transport": "Transport",
     "tile": "Tile",
     "owner": "Owner",
     "unowned": "Unowned",
@@ -326,7 +325,6 @@
     "regionBonus": "Rent is ×{{mult}} when you own all of {{region}}.",
     "transportsOwned": "Transports owned",
     "transportCount": "{{count}} owned",
-    "cantOwn": "This tile can't be owned.",
     "activeEffects": "Active effects",
     "unbuilt": "Unbuilt",
     "tierFallback": "Tier {{tier}}",
@@ -343,6 +341,78 @@
     "offerBuy": "Offer to buy",
     "proposeSwap": "Propose a swap",
     "close": "Close"
+  },
+  "tileInfo": {
+    "heading": "How this tile works",
+    "type": {
+      "go": "Start",
+      "property": "Property",
+      "transport": "Transport",
+      "tax": "Tax",
+      "event": "National event",
+      "hustle": "Side hustle",
+      "jail_visit": "Jail",
+      "jail_go": "Go to jail",
+      "buildable_land": "Empty land",
+      "law_office": "Law office",
+      "vacation": "Vacation"
+    },
+    "deck": "Deck",
+    "deckValue": "{{left}} of {{total}} cards left",
+    "go": {
+      "desc": "The start of every lap. Passing GO — or landing on it — pays your salary, collects passive income from everything you own, and refreshes your meta-action allowance.",
+      "salary": "Your salary",
+      "metaActions": "Meta actions",
+      "metaActionsValue": "{{max}} per lap",
+      "note": "Pinjol interest is also charged once per lap, at the start of your next turn."
+    },
+    "tax": {
+      "descCash": "Landing here charges income tax on the cash in your hand. Property you own is untouched.",
+      "descWealth": "Landing here charges luxury tax on your total wealth — cash plus the market value of every tile you own.",
+      "rate": "Rate",
+      "rateCash": "{{percent}}% of cash on hand",
+      "rateWealth": "{{percent}}% of total wealth",
+      "base": "Your taxable base",
+      "due": "You'd pay now",
+      "note": "A tax-free pass card waives the charge automatically.",
+      "noteOjol": "Your Ojol Driver passive halves the rate."
+    },
+    "event": {
+      "desc": "Draw a Kejadian Nasional card — a nationwide event. They hand out windfalls, charge everyone at once, or shift rent and tiers across whole regions for a few rounds."
+    },
+    "hustle": {
+      "desc": "Draw a Hustle card — a side gig. Most pay cash on the spot; a few cost you, grant a free-pass card, or move your token to another tile and resolve it like a landing."
+    },
+    "jailVisit": {
+      "desc": "Just visiting — nothing happens when you land here. This is also the cell where jailed players are held."
+    },
+    "jailGo": {
+      "desc": "Straight to jail. You're moved to the Penjara tile at once and can't move again until you're out.",
+      "sentence": "Sentence",
+      "sentenceValue": "{{turns}} turns",
+      "getOut": "Get out early",
+      "getOutValue": "Roll doubles, or pay {{bail}} bail",
+      "note": "A jail-free pass card cancels it, and a Pejabat is never jailed."
+    },
+    "lawOffice": {
+      "desc": "Land here and pick one legal power — or skip. Only the player standing on the tile may act.",
+      "buy": "Buy any unowned tile remotely, at its normal price.",
+      "forceBuy": "Force-buy a rival's property: open a bid at {{percent}}% of its value — the owner may out-bid you to keep it.",
+      "jail": "Send a rival to jail for {{fee}}.",
+      "freepass": "Buy a free-pass card — rent, tax, or jail — for {{price}}.",
+      "priceUpgrade": "Permanently multiply one tile's price ×{{min}}–{{max}}, lifting its rent, passive income, and resale value.",
+      "note": "A Pengacara pays half of every law-office fee."
+    },
+    "vacation": {
+      "desc": "Landing here summons everyone to the mountain: every active player is moved to this tile and each pays the vacation fee to the bank.",
+      "fee": "Fee per player",
+      "note": "Jailed players stay put and pay nothing. Being summoned here never pays GO salary."
+    },
+    "land": {
+      "desc": "Bare land, yours for {{price}}. Once you own it, build one of two businesses on the plot and upgrade it through four tiers.",
+      "descOwned": "This plot is taken. Its owner can build one of two businesses on it and upgrade that through four tiers.",
+      "note": "Dapur MBG leans on guaranteed passive income each lap; Warkop-Cafe leans on steep rent when a rival lands on it. One business per plot — the choice is permanent."
+    }
   },
   "lawOffice": {
     "title": "⚖️ Law Office",

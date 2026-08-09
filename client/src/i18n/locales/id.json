@@ -82,7 +82,7 @@
     "leaveConfirm": "Keluar dari permainan? Kamu akan kehilangan propertimu dan tidak bisa bergabung lagi.",
     "surrender": "Menyerah",
     "surrenderConfirm": "Menyerah dan menjadi penonton? Kamu akan tersingkir dan kehilangan propertimu, tapi tetap bisa menonton sisa permainan.",
-    "payBail": "Bayar jaminan (Rp 1 juta)",
+    "payBail": "Bayar jaminan ({{amount}})",
     "rollForDoubles": "Lempar untuk dadu kembar",
     "rollDice": "Lempar dadu",
     "rollAgain": "Lempar lagi (dadu kembar!)",
@@ -161,7 +161,7 @@
   },
   "pinjol": {
     "title": "🏦 Pinjol — Ambil pinjaman",
-    "terms": "Bunga 10%/putaran · maks {{maxLoans}} pinjaman · pinjam hingga {{limit}}",
+    "terms": "Bunga {{rate}}%/putaran · maks {{maxLoans}} pinjaman · pinjam hingga {{limit}}",
     "lender": "Pemberi pinjaman",
     "bank": "Bank",
     "notEnoughToLend": "Kas tidak cukup untuk meminjamkan",
@@ -189,7 +189,7 @@
   },
   "judol": {
     "title": "🎰 Judol — Judi online",
-    "terms": "Menang 10% → x3–x5 · jackpot 1% → x10 · jika kalah deposit hangus",
+    "terms": "Menang {{winPercent}}% → x{{minMult}}–x{{maxMult}} · jackpot {{jackpotPercent}}% → x{{jackpotMult}} · jika kalah deposit hangus",
     "deposit": "Deposit",
     "custom": "Jumlah bebas",
     "notEnoughCash": "Kas tidak cukup",
@@ -210,12 +210,12 @@
     "negotiate": "🤝 Negosiasi",
     "chooseBeforeRolling": "Pilih sebelum melempar — melewati gerakanmu",
     "descriptions": {
-      "judol": "Pertaruhkan deposit — 10% peluang menang x3–x5, dengan jackpot 1% x10; jika kalah hangus.",
+      "judol": "Pertaruhkan deposit — {{judolWinPercent}}% peluang menang x{{judolMinMult}}–x{{judolMaxMult}}, dengan jackpot {{judolJackpotPercent}}% x{{judolJackpotMult}}; jika kalah hangus.",
       "work": "Lewati gerakanmu dan terima gajimu. Pilih sebelum melempar dadu.",
       "hustle": "Ambil kartu Hustle — usaha sampingan berisiko dengan hasil acak.",
       "lobby": "Bayar untuk membuat lawan melewati giliran berikutnya.",
-      "sabotage": "Bayar untuk memotong setengah sewa lawan di petak pilihan selama 2 ronde.",
-      "korupsi": "Bertaruh demi untung cepat — 30% berhasil curi Rp 7 juta dari bank, 70% dipenjara dan didenda."
+      "sabotage": "Bayar untuk memotong setengah sewa lawan di petak pilihan selama {{sabotageRounds}} ronde.",
+      "korupsi": "Bertaruh demi untung cepat — {{korupsiSuccessPercent}}% berhasil curi {{korupsiSteal}} dari bank, {{korupsiBustPercent}}% dipenjara dan didenda."
     }
   },
   "ability": {
@@ -300,7 +300,6 @@
     "votedForPost": ". Menunggu yang lain…"
   },
   "property": {
-    "transport": "Transport",
     "tile": "Petak",
     "owner": "Pemilik",
     "unowned": "Belum dimiliki",
@@ -326,7 +325,6 @@
     "regionBonus": "Sewa ×{{mult}} jika kamu memiliki seluruh {{region}}.",
     "transportsOwned": "Transportasi dimiliki",
     "transportCount": "{{count}} dimiliki",
-    "cantOwn": "Petak ini tidak bisa dimiliki.",
     "activeEffects": "Efek aktif",
     "unbuilt": "Belum dibangun",
     "tierFallback": "Tingkat {{tier}}",
@@ -343,6 +341,78 @@
     "offerBuy": "Tawar untuk beli",
     "proposeSwap": "Ajukan tukar",
     "close": "Tutup"
+  },
+  "tileInfo": {
+    "heading": "Cara petak ini bekerja",
+    "type": {
+      "go": "Start",
+      "property": "Properti",
+      "transport": "Transportasi",
+      "tax": "Pajak",
+      "event": "Kejadian nasional",
+      "hustle": "Kerja sampingan",
+      "jail_visit": "Penjara",
+      "jail_go": "Masuk penjara",
+      "buildable_land": "Lahan kosong",
+      "law_office": "Kantor hukum",
+      "vacation": "Liburan"
+    },
+    "deck": "Tumpukan",
+    "deckValue": "Sisa {{left}} dari {{total}} kartu",
+    "go": {
+      "desc": "Awal setiap putaran. Melewati GO — atau mendarat di atasnya — membayar gajimu, menagih pendapatan pasif dari semua asetmu, dan menyegarkan kuota aksi metamu.",
+      "salary": "Gajimu",
+      "metaActions": "Aksi meta",
+      "metaActionsValue": "{{max}} per putaran",
+      "note": "Bunga pinjol juga ditagih sekali per putaran, di awal turnmu berikutnya."
+    },
+    "tax": {
+      "descCash": "Mendarat di sini menagih pajak penghasilan atas uang tunai di tanganmu. Properti milikmu tidak disentuh.",
+      "descWealth": "Mendarat di sini menagih pajak kemewahan atas total kekayaanmu — uang tunai ditambah nilai pasar setiap petak yang kamu miliki.",
+      "rate": "Tarif",
+      "rateCash": "{{percent}}% dari uang tunai",
+      "rateWealth": "{{percent}}% dari total kekayaan",
+      "base": "Dasar pengenaan pajakmu",
+      "due": "Yang kamu bayar sekarang",
+      "note": "Kartu bebas pajak otomatis membatalkan tagihan ini.",
+      "noteOjol": "Pasif Ojol Driver-mu memotong tarifnya setengah."
+    },
+    "event": {
+      "desc": "Ambil kartu Kejadian Nasional — peristiwa berskala nasional. Kartunya bisa membagi rezeki, menagih semua pemain sekaligus, atau mengubah sewa dan tingkat bangunan di seluruh kawasan selama beberapa ronde."
+    },
+    "hustle": {
+      "desc": "Ambil kartu Hustle — kerja sampingan. Sebagian besar langsung membayar tunai; beberapa justru memakan uang, memberi kartu bebas, atau memindahkan bidakmu ke petak lain dan menyelesaikannya seperti mendarat di sana."
+    },
+    "jailVisit": {
+      "desc": "Cuma mampir — tidak ada apa pun yang terjadi saat kamu mendarat di sini. Petak ini juga sel tempat pemain yang dipenjara ditahan."
+    },
+    "jailGo": {
+      "desc": "Langsung ke penjara. Kamu dipindahkan ke petak Penjara seketika dan tidak bisa bergerak sampai bebas.",
+      "sentence": "Masa tahanan",
+      "sentenceValue": "{{turns}} turn",
+      "getOut": "Bebas lebih cepat",
+      "getOutValue": "Lempar dadu kembar, atau bayar jaminan {{bail}}",
+      "note": "Kartu bebas penjara membatalkannya, dan Pejabat tidak pernah dipenjara."
+    },
+    "lawOffice": {
+      "desc": "Mendarat di sini, pilih satu kuasa hukum — atau lewati. Hanya pemain yang berdiri di petak ini yang boleh bertindak.",
+      "buy": "Beli petak mana pun yang belum bertuan dari jauh, dengan harga normal.",
+      "forceBuy": "Rebut properti lawan: buka penawaran di {{percent}}% dari nilainya — pemiliknya boleh menawar lebih tinggi untuk mempertahankannya.",
+      "jail": "Kirim satu lawan ke penjara seharga {{fee}}.",
+      "freepass": "Beli kartu bebas — sewa, pajak, atau penjara — seharga {{price}}.",
+      "priceUpgrade": "Kalikan harga satu petak secara permanen ×{{min}}–{{max}}, menaikkan sewa, pendapatan pasif, dan nilai jualnya.",
+      "note": "Pengacara hanya membayar setengah dari setiap biaya kantor hukum."
+    },
+    "vacation": {
+      "desc": "Mendarat di sini memanggil semua orang ke gunung: setiap pemain aktif dipindahkan ke petak ini dan masing-masing membayar biaya liburan ke bank.",
+      "fee": "Biaya per pemain",
+      "note": "Pemain yang dipenjara tetap di tempat dan tidak membayar. Dipanggil ke sini tidak pernah membayar gaji GO."
+    },
+    "land": {
+      "desc": "Lahan kosong, bisa jadi milikmu seharga {{price}}. Setelah dimiliki, bangun salah satu dari dua usaha di lahan ini dan tingkatkan sampai tingkat empat.",
+      "descOwned": "Lahan ini sudah ada yang punya. Pemiliknya bisa membangun salah satu dari dua usaha di sini dan meningkatkannya sampai tingkat empat.",
+      "note": "Dapur MBG mengandalkan pendapatan pasif yang pasti tiap putaran; Warkop-Cafe mengandalkan sewa besar saat lawan mendarat di sana. Satu usaha per lahan — pilihannya permanen."
+    }
   },
   "lawOffice": {
     "title": "⚖️ Kantor Hukum",

@@ -1,5 +1,6 @@
 import {
   BOARD,
+  JAIL_EXIT_COST,
   LAHAN_LAND_PRICE,
   META_ACTIONS_PER_LAP,
   REGIONS,
@@ -153,7 +154,7 @@ export function Game() {
     <>
       {me?.inJail && !turn.hasRolled && (
         <Button variant="secondary" size="sm" block onClick={payJail}>
-          {t('game.payBail')}
+          {t('game.payBail', { amount: formatRupiah(JAIL_EXIT_COST) })}
         </Button>
       )}
       {(!turn.hasRolled || turn.rolledDoubles) && (

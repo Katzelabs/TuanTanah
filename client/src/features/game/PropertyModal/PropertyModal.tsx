@@ -25,11 +25,14 @@ import {
   tierName,
   tileEffectLabel,
   tileName,
+  tileTypeLabel,
 } from '@/i18n/gameData.js'
-import { EffectIcon, isTileEffect } from '@/features/game/Board/icons.js'
+import { EffectIcon, isTileEffect, TYPE_COLOR } from '@/features/game/Board/icons.js'
 import { Badge, Button, Card, Modal } from '@/components/ui/index.js'
 import { tileValue } from '@/features/game/lib/tileValue.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
+import { Row } from './Row.js'
+import { SpecialTileInfo } from './SpecialTileInfo.js'
 
 type TFunc = ReturnType<typeof useTranslation>['t']
 
@@ -171,19 +174,13 @@ export function PropertyModal({
 
   return (
     <Modal open={open} onClose={onClose} title={tileName(t, tileId)} size="lg">
-      {/* Region accent + subtitle */}
-      {region && (
-        <div
-          className="h-2 w-full rounded-full border-2 border-ink"
-          style={{ background: region.color }}
-        />
-      )}
+      {/* Accent bar + subtitle — region color for properties, tile-type color otherwise */}
+      <div
+        className="h-2 w-full rounded-full border-2 border-ink"
+        style={{ background: region ? region.color : TYPE_COLOR[def.type] }}
+      />
       <div className="mt-2 text-xs font-bold uppercase tracking-wide text-ink-muted">
-        {region
-          ? region.name
-          : def.type === 'transport'
-            ? t('property.transport')
-            : t('property.tile')}
+        {region ? region.name : tileTypeLabel(t, def.type)}
       </div>
 
       {ownable ? (
@@ -260,9 +257,11 @@ export function PropertyModal({
             </>
           )}
         </Card>
-      ) : (
-        <div className="mt-4 text-sm text-ink-muted">{t('property.cantOwn')}</div>
-      )}
+      ) : null}
+
+      {/* Non-property tiles (GO, tax, cards, jail, Kantor Hukum, Rinjani) carry no
+          rent table, so explain what landing there actually does. */}
+      <SpecialTileInfo def={def} tile={tile} state={state} me={me} t={t} />
 
       {isProperty && region && (
         <div className="mt-4">
@@ -686,14 +685,5 @@ function ScheduleRow({
       <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">{passive}</td>
       <td className="whitespace-nowrap px-2 py-1.5 text-right tabular-nums">{cost}</td>
     </tr>
-  )
-}
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-ink-muted">{label}</span>
-      <span className="font-semibold text-ink">{children}</span>
-    </div>
   )
 }
