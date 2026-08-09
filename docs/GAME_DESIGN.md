@@ -8,15 +8,15 @@ A multiplayer web-based Monopoly game with Indonesian theme, supporting 2-8 play
 
 ---
 
-### 🏆 Win Conditions
+### 🏆 Win Condition
 
-Room master chooses one or both:
+Every game is time-limited — the room master picks the length:
 
-| Mode          | Rule                                                                |
-| ------------- | ------------------------------------------------------------------- |
-| Time Limit    | 30 / 60 / 90 / 120 minutes — richest player wins when time runs out |
-| Target Wealth | First player to reach target amount wins                            |
-| Both          | First condition met ends the game                                   |
+| Mode       | Rule                                                          |
+| ---------- | ------------------------------------------------------------- |
+| Time Limit | 30 / 60 / 90 minutes — richest player wins when time runs out |
+
+(A game also ends early if only one player is left standing.)
 
 Richest = total cash + all property values at current tier
 
@@ -24,7 +24,7 @@ Richest = total cash + all property values at current tier
 
 ### 💰 Starting Setup
 
-- Starting money: room master sets **Rp 5 juta – Rp 50 juta** (same for all players)
+- Starting money: room master sets **Rp 1 juta – Rp 15 juta** (same for all players)
 - Players pick roles in lobby first come first served
 - Room master can enable/disable any role before game starts
 
@@ -335,7 +335,7 @@ Everything is finalized:
 ✅ Pinjol         3 sizes, 10% interest, max 3 loans
 ✅ Cards          15 Kejadian + 15 Hustle
 ✅ Jail           2 turns, Rp 1 juta exit, doubles = free
-✅ Win condition  Time limit + Target wealth (room master sets)
+✅ Win condition  Time limit 30/60/90m (room master sets)
 ✅ Elimination    Bankrupt → spectator
 ✅ Bank           Holds properties, source of loans
 ```

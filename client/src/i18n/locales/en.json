@@ -52,23 +52,23 @@
     "roles": "Roles",
     "salary": "Salary {{amount}}",
     "players": "Players ({{count}})",
+    "settings": "Game settings",
+    "tabs": {
+      "general": "General",
+      "roles": "Roles",
+      "rules": "Rules"
+    },
     "startingCash": "Starting cash",
-    "winCondition": "Win condition",
     "timeLimit": "Time limit",
     "timeLimitValue": "{{count}}m",
-    "targetWealth": "Target wealth",
+    "timeLimitHint": "When time runs out, the richest player still in the game wins.",
     "enabledRoles": "Enabled roles",
     "buildRules": "Build rules",
     "requireFullRegion": "Require full region to build",
     "requireFullRegionHint": "Players must own every tile in a region before building houses or properties there.",
     "startGame": "Start game",
     "waitingForRoles": "Waiting for roles…",
-    "waitingForHost": "Waiting for the host to start…",
-    "winConditions": {
-      "time": "Time",
-      "wealth": "Wealth",
-      "both": "Both"
-    }
+    "waitingForHost": "Waiting for the host to start…"
   },
   "game": {
     "room": "Room {{code}}",

@@ -11,7 +11,6 @@ export const log: MessageMap = {
     'elimination.afkKicked': '⏱️ {{name}} was kicked for repeated inactivity',
     'elimination.afkFined': '⏱️ {{name}} was AFK — turn skipped and fined {{amount}}',
     'elimination.winsTime': '🏆 {{name}} wins — time ran out!',
-    'elimination.winsWealth': '🏆 {{name}} wins — reached the target wealth!',
     'elimination.winsLastStanding': '🏆 {{name}} wins — is the last player standing!',
   },
   id: {
@@ -24,7 +23,6 @@ export const log: MessageMap = {
     'elimination.afkKicked': '⏱️ {{name}} dikeluarkan karena tidak aktif berulang kali',
     'elimination.afkFined': '⏱️ {{name}} tidak aktif — giliran dilewati dan didenda {{amount}}',
     'elimination.winsTime': '🏆 {{name}} menang — waktu habis!',
-    'elimination.winsWealth': '🏆 {{name}} menang — mencapai target kekayaan!',
     'elimination.winsLastStanding': '🏆 {{name}} menang — satu-satunya yang tersisa!',
   },
 }

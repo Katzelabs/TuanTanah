@@ -13,29 +13,10 @@ describe('checkWinCondition', () => {
     })
   })
 
-  it('declares a wealth win for the richest once the target is reached', () => {
-    const { state, players } = makeGame(2, {
-      cash: 0,
-      settings: { winCondition: 'wealth', targetWealth: 10_000_000 },
-    })
-    players[0]!.cash = 10_000_000
-    players[1]!.cash = 1_000_000
-    expect(checkWinCondition(state, 0)).toEqual({ winnerId: players[0]!.id, reason: 'wealth' })
-  })
-
-  it('does not declare a wealth win before the target is reached', () => {
-    const { state, players } = makeGame(2, {
-      cash: 0,
-      settings: { winCondition: 'wealth', targetWealth: 500_000_000 },
-    })
-    players[0]!.cash = 10_000_000
-    expect(checkWinCondition(state, 0)).toBeNull()
-  })
-
   it('declares a time win for the richest once the clock runs out', () => {
     const { state, players } = makeGame(2, {
       cash: 0,
-      settings: { winCondition: 'time', timeLimitMinutes: 60 },
+      settings: { timeLimitMinutes: 60 },
     })
     players[0]!.cash = 5_000_000
     players[1]!.cash = 1_000_000

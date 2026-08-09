@@ -3,11 +3,7 @@ import {
   ROLES,
   STARTING_CASH_MAX,
   STARTING_CASH_MIN,
-  TARGET_WEALTH_MAX,
-  TARGET_WEALTH_MIN,
-  TARGET_WEALTH_STEP,
   TIME_LIMIT_OPTIONS,
-  WIN_CONDITIONS,
   type Role,
 } from '@tuan-tanah/shared'
 import { useState } from 'react'
@@ -19,6 +15,9 @@ import { LeaveButton, ShareLinkButton } from '@/components/RoomActions.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 
+const SETTINGS_TABS = ['general', 'roles', 'rules'] as const
+type SettingsTab = (typeof SETTINGS_TABS)[number]
+
 export function Lobby() {
   const { t } = useTranslation()
   const state = useGame((s) => s.state)
@@ -26,6 +25,7 @@ export function Lobby() {
   const pickRole = useGame((s) => s.pickRole)
   const updateSettings = useGame((s) => s.updateSettings)
   const startGame = useGame((s) => s.startGame)
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('general')
 
   if (!state) return <Centered>{t('lobby.loading')}</Centered>
 
@@ -33,9 +33,6 @@ export function Lobby() {
   const roleOwner = (role: Role) => state.players.find((p) => p.role === role)
   const everyoneReady = state.players.every((p) => p.role !== null)
   const canStart = isMaster && state.players.length >= 2 && everyoneReady
-  const { winCondition } = state.settings
-  const showTime = winCondition === 'time' || winCondition === 'both'
-  const showWealth = winCondition === 'wealth' || winCondition === 'both'
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -143,140 +140,139 @@ export function Lobby() {
             </ul>
           </div>
 
-          <SettingSlider
-            label={t('lobby.startingCash')}
-            value={state.settings.startingCash}
-            min={STARTING_CASH_MIN}
-            max={STARTING_CASH_MAX}
-            step={1_000_000}
-            editable={isMaster}
-            format={formatRupiah}
-            onCommit={(startingCash) => updateSettings({ startingCash })}
-          />
-
           <div>
             <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-              {t('lobby.winCondition')}
+              {t('lobby.settings')}
             </h2>
-            <div className="grid grid-cols-3 gap-1">
-              {WIN_CONDITIONS.map((wc) => {
-                const active = state.settings.winCondition === wc
+            <div className="grid grid-cols-3 gap-1 rounded-xl border-2 border-ink bg-surface-sunken p-1">
+              {SETTINGS_TABS.map((tab) => {
+                const active = settingsTab === tab
                 return (
                   <button
-                    key={wc}
-                    disabled={!isMaster}
-                    onClick={() => updateSettings({ winCondition: wc })}
-                    className={`rounded-lg border-2 border-ink py-1.5 text-xs font-bold transition ${
+                    key={tab}
+                    onClick={() => setSettingsTab(tab)}
+                    className={`rounded-lg py-1.5 text-xs font-bold uppercase transition ${
                       active
-                        ? 'bg-accent text-ink shadow-brutal-sm'
-                        : 'bg-surface-sunken text-ink-muted enabled:hover:bg-surface disabled:opacity-60'
+                        ? 'border-2 border-ink bg-accent text-ink shadow-brutal-sm'
+                        : 'text-ink-muted hover:text-ink'
                     }`}
                   >
-                    {t(`lobby.winConditions.${wc}`)}
+                    {t(`lobby.tabs.${tab}`)}
                   </button>
                 )
               })}
             </div>
-          </div>
 
-          {showTime && (
-            <div>
-              <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-                {t('lobby.timeLimit')}
-              </h2>
-              <div className="grid grid-cols-4 gap-1">
-                {TIME_LIMIT_OPTIONS.map((min) => {
-                  const active = state.settings.timeLimitMinutes === min
-                  return (
-                    <button
-                      key={min}
+            <div className="mt-4 space-y-6">
+              {settingsTab === 'general' && (
+                <>
+                  <SettingSlider
+                    label={t('lobby.startingCash')}
+                    value={state.settings.startingCash}
+                    min={STARTING_CASH_MIN}
+                    max={STARTING_CASH_MAX}
+                    step={1_000_000}
+                    editable={isMaster}
+                    format={formatRupiah}
+                    onCommit={(startingCash) => updateSettings({ startingCash })}
+                  />
+
+                  <div>
+                    <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
+                      {t('lobby.timeLimit')}
+                    </h3>
+                    <div className="grid grid-cols-3 gap-1">
+                      {TIME_LIMIT_OPTIONS.map((min) => {
+                        const active = state.settings.timeLimitMinutes === min
+                        return (
+                          <button
+                            key={min}
+                            disabled={!isMaster}
+                            onClick={() => updateSettings({ timeLimitMinutes: min })}
+                            className={`rounded-lg border-2 border-ink py-1.5 text-xs font-bold transition ${
+                              active
+                                ? 'bg-accent text-ink shadow-brutal-sm'
+                                : 'bg-surface-sunken text-ink-muted enabled:hover:bg-surface disabled:opacity-60'
+                            }`}
+                          >
+                            {t('lobby.timeLimitValue', { count: min })}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <p className="mt-1 text-xs text-ink-faint">{t('lobby.timeLimitHint')}</p>
+                  </div>
+                </>
+              )}
+
+              {settingsTab === 'roles' && (
+                <div>
+                  <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
+                    {t('lobby.enabledRoles')}
+                  </h3>
+                  <ul className="space-y-1">
+                    {ALL_ROLES.map((role) => {
+                      const enabled = state.settings.enabledRoles.includes(role)
+                      return (
+                        <li key={role}>
+                          <label
+                            className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
+                              isMaster ? 'cursor-pointer' : ''
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={enabled}
+                              disabled={!isMaster}
+                              onChange={() =>
+                                updateSettings({
+                                  enabledRoles: enabled
+                                    ? state.settings.enabledRoles.filter((r) => r !== role)
+                                    : [...state.settings.enabledRoles, role],
+                                })
+                              }
+                              className="accent-accent-strong"
+                            />
+                            <span
+                              className={
+                                enabled ? 'font-medium text-ink' : 'text-ink-faint line-through'
+                              }
+                            >
+                              {roleName(t, role)}
+                            </span>
+                          </label>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {settingsTab === 'rules' && (
+                <div>
+                  <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
+                    {t('lobby.buildRules')}
+                  </h3>
+                  <label
+                    className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
+                      isMaster ? 'cursor-pointer' : ''
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={state.settings.requireFullRegionToBuild}
                       disabled={!isMaster}
-                      onClick={() => updateSettings({ timeLimitMinutes: min })}
-                      className={`rounded-lg border-2 border-ink py-1.5 text-xs font-bold transition ${
-                        active
-                          ? 'bg-accent text-ink shadow-brutal-sm'
-                          : 'bg-surface-sunken text-ink-muted enabled:hover:bg-surface disabled:opacity-60'
-                      }`}
-                    >
-                      {t('lobby.timeLimitValue', { count: min })}
-                    </button>
-                  )
-                })}
-              </div>
+                      onChange={(e) =>
+                        updateSettings({ requireFullRegionToBuild: e.target.checked })
+                      }
+                      className="accent-accent-strong"
+                    />
+                    <span className="font-medium text-ink">{t('lobby.requireFullRegion')}</span>
+                  </label>
+                  <p className="mt-1 text-xs text-ink-faint">{t('lobby.requireFullRegionHint')}</p>
+                </div>
+              )}
             </div>
-          )}
-
-          {showWealth && (
-            <SettingSlider
-              label={t('lobby.targetWealth')}
-              value={state.settings.targetWealth ?? TARGET_WEALTH_MIN}
-              min={TARGET_WEALTH_MIN}
-              max={TARGET_WEALTH_MAX}
-              step={TARGET_WEALTH_STEP}
-              editable={isMaster}
-              format={formatRupiah}
-              onCommit={(targetWealth) => updateSettings({ targetWealth })}
-            />
-          )}
-
-          <div>
-            <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-              {t('lobby.enabledRoles')}
-            </h2>
-            <ul className="space-y-1">
-              {ALL_ROLES.map((role) => {
-                const enabled = state.settings.enabledRoles.includes(role)
-                return (
-                  <li key={role}>
-                    <label
-                      className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
-                        isMaster ? 'cursor-pointer' : ''
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={enabled}
-                        disabled={!isMaster}
-                        onChange={() =>
-                          updateSettings({
-                            enabledRoles: enabled
-                              ? state.settings.enabledRoles.filter((r) => r !== role)
-                              : [...state.settings.enabledRoles, role],
-                          })
-                        }
-                        className="accent-accent-strong"
-                      />
-                      <span
-                        className={enabled ? 'font-medium text-ink' : 'text-ink-faint line-through'}
-                      >
-                        {roleName(t, role)}
-                      </span>
-                    </label>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-              {t('lobby.buildRules')}
-            </h2>
-            <label
-              className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
-                isMaster ? 'cursor-pointer' : ''
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={state.settings.requireFullRegionToBuild}
-                disabled={!isMaster}
-                onChange={(e) => updateSettings({ requireFullRegionToBuild: e.target.checked })}
-                className="accent-accent-strong"
-              />
-              <span className="font-medium text-ink">{t('lobby.requireFullRegion')}</span>
-            </label>
-            <p className="mt-1 text-xs text-ink-faint">{t('lobby.requireFullRegionHint')}</p>
           </div>
 
           {isMaster ? (

@@ -44,7 +44,7 @@ export async function concludeIfWon(io: TTServer, store: GameStore, roomId: stri
 /**
  * Schedule the time-limit wakeup for a room that just started. The timer is a
  * safety net for inactivity — `concludeIfWon` recomputes from `startedAt`, so a
- * little clock drift is harmless. No-op unless the win condition uses time.
+ * little clock drift is harmless.
  */
 export async function scheduleTimeLimit(
   io: TTServer,
@@ -53,8 +53,7 @@ export async function scheduleTimeLimit(
 ): Promise<void> {
   const state = await store.get(roomId)
   if (!state) return
-  const { winCondition, timeLimitMinutes } = state.settings
-  if (winCondition !== 'time' && winCondition !== 'both') return
+  const { timeLimitMinutes } = state.settings
   if (!timeLimitMinutes) return
 
   clearRoomTimer(roomId)

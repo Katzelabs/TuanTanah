@@ -170,17 +170,14 @@ export interface PendingAuction {
   deadline: number | null
 }
 
-export type WinCondition = 'time' | 'wealth' | 'both'
-
-// How a finished game was actually decided (settings.winCondition is the
-// configured goal; this is the outcome that triggered the win).
-export type WinReason = 'time' | 'wealth' | 'last_standing'
+// How a finished game was decided: the time limit expiring (richest active
+// player wins) or everyone else going bankrupt first.
+export type WinReason = 'time' | 'last_standing'
 
 export interface RoomSettings {
-  winCondition: WinCondition
-  timeLimitMinutes?: 30 | 60 | 90 | 120
-  targetWealth?: RupiahAmount
-  startingCash: RupiahAmount // Rp 5jt – Rp 50jt
+  // Games are always time-limited; the richest active player wins at the bell.
+  timeLimitMinutes: 30 | 60 | 90
+  startingCash: RupiahAmount // Rp 1jt – Rp 15jt
   enabledRoles: Role[]
   // When true, a player must own every tile in a region before building there.
   requireFullRegionToBuild: boolean

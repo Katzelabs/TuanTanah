@@ -27,11 +27,9 @@ import {
   STARTING_CASH_DEFAULT,
   STARTING_CASH_MAX,
   STARTING_CASH_MIN,
-  TARGET_WEALTH_DEFAULT,
-  TARGET_WEALTH_MAX,
-  TARGET_WEALTH_MIN,
   tierP,
   tileP,
+  TIME_LIMIT_DEFAULT,
   TIME_LIMIT_OPTIONS,
   TRANSPORT_BUY_PRICE,
   TRANSPORT_RENT,
@@ -118,9 +116,7 @@ export function createGameState(roomId: string, now: number): GameState {
     pendingAuction: null,
     bank: BANK_STARTING,
     settings: {
-      winCondition: 'both',
-      timeLimitMinutes: 60,
-      targetWealth: TARGET_WEALTH_DEFAULT,
+      timeLimitMinutes: TIME_LIMIT_DEFAULT,
       startingCash: STARTING_CASH_DEFAULT,
       enabledRoles: [...ALL_ROLES],
       requireFullRegionToBuild: true,
@@ -205,17 +201,6 @@ export function updateSettings(
     next.startingCash = Math.min(
       STARTING_CASH_MAX,
       Math.max(STARTING_CASH_MIN, partial.startingCash),
-    )
-  }
-  if (partial.winCondition !== undefined) {
-    if (!['time', 'wealth', 'both'].includes(partial.winCondition)) {
-      throw new EngineError('core.invalidWinCondition')
-    }
-  }
-  if (partial.targetWealth !== undefined) {
-    next.targetWealth = Math.min(
-      TARGET_WEALTH_MAX,
-      Math.max(TARGET_WEALTH_MIN, partial.targetWealth),
     )
   }
   if (partial.timeLimitMinutes !== undefined) {

@@ -1,7 +1,7 @@
 // Economic & action tuning — the non-content numbers that govern the game loop:
 // player/cash limits, win conditions, AFK, pinjol, jail, meta-actions, and the
 // Kantor Hukum / Rinjani fees.
-import type { RupiahAmount, TileId, WinCondition } from '../types/game.js'
+import type { RupiahAmount, TileId } from '../types/game.js'
 import { jt } from './units.js'
 
 export const MIN_PLAYERS = 2
@@ -9,19 +9,17 @@ export const MAX_PLAYERS = 8
 
 // Room master sets starting cash in this range.
 export const STARTING_CASH_MIN = jt(1)
-export const STARTING_CASH_MAX = jt(20)
+export const STARTING_CASH_MAX = jt(15)
 export const STARTING_CASH_DEFAULT = jt(6)
 
 // Bank starts effectively unlimited; tracked for accounting.
 export const BANK_STARTING = jt(1_000_000)
 
-// ---- Win conditions (room master sets in lobby) ----
-export const WIN_CONDITIONS: WinCondition[] = ['time', 'wealth', 'both']
-export const TIME_LIMIT_OPTIONS = [30, 60, 90, 120] as const
-export const TARGET_WEALTH_MIN = jt(50) // Rp 50 juta
-export const TARGET_WEALTH_MAX = jt(500) // Rp 500 juta
-export const TARGET_WEALTH_DEFAULT = jt(80) // matches createGameState default
-export const TARGET_WEALTH_STEP = jt(10)
+// ---- Win condition (room master sets the time limit in the lobby) ----
+// Games are always time-limited: when the clock runs out the richest active
+// player wins (or the last player standing wins early).
+export const TIME_LIMIT_OPTIONS = [30, 60, 90] as const
+export const TIME_LIMIT_DEFAULT = 60
 
 // ---- AFK auto-skip ----
 // Inactivity allowed per turn before the active player is auto-skipped. The

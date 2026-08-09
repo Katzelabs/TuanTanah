@@ -106,7 +106,6 @@ export const error: MessageMap = {
     'core.roleTaken': 'Role already taken',
     'core.cannotChangeSettingsAfterStart': 'Cannot change settings after start',
     'core.notRoomMaster': 'Only the room master can change settings',
-    'core.invalidWinCondition': 'Invalid win condition',
     'core.invalidTimeLimit': 'Invalid time limit',
     'core.invalidRoles': 'Invalid roles',
     'core.atLeastOneRole': 'At least one role must be enabled',
@@ -180,7 +179,6 @@ export const error: MessageMap = {
     'core.cannotChangeSettingsAfterStart':
       'Tidak dapat mengubah pengaturan setelah permainan dimulai',
     'core.notRoomMaster': 'Hanya tuan ruang yang bisa mengubah pengaturan',
-    'core.invalidWinCondition': 'Kondisi menang tidak valid',
     'core.invalidTimeLimit': 'Batas waktu tidak valid',
     'core.invalidRoles': 'Peran tidak valid',
     'core.atLeastOneRole': 'Minimal satu peran harus diaktifkan',

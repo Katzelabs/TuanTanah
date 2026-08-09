@@ -52,23 +52,23 @@
     "roles": "Peran",
     "salary": "Gaji {{amount}}",
     "players": "Pemain ({{count}})",
+    "settings": "Pengaturan permainan",
+    "tabs": {
+      "general": "Umum",
+      "roles": "Peran",
+      "rules": "Aturan"
+    },
     "startingCash": "Modal awal",
-    "winCondition": "Syarat menang",
     "timeLimit": "Batas waktu",
     "timeLimitValue": "{{count}}m",
-    "targetWealth": "Target kekayaan",
+    "timeLimitHint": "Saat waktu habis, pemain terkaya yang masih bertahan menang.",
     "enabledRoles": "Peran aktif",
     "buildRules": "Aturan membangun",
     "requireFullRegion": "Wajib miliki satu kawasan penuh untuk membangun",
     "requireFullRegionHint": "Pemain harus memiliki semua petak dalam satu kawasan sebelum membangun rumah atau properti di sana.",
     "startGame": "Mulai permainan",
     "waitingForRoles": "Menunggu pemilihan peran…",
-    "waitingForHost": "Menunggu host memulai…",
-    "winConditions": {
-      "time": "Waktu",
-      "wealth": "Kekayaan",
-      "both": "Keduanya"
-    }
+    "waitingForHost": "Menunggu host memulai…"
   },
   "game": {
     "room": "Ruangan {{code}}",

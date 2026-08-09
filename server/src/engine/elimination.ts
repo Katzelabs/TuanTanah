@@ -106,18 +106,10 @@ export function checkWinCondition(state: GameState, now: number): WinResult | nu
     return null
   }
 
-  const { winCondition, targetWealth, timeLimitMinutes } = state.settings
-
-  // Target wealth: first to reach it wins (richest if several cross at once).
-  if ((winCondition === 'wealth' || winCondition === 'both') && targetWealth) {
-    const richest = richestActive(state)
-    if (richest && playerWealth(state, richest) >= targetWealth) {
-      return { winnerId: richest.id, reason: 'wealth' }
-    }
-  }
+  const { timeLimitMinutes } = state.settings
 
   // Time limit: when the clock runs out, the richest active player wins.
-  if ((winCondition === 'time' || winCondition === 'both') && timeLimitMinutes && state.startedAt) {
+  if (timeLimitMinutes && state.startedAt) {
     if (now - state.startedAt >= timeLimitMinutes * 60_000) {
       const richest = richestActive(state)
       if (richest) return { winnerId: richest.id, reason: 'time' }
@@ -135,12 +127,7 @@ export function endGame(state: GameState, winnerId: string, reason: WinReason): 
   state.winReason = reason
   const winner = state.players.find((p) => p.id === winnerId)
   const name = winner?.name ?? 'Someone'
-  const code =
-    reason === 'time'
-      ? 'elimination.winsTime'
-      : reason === 'wealth'
-        ? 'elimination.winsWealth'
-        : 'elimination.winsLastStanding'
+  const code = reason === 'time' ? 'elimination.winsTime' : 'elimination.winsLastStanding'
   logKey(state, code, { name }, winnerId)
 }
 
