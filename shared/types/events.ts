@@ -2,7 +2,6 @@
 // server and client for end-to-end safety.
 
 import type {
-  AbilityType,
   GameState,
   LandBusiness,
   NegotiationDeal,
@@ -80,7 +79,6 @@ export interface ClientToServerEvents {
     tileId?: TileId
     depositAmount?: RupiahAmount
   }) => void
-  use_ability: (payload: { ability: AbilityType }) => void
   pay_jail: () => void
   take_pinjol: (payload: { amount: RupiahAmount; lenderId?: string }) => void
   // Rentenir's once-per-round loanshark power: force a rival to take a pinjol

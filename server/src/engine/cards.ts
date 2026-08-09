@@ -143,13 +143,6 @@ export function drawKejadian(
     player.id,
   )
 
-  // Pejabat may have armed a block; the card is drawn but its effects are nullified.
-  if (state.pendingKejadianBlock) {
-    state.pendingKejadianBlock = false
-    logKey(state, 'cards.kejadianBlocked', { card: kejadianP(id) }, player.id)
-    return { cardId: id, name: card.name }
-  }
-
   switch (id) {
     // ---- Immediate cash effects ----
     case 'lebaran': {

@@ -22,7 +22,6 @@ import {
   startLawOfficeAuction,
   takeLoan,
   upgradeProperty,
-  useAbility,
 } from '../engine/index.js'
 import { castVote, performMetaAction } from '../engine/actions.js'
 import { isDev } from '../bootstrap/env.js'
@@ -207,15 +206,6 @@ export function registerGameHandlers(io: TTServer, socket: TTSocket, store: Game
       const { roomId, playerId } = requireSession(socket)
       await mutateAndBroadcast(io, store, roomId, (state) =>
         castVote(state, playerId, payload.targetId),
-      )
-    }),
-  )
-
-  socket.on('use_ability', (payload) =>
-    guard(socket, async () => {
-      const { roomId, playerId } = requireSession(socket)
-      await mutateAndBroadcast(io, store, roomId, (state) =>
-        useAbility(state, playerId, payload.ability),
       )
     }),
   )

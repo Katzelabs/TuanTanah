@@ -5,7 +5,6 @@
 // (`turn.passGo`, `actions.invest`, …) so modules never collide.
 
 import type { MessageMap } from '../params.js'
-import * as abilities from './abilities.js'
 import * as actions from './actions.js'
 import * as cards from './cards.js'
 import * as core from './core.js'
@@ -15,7 +14,7 @@ import * as pinjol from './pinjol.js'
 import * as roles from './roles.js'
 import * as turn from './turn.js'
 
-const MODULES = [abilities, actions, cards, core, elimination, negotiation, pinjol, roles, turn]
+const MODULES = [actions, cards, core, elimination, negotiation, pinjol, roles, turn]
 
 function merge(pick: (m: { log: MessageMap; error: MessageMap }) => MessageMap): MessageMap {
   const out: MessageMap = { en: {}, id: {} }

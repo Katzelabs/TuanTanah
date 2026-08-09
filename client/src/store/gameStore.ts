@@ -1,7 +1,6 @@
 import {
   HUSTLE_CARDS,
   KEJADIAN_CARDS,
-  type AbilityType,
   type FinalStanding,
   type GameState,
   type LandBusiness,
@@ -157,7 +156,6 @@ interface GameStore {
     tileId?: TileId,
     depositAmount?: RupiahAmount,
   ) => void
-  useAbility: (ability: AbilityType) => void
   takePinjol: (amount: RupiahAmount, lenderId?: string) => void
   forcePinjol: (targetId: string, amount: RupiahAmount) => void
   repayPinjol: (loanId?: string) => void
@@ -392,10 +390,6 @@ export const useGame = create<GameStore>((set, get) => ({
   metaAction: (action, targetId, tileId, depositAmount) => {
     playSound('click', { volume: 0.5 })
     getActiveSocket().emit('meta_action', { action, targetId, tileId, depositAmount })
-  },
-  useAbility: (ability) => {
-    playSound('click', { volume: 0.5 })
-    getActiveSocket().emit('use_ability', { ability })
   },
   takePinjol: (amount, lenderId) => getActiveSocket().emit('take_pinjol', { amount, lenderId }),
   forcePinjol: (targetId, amount) => getActiveSocket().emit('force_pinjol', { targetId, amount }),

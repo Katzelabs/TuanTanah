@@ -13,7 +13,6 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { roleName, tileName } from '@/i18n/gameData.js'
-import { AbilityBar } from '@/features/game/AbilityBar/AbilityBar.js'
 import { AfkCountdown } from '@/features/game/AfkCountdown/AfkCountdown.js'
 import { Board } from '@/features/game/Board/Board.js'
 import { DebtPanel } from '@/features/game/DebtPanel/DebtPanel.js'
@@ -49,7 +48,6 @@ export function Game() {
   const roll = useGame((s) => s.roll)
   const buy = useGame((s) => s.buy)
   const metaAction = useGame((s) => s.metaAction)
-  const useAbility = useGame((s) => s.useAbility)
   const payJail = useGame((s) => s.payJail)
   const endTurn = useGame((s) => s.endTurn)
   const lawOfficeSkip = useGame((s) => s.lawOfficeSkip)
@@ -193,7 +191,6 @@ export function Game() {
           onPick={handlePickMeta}
         />
       )}
-      {me && !rolling && <AbilityBar me={me} onUse={useAbility} />}
       {!rolling && (
         <Tooltip content={t('game.pinjolDesc')} className="w-full">
           <Button variant="secondary" size="sm" block onClick={() => setShowPinjol(true)}>

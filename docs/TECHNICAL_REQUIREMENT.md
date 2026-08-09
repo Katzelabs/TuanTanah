@@ -4,7 +4,7 @@
 
 ## 1. Project Overview
 
-A real-time multiplayer web-based Monopoly game with Indonesian theme, supporting 2–8 players per room. The system must handle complex game state including two property tracks, role-based abilities, pinjol loan system, timed card effects, structured negotiations, and turn enforcement — all synchronized in real-time across all players.
+A real-time multiplayer web-based Monopoly game with Indonesian theme, supporting 2–8 players per room. The system must handle complex game state including two property tracks, role passives, pinjol loan system, timed card effects, structured negotiations, and turn enforcement — all synchronized in real-time across all players.
 
 ---
 
@@ -104,7 +104,7 @@ tuan-tanah/
             ├── pinjol.ts          ← loan system logic
             ├── negotiation.ts     ← deal state machine
             ├── effects.ts         ← timed effect scheduler
-            ├── roles.ts           ← role ability resolvers
+            ├── roles.ts           ← role passive resolvers
             └── elimination.ts     ← bankruptcy + win condition check
 ```
 
@@ -214,7 +214,6 @@ interface Player {
   loans: PinjolLoan[]
   isEliminated: boolean
   isRoomMaster: boolean
-  usedAbility: boolean // for once-per-game role abilities
 }
 
 interface TileState {

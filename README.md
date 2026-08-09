@@ -1,6 +1,6 @@
 # Tuan Tanah 🇮🇩
 
-A real-time multiplayer web-based Monopoly game with an Indonesian theme. 2–8 players, two property tracks, role-based abilities, a pinjol (loan) system, themed cards, and structured negotiation.
+A real-time multiplayer web-based Monopoly game with an Indonesian theme. 2–8 players, two property tracks, role passives, a pinjol (loan) system, themed cards, and structured negotiation.
 
 See [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) and [`docs/TECHNICAL_REQUIREMENT.md`](docs/TECHNICAL_REQUIREMENT.md) for the full design and architecture.
 
@@ -15,7 +15,7 @@ The full game loop is playable end-to-end, synced over Socket.io:
 - Property & tier upgrades, downgrades, and sells
 - Pinjol (loan) system + debt resolution
 - Structured negotiation deals between players
-- Role active abilities, voting, elimination / bankruptcy cascade, and win conditions
+- Role passives, voting, elimination / bankruptcy cascade, and win conditions
 - Game-over standings, optionally archived to Postgres
 
 Client extras: neobrutalist design system, framer-motion animations, a sound system, and per-player EN/ID i18n. The engine and the client both have Vitest suites. Remaining work is balance/content tuning and a couple of residual server-side i18n gaps — see `CLAUDE.md`.

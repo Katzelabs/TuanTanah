@@ -104,7 +104,3 @@ export const INFLUENCER_SALARY_CAP: RupiahAmount = jt(7) // hard salary plateau
 export const RENTENIR_INTEREST_CUT_RATE = 0.5 // 50% of others' pinjol interest payments
 export const SALES_TRANSACTION_BONUS_RATE = 0.5 // 50% of others' tile buys/sells
 export const SALES_BUY_DISCOUNT_MULTIPLIER = 0.8 // buys property 20% cheaper
-
-// ---- Role active abilities (unchanged in the passive-v3 pass) ----
-export const INFLUENCER_BOOST_MULTIPLIER = 3 // viral boost passive multiplier
-export const INFLUENCER_BOOST_ROUNDS = 3 // viral boost duration

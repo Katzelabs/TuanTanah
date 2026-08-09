@@ -30,7 +30,7 @@ export const useRollAnim = create<RollAnimState>((set) => ({
 
 /**
  * True while the cinematic is in flight — the dice are tumbling, the roll is
- * being read, or the token is walking. Post-roll actions (buy/end-turn/abilities)
+ * being read, or the token is walking. Post-roll actions (buy/end-turn/meta)
  * stay hidden until it returns false so nothing can be triggered mid-journey.
  */
 export const isRollAnimating = (p: RollPhase): boolean =>

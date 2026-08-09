@@ -218,13 +218,6 @@
       "korupsi": "Bertaruh demi untung cepat — {{korupsiSuccessPercent}}% berhasil curi {{korupsiSteal}} dari bank, {{korupsiBustPercent}}% dipenjara dan didenda."
     }
   },
-  "ability": {
-    "title": "Kemampuan peran (sekali per permainan)",
-    "viralBoost": "✨ Viral Boost",
-    "viralBoostHint": "Pendapatan pasif 3× selama 3 ronde — sekali per permainan",
-    "blockKejadian": "🛡️ Blokir Kejadian",
-    "blockKejadianHint": "Batalkan kartu Kejadian Nasional berikutnya — sekali per permainan"
-  },
   "negotiation": {
     "title": "🤝 Ajukan kesepakatan",
     "with": "Dengan",

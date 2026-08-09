@@ -6,7 +6,6 @@ export const log: MessageMap = {
     'cards.hustlePass': '{{name}} hustled "{{card}}" — gained a {{pass}} pass',
     'cards.hustleMove': '{{name}} hustled "{{card}}" — advancing to {{tile}}',
     'cards.kejadianDraw': 'Kejadian Nasional: {{card}} — {{effect}}',
-    'cards.kejadianBlocked': '{{card}} was blocked by Pejabat — no effect',
     'cards.korupsiNoEffect': 'Korupsi Terungkap — nobody has outstanding pinjol; no effect',
     'cards.reshuffleKabinet':
       'Reshuffle Kabinet — {{cleared}} effect(s) and {{passes}} free-pass card(s) wiped',
@@ -19,7 +18,6 @@ export const log: MessageMap = {
     'cards.hustlePass': '{{name}} berhasil hustle "{{card}}" — mendapat kartu {{pass}}',
     'cards.hustleMove': '{{name}} berhasil hustle "{{card}}" — bergerak ke {{tile}}',
     'cards.kejadianDraw': 'Kejadian Nasional: {{card}} — {{effect}}',
-    'cards.kejadianBlocked': '{{card}} diblokir oleh Pejabat — tidak berdampak',
     'cards.korupsiNoEffect':
       'Korupsi Terungkap — tidak ada pemain yang memiliki pinjol; tidak berdampak',
     'cards.reshuffleKabinet':

@@ -110,7 +110,6 @@ export function createGameState(roomId: string, now: number): GameState {
     activeEffects: [],
     kejadianDeck: [],
     hustleDeck: [],
-    pendingKejadianBlock: false,
     pendingDebts: [],
     pendingDeals: [],
     pendingAuction: null,
@@ -145,7 +144,6 @@ export function addPlayer(state: GameState, name: string): Player {
     isEliminated: false,
     isRoomMaster: state.players.length === 0,
     isConnected: true,
-    usedAbility: false,
     forcedLoanRound: 0,
     metaActionsUsed: [],
     roleBonusThisLap: 0,
@@ -237,7 +235,6 @@ export function startGame(state: GameState, playerId: string, rng: Rng = default
   state.phase = 'playing'
   state.round = 1
   state.currentPlayerIndex = 0
-  state.pendingKejadianBlock = false
   for (const p of state.players) {
     p.cash = state.settings.startingCash
     p.position = GO_TILE_ID
@@ -246,7 +243,6 @@ export function startGame(state: GameState, playerId: string, rng: Rng = default
     p.loans = []
     p.ownedCards = []
     p.isEliminated = false
-    p.usedAbility = false
     p.roleBonusThisLap = 0
   }
   state.kejadianDeck = shuffle(
@@ -991,7 +987,6 @@ export function endTurn(state: GameState, playerId: string): void {
 
 export * from './board.js'
 export { collectPassiveIncome } from './turn.js'
-export { useAbility } from './abilities.js'
 // Kantor Hukum subsystem lives in lawoffice.ts; re-exported so the engine's import
 // surface (realtime handlers + tests import these from index.js) is unchanged.
 export {

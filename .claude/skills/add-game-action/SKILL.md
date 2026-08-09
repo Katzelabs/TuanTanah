@@ -1,6 +1,6 @@
 ---
 name: add-game-action
-description: Step-by-step recipe for adding a new player action to Tuan Tanah end-to-end — socket event, pure engine function, server handler, client emitter, and i18n. Use when a new action lets a player do something the server must validate and broadcast (e.g. a new meta-action, ability, or board interaction).
+description: Step-by-step recipe for adding a new player action to Tuan Tanah end-to-end — socket event, pure engine function, server handler, client emitter, and i18n. Use when a new action lets a player do something the server must validate and broadcast (e.g. a new meta-action, role power, or board interaction).
 ---
 
 # Add a game action (end-to-end recipe)
@@ -20,7 +20,7 @@ Keep payloads minimal — the server already knows the player via the session. R
 
 ## 2. Write the pure engine function — `server/src/engine/<submodule>.ts`
 
-Pick the submodule by domain (`actions.ts` for meta-actions, `abilities.ts` for role powers, `lawoffice.ts`, `pinjol.ts`, …). The function takes `GameState` (+ the acting `playerId` and payload), mutates in place, and **throws `EngineError` on every invalid path**. No I/O; if you need randomness, take the injectable `Rng`.
+Pick the submodule by domain (`actions.ts` for meta-actions, `roles.ts` for role powers, `lawoffice.ts`, `pinjol.ts`, …). The function takes `GameState` (+ the acting `playerId` and payload), mutates in place, and **throws `EngineError` on every invalid path**. No I/O; if you need randomness, take the injectable `Rng`.
 
 ```ts
 export function myAction(state: GameState, playerId: string, tileId: TileId, amount: RupiahAmount) {

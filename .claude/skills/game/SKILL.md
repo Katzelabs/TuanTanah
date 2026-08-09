@@ -20,7 +20,6 @@ The game is an Indonesian-themed Monopoly (2–8 players). Design docs: `docs/GA
 | `board.ts`       | tile/region queries over shared data                                                                                        |
 | `cards.ts`       | Kejadian/Hustle decks (`drawKejadian`, `drawHustle`)                                                                        |
 | `roles.ts`       | role modifiers (build/buy/tax multipliers, salary) — has balance TODOs                                                      |
-| `abilities.ts`   | role active abilities (`useAbility` dispatch)                                                                               |
 | `actions.ts`     | meta-actions: invest/work/hustle/sabotage/korupsi/negotiate; voting                                                         |
 | `effects.ts`     | timed card/status effects, `effectiveTier`, rent immunity                                                                   |
 | `pinjol.ts`      | loans + debt resolution (loanshark mechanics)                                                                               |

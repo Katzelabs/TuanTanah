@@ -4,7 +4,7 @@
 
 ### 🎯 Overview
 
-A multiplayer web-based Monopoly game with Indonesian theme, supporting 2-8 players, with expanded mechanics beyond classic Monopoly including two property tracks, role-based abilities, pinjol system, meta actions, and Indonesian-themed cards and board.
+A multiplayer web-based Monopoly game with Indonesian theme, supporting 2-8 players, with expanded mechanics beyond classic Monopoly including two property tracks, role passives, pinjol system, meta actions, and Indonesian-themed cards and board.
 
 ---
 
@@ -302,9 +302,11 @@ meta-action allowance): **Rp 2 juta/lap** for every role except Sales (**Rp 1.5 
 | 9   | Rentenir    | Rp 4 juta          | Lends pinjol directly (earns full interest) + earns 50% of others' loan interest (capped) |
 | 10  | Sales       | Rp 3 juta          | Buys property 20% cheaper + earns 50% of others' tile buys/sells/deals (capped 1.5jt)     |
 
-Active abilities are unchanged in this pass (Influencer viral boost and Pejabat kejadian
-block, once per game; Rentenir force-loan once per round). A per-lap active ability for
-every role is planned as phase 2.
+Roles have **no active abilities** right now. The old once-per-game pair (Influencer viral
+boost, Pejabat kejadian block) was removed alongside the passive redesign — it predated the
+capped-skim model and only covered 2 of the 10 roles. The Rentenir force-loan
+(once per round) is a role power, not part of that system, and stays. A per-lap active
+ability for every role is planned as phase 2.
 
 Room master can enable/disable any role before game starts. Players pick first come first served in lobby. No duplicate roles.
 

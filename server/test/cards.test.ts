@@ -104,18 +104,6 @@ describe('drawKejadian — immediate cash effects', () => {
   })
 })
 
-describe('drawKejadian — Pejabat block', () => {
-  it('nullifies the drawn card when a block is armed', () => {
-    const { state, players } = makeGame(2, { cash: 0 })
-    state.kejadianDeck = ['lebaran']
-    state.pendingKejadianBlock = true
-    const drawn = drawKejadian(state, players[0]!)
-    expect(drawn).toEqual({ cardId: 'lebaran', name: 'Lebaran' })
-    expect(players[0]!.cash).toBe(0) // no THR
-    expect(state.pendingKejadianBlock).toBe(false)
-  })
-})
-
 describe('drawKejadian — timed effects', () => {
   it('banjir_jakarta drops the tier of every Jakarta tile', () => {
     const { state, players } = makeGame(2)

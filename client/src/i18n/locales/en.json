@@ -218,13 +218,6 @@
       "korupsi": "Gamble for a quick payout — {{korupsiSuccessPercent}}% you steal {{korupsiSteal}} from the bank, {{korupsiBustPercent}}% you're jailed and fined."
     }
   },
-  "ability": {
-    "title": "Role ability (once per game)",
-    "viralBoost": "✨ Viral Boost",
-    "viralBoostHint": "3× passive income for 3 rounds — once per game",
-    "blockKejadian": "🛡️ Block Event",
-    "blockKejadianHint": "Nullify the next National Event card — once per game"
-  },
   "negotiation": {
     "title": "🤝 Propose a deal",
     "with": "With",

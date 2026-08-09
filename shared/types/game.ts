@@ -22,9 +22,6 @@ export type Role =
 
 export type PropertyTrack = 'house' | 'property'
 
-// Player-triggered, once-per-game role abilities.
-export type AbilityType = 'viral_boost' | 'block_kejadian'
-
 export type TileType =
   | 'go'
   | 'property'
@@ -85,7 +82,6 @@ export interface Player {
   isEliminated: boolean
   isRoomMaster: boolean
   isConnected: boolean
-  usedAbility: boolean // for once-per-game role abilities
   // Round in which the Rentenir last forced a loan on a rival (their once-per-round
   // loanshark power). 0 = never used. Compared against state.round to gate reuse.
   forcedLoanRound: number
@@ -140,7 +136,7 @@ export interface ActiveEffect {
   targetTileIds?: TileId[]
   targetPlayerId?: string
   multiplier?: number
-  // Round-based decay (cards/abilities); the effect expires when this hits 0.
+  // Round-based decay (cards/meta-actions); the effect expires when this hits 0.
   roundsRemaining: number
   sourceCard: string
 }
@@ -229,8 +225,6 @@ export interface GameState {
   activeEffects: ActiveEffect[]
   kejadianDeck: string[]
   hustleDeck: string[]
-  // Pejabat armed their once/game Kejadian block; the next drawn card is nullified.
-  pendingKejadianBlock?: boolean
   // An in-progress Pemilu election; cleared once the vote resolves.
   pendingVote?: PendingVote | null
   // A live Kantor Hukum force-buy auction; while set the table is paused.

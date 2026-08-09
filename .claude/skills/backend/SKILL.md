@@ -53,7 +53,7 @@ socket.on('roll_dice', () =>
 
 - `realtime/common.ts` — `TTServer`/`TTSocket` types, `broadcastState`, `sendStateTo`, `guard`, `requireSession`.
 - `realtime/mutations.ts` — the write-path helpers above.
-- `realtime/game.ts` — in-game handlers (roll, buy, upgrade, law office, auction, meta-action, ability, pinjol).
+- `realtime/game.ts` — in-game handlers (roll, buy, upgrade, law office, auction, meta-action, pinjol).
 - `realtime/lobby.ts` — join/rejoin/pick_role/update_settings/start/leave. **Lobby ack errors are returned via `AckResult.error` as plain English** (not yet i18n-keyed).
 - `realtime/gameOver.ts` — `concludeIfWon`, `scheduleTimeLimit`. Call `concludeIfWon` after actions that can end the game.
 - `realtime/afk.ts` — `broadcastAndArm`, auction timers, AFK strike logic.

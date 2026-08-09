@@ -101,7 +101,7 @@ export function tileEffectLabel(t: TFunction, effect: ActiveEffect): string | nu
 /**
  * Human name for what caused an active effect, for the modal/tooltip ("why is
  * this here?"). Kejadian cards resolve to their localized name; sabotage gets its
- * own label. Returns null for sources we don't surface (deals, abilities).
+ * own label. Returns null for sources we don't surface (e.g. deals).
  */
 export function effectSourceName(t: TFunction, sourceCard: string): string | null {
   if (KEJADIAN_CARDS.some((c) => c.id === sourceCard)) return kejadianName(t, sourceCard)
