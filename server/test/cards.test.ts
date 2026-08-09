@@ -151,16 +151,15 @@ describe('drawKejadian — overhauled cards', () => {
     expect(players[1]!.cash).toBe(0) // owns nothing
   })
 
-  it('reshuffle_kabinet wipes card effects and free-passes but keeps deals', () => {
+  it('reshuffle_kabinet wipes all card effects and free-passes', () => {
     const { state, players } = makeGame(2)
     addEffect(state, { sourceCard: 'banjir_jakarta', type: 'tier_drop' })
-    addEffect(state, { sourceCard: 'deal_abc', type: 'rent_immunity' })
+    addEffect(state, { sourceCard: 'demo_buruh', type: 'passive_halved' })
     players[0]!.ownedCards.push({ id: 'c1', type: 'rent_free' })
     players[1]!.ownedCards.push({ id: 'c2', type: 'jail_free' })
     state.kejadianDeck = ['reshuffle_kabinet']
     drawKejadian(state, players[0]!)
-    expect(state.activeEffects).toHaveLength(1)
-    expect(state.activeEffects[0]!.sourceCard).toBe('deal_abc')
+    expect(state.activeEffects).toHaveLength(0)
     expect(players[0]!.ownedCards).toHaveLength(0)
     expect(players[1]!.ownedCards).toHaveLength(0)
   })

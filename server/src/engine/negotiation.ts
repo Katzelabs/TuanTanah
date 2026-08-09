@@ -1,16 +1,9 @@
 // Negotiation deal state machine (tech doc §11). Server-enforced player-to-player
-// deals: property_swap, cash_for_property, rent_immunity, revenue_share.
+// property deals: property_swap (tukar), cash_for_property (beli), sell_property (jual).
 // Proposing commits the proposer; the target accepts/rejects; on accept the deal is
 // re-validated against the current state and applied atomically. Pure engine logic —
 // throws EngineError on invalid input.
-import {
-  dealTypeP,
-  PLAYER_LOAN_MAX_RATE,
-  REGIONS,
-  rpP,
-  tileP,
-  TRANSPORT_BUY_PRICE,
-} from '@tuan-tanah/shared'
+import { dealTypeP, REGIONS, rpP, tileP, TRANSPORT_BUY_PRICE } from '@tuan-tanah/shared'
 import type {
   GameState,
   LogParams,
@@ -46,7 +39,6 @@ function dealValue(deal: NegotiationDeal): RupiahAmount {
   switch (deal.type) {
     case 'cash_for_property':
     case 'sell_property':
-    case 'rent_immunity':
       return deal.cashAmount ?? 0
     case 'property_swap': {
       // The requested tile's value plus any cash the proposer pays in (Sales bonus
@@ -55,10 +47,6 @@ function dealValue(deal: NegotiationDeal): RupiahAmount {
       const cashIn = deal.cashFrom === 'proposer' ? (deal.cashAmount ?? 0) : 0
       return base + cashIn
     }
-    case 'revenue_share':
-    case 'player_loan':
-    case 'cash_gift':
-      return 0 // no Sales bonus: no upfront sale of value (loans/gifts aren't sales)
   }
 }
 
@@ -111,47 +99,6 @@ export function validateDeal(state: GameState, deal: NegotiationDeal): DealError
       if (ownerOf(state, deal.offerTileId) !== from.id) return e('negotiation.noLongerOwnOffered')
       if (to.cash < (deal.cashAmount ?? 0))
         return e('negotiation.namedCannotAffordOffer', { name: to.name })
-      return null
-    }
-    case 'rent_immunity': {
-      if (deal.immuneFor !== 'proposer' && deal.immuneFor !== 'target')
-        return e('negotiation.chooseImmune')
-      if ((deal.laps ?? 0) < 1) return e('negotiation.immunityMinLap')
-      const cash = deal.cashAmount ?? 0
-      if (cash < 0) return e('negotiation.immunityFeeNegative')
-      // The immune player pays the owner (the non-immune party); fee may be 0 (free).
-      const immune = deal.immuneFor === 'proposer' ? from : to
-      if (immune.cash < cash) return e('negotiation.namedCannotAffordOffer', { name: immune.name })
-      return null
-    }
-    case 'revenue_share': {
-      const pct = deal.sharePercent ?? 0
-      if (pct <= 0 || pct > 100) return e('negotiation.shareRange')
-      if ((deal.laps ?? 0) < 1) return e('negotiation.shareMinLap')
-      if (deal.shareFrom !== 'proposer' && deal.shareFrom !== 'target')
-        return e('negotiation.chooseSharer')
-      return null
-    }
-    case 'player_loan': {
-      const principal = deal.cashAmount ?? 0
-      if (principal < 1) return e('negotiation.enterLoanAmount')
-      if (deal.cashFrom !== 'proposer' && deal.cashFrom !== 'target')
-        return e('negotiation.chooseLender')
-      const rate = deal.interestRate ?? 0
-      if (rate < 0 || rate > PLAYER_LOAN_MAX_RATE)
-        return e('negotiation.interestRange', { max: Math.round(PLAYER_LOAN_MAX_RATE * 100) })
-      const lender = deal.cashFrom === 'proposer' ? from : to
-      if (lender.cash < principal)
-        return e('negotiation.lenderCannotAffordLend', { name: lender.name })
-      return null
-    }
-    case 'cash_gift': {
-      const amount = deal.cashAmount ?? 0
-      if (amount < 1) return e('negotiation.enterAmount')
-      if (deal.cashFrom !== 'proposer' && deal.cashFrom !== 'target')
-        return e('negotiation.chooseGiver')
-      const giver = deal.cashFrom === 'proposer' ? from : to
-      if (giver.cash < amount) return e('negotiation.giverCannotAfford', { name: giver.name })
       return null
     }
     default:
@@ -302,113 +249,6 @@ export function applyDeal(state: GameState, deal: NegotiationDeal): void {
         'negotiation.sold',
         { name: from.name, tile: tileP(deal.offerTileId!), to: to.name, amount: rpP(amount) },
         from.id,
-      )
-      break
-    }
-    case 'rent_immunity': {
-      const immune = deal.immuneFor === 'proposer' ? from : to
-      const owner = immune.id === from.id ? to : from
-      const amount = deal.cashAmount ?? 0
-      if (amount > 0) {
-        immune.cash -= amount
-        owner.cash += amount
-      }
-      const laps = deal.laps ?? 1
-      state.activeEffects.push({
-        id: uid(),
-        type: 'rent_immunity',
-        targetPlayerId: immune.id, // the immune player pays no rent...
-        ownerId: owner.id, // ...on any tile owned by this player.
-        roundsRemaining: 0, // lap-based; skipped by tickEffects
-        lapsRemaining: laps,
-        lapAnchorPlayerId: immune.id, // decays on the immune player's own laps
-        sourceCard: `deal_${deal.id}`,
-      })
-      if (amount > 0) {
-        logKey(
-          state,
-          'negotiation.rentImmunityPaid',
-          { name: immune.name, amount: rpP(amount), owner: owner.name, laps },
-          immune.id,
-        )
-      } else {
-        logKey(
-          state,
-          'negotiation.rentImmunityFree',
-          { name: immune.name, owner: owner.name, laps },
-          immune.id,
-        )
-      }
-      break
-    }
-    case 'revenue_share': {
-      const source = deal.shareFrom === 'proposer' ? from : to
-      const beneficiary = source.id === from.id ? to : from
-      const laps = deal.laps ?? 1
-      state.activeEffects.push({
-        id: uid(),
-        type: 'revenue_share',
-        targetPlayerId: source.id, // whose passive income is shared
-        beneficiaryPlayerId: beneficiary.id,
-        multiplier: (deal.sharePercent ?? 0) / 100,
-        roundsRemaining: 0, // lap-based; skipped by tickEffects
-        lapsRemaining: laps,
-        lapAnchorPlayerId: source.id, // decays on the sharer's laps
-        sourceCard: `deal_${deal.id}`,
-      })
-      logKey(
-        state,
-        'negotiation.revenueShare',
-        {
-          name: source.name,
-          percent: deal.sharePercent ?? 0,
-          beneficiary: beneficiary.name,
-          laps,
-        },
-        source.id,
-      )
-      break
-    }
-    case 'player_loan': {
-      const lender = deal.cashFrom === 'proposer' ? from : to
-      const borrower = lender.id === from.id ? to : from
-      const principal = deal.cashAmount ?? 0
-      const rate = deal.interestRate ?? 0
-      lender.cash -= principal
-      borrower.cash += principal
-      borrower.loans.push({
-        id: uid(),
-        amount: principal,
-        interestPerLap: Math.round(principal * rate),
-        lenderId: lender.id,
-        roundBorrowed: state.round,
-        interestPaid: 0,
-        interestRate: rate,
-      })
-      logKey(
-        state,
-        'negotiation.playerLoan',
-        {
-          name: borrower.name,
-          amount: rpP(principal),
-          lender: lender.name,
-          rate: Math.round(rate * 100),
-        },
-        borrower.id,
-      )
-      break
-    }
-    case 'cash_gift': {
-      const giver = deal.cashFrom === 'proposer' ? from : to
-      const receiver = giver.id === from.id ? to : from
-      const amount = deal.cashAmount ?? 0
-      giver.cash -= amount
-      receiver.cash += amount
-      logKey(
-        state,
-        'negotiation.cashGift',
-        { name: giver.name, amount: rpP(amount), to: receiver.name },
-        giver.id,
       )
       break
     }

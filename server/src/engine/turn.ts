@@ -36,7 +36,7 @@ export function collectPassiveIncome(state: GameState, player: Player): RupiahAm
     }
 
     // Lahan Kosong businesses: tiered passive (bigger than property), treated like
-    // property income — subject to passive multipliers and revenue-share deals.
+    // property income — subject to passive multipliers.
     if (def.type === 'buildable_land' && tile.landBuild) {
       total += (landTier(tile.landBuild, tier)?.passive ?? 0) * tile.priceMultiplier
     }
@@ -47,39 +47,10 @@ export function collectPassiveIncome(state: GameState, player: Player): RupiahAm
     player.cash += total
     state.bank -= total
     logKey(state, 'turn.passiveIncome', { name: player.name, amount: rpP(total) }, player.id)
-    payRevenueShares(state, player, total)
     // Pengusaha passive: +50% landlord bonus on passive income (capped per lap).
     applyPassiveIncomeRoleBonus(state, player, total)
   }
   return total
-}
-
-/**
- * Redirect a cut of `player`'s passive income to any beneficiaries of an active
- * revenue-share deal (from an accepted negotiation). Mutates state.
- */
-function payRevenueShares(state: GameState, player: Player, income: RupiahAmount): void {
-  // Shares can stack; never pay out more than the income collected this lap.
-  // Earlier effects take priority when total shares exceed 100%.
-  let remaining = income
-  for (const effect of state.activeEffects) {
-    if (effect.type !== 'revenue_share' || effect.targetPlayerId !== player.id) continue
-    const beneficiary = state.players.find((p) => p.id === effect.beneficiaryPlayerId)
-    if (!beneficiary || beneficiary.isEliminated) continue
-    let cut = Math.round(income * (effect.multiplier ?? 0))
-    if (cut <= 0) continue
-    cut = Math.min(cut, remaining)
-    if (cut <= 0) break
-    remaining -= cut
-    player.cash -= cut
-    beneficiary.cash += cut
-    logKey(
-      state,
-      'turn.revenueShare',
-      { name: player.name, amount: rpP(cut), beneficiary: beneficiary.name },
-      player.id,
-    )
-  }
 }
 
 function resetTurnState(state: GameState): void {

@@ -212,10 +212,9 @@ export function drawKejadian(
     }
     case 'reshuffle_kabinet': {
       // Wipe every card-driven effect (kejadian, hustle, meta-lobby) and all
-      // free-pass inventories. Player-agreed negotiation deals (deal_*) survive.
-      const before = state.activeEffects.length
-      state.activeEffects = state.activeEffects.filter((e) => e.sourceCard.startsWith('deal_'))
-      const cleared = before - state.activeEffects.length
+      // free-pass inventories.
+      const cleared = state.activeEffects.length
+      state.activeEffects = []
       let passesWiped = 0
       for (const p of state.players) {
         passesWiped += p.ownedCards.length

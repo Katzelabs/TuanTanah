@@ -3,7 +3,6 @@ import {
   applyPassiveMultiplier,
   applyRentEffects,
   effectiveTier,
-  hasRentImmunity,
   tickEffects,
 } from '../src/engine/effects.js'
 import { addEffect, makeGame } from './helpers.js'
@@ -55,19 +54,5 @@ describe('effectiveTier', () => {
     addEffect(state, { type: 'tier_drop', targetTileIds: [1], multiplier: 1 })
     expect(effectiveTier(state, 1, 3)).toBe(2)
     expect(effectiveTier(state, 1, 0)).toBe(0)
-  })
-})
-
-describe('hasRentImmunity', () => {
-  it('detects an active immunity for the payer on the tile', () => {
-    const { state, players } = makeGame(2)
-    addEffect(state, {
-      type: 'rent_immunity',
-      targetPlayerId: players[0]!.id,
-      targetTileIds: [1],
-    })
-    expect(hasRentImmunity(state, players[0]!.id, 1)).toBe(true)
-    expect(hasRentImmunity(state, players[0]!.id, 2)).toBe(false)
-    expect(hasRentImmunity(state, players[1]!.id, 1)).toBe(false)
   })
 })

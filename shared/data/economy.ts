@@ -43,8 +43,6 @@ export const PINJOL_AMOUNTS: RupiahAmount[] = [jt(2), jt(5), jt(10)]
 export const PINJOL_INTEREST_RATE = 0.2 // 20% per lap (charged when the borrower passes GO)
 export const PINJOL_MAX_LOANS = 3
 export const PINJOL_BORROW_LIMIT_MULTIPLE = 3 // ≤ 3× total property value
-// Ceiling on the per-lap rate a player can set on a negotiated peer loan (player_loan deal).
-export const PLAYER_LOAN_MAX_RATE = 0.5 // 50% per lap
 
 // ---- Selling ----
 /** Fraction of a tile's invested value (buy price + build costs) refunded when sold back to the bank. */

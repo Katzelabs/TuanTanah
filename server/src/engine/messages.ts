@@ -63,10 +63,6 @@ const DEAL_TYPE_LABELS_EN: Record<NegotiationDealType, string> = {
   property_swap: 'property swap',
   cash_for_property: 'cash-for-property deal',
   sell_property: 'property sale',
-  rent_immunity: 'rent-immunity deal',
-  revenue_share: 'revenue-share deal',
-  player_loan: 'loan deal',
-  cash_gift: 'cash transfer',
 }
 
 function resolveParams(params?: LogParams): Record<string, string | number> {

@@ -59,21 +59,4 @@ describe('collectPassiveIncome', () => {
     addEffect(state, { type: 'passive_multiplier', targetPlayerId: p.id, multiplier: 3 })
     expect(collectPassiveIncome(state, p)).toBe(PAPUA.passiveBase * 3)
   })
-
-  it('redirects a revenue_share cut to the beneficiary', () => {
-    const { state, players } = makeGame(2, { cash: 0 })
-    const earner = players[0]!
-    const beneficiary = players[1]!
-    own(state, 1, earner.id, { track: 'property', tier: 1 })
-    addEffect(state, {
-      type: 'revenue_share',
-      targetPlayerId: earner.id,
-      beneficiaryPlayerId: beneficiary.id,
-      multiplier: 0.5,
-    })
-    const income = PAPUA.passiveBase // 100k
-    collectPassiveIncome(state, earner)
-    expect(earner.cash).toBe(income - income * 0.5)
-    expect(beneficiary.cash).toBe(income * 0.5)
-  })
 })

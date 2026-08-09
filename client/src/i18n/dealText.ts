@@ -40,40 +40,5 @@ export function describeDeal(state: GameState, deal: NegotiationDeal, t: TFunc):
         cash: formatRupiah(deal.cashAmount ?? 0),
         offer: tileName(t, deal.offerTileId!),
       })
-    case 'rent_immunity': {
-      const cash = formatRupiah(deal.cashAmount ?? 0)
-      // immuneFor = who is immune. 'proposer' = they're immune on your properties (they pay you);
-      // 'target' = you're immune on their properties (you pay them).
-      return deal.immuneFor === 'proposer'
-        ? t('negotiation.desc.rent_immunity_get', { from, cash, laps: deal.laps })
-        : t('negotiation.desc.rent_immunity_give', { from, cash, laps: deal.laps })
-    }
-    case 'revenue_share':
-      return deal.shareFrom === 'proposer'
-        ? t('negotiation.desc.revenue_share_proposer', {
-            from,
-            percent: deal.sharePercent,
-            laps: deal.laps,
-          })
-        : t('negotiation.desc.revenue_share_target', {
-            from,
-            percent: deal.sharePercent,
-            laps: deal.laps,
-          })
-    case 'player_loan': {
-      const cash = formatRupiah(deal.cashAmount ?? 0)
-      const rate = Math.round((deal.interestRate ?? 0) * 100)
-      // cashFrom = lender. 'proposer' = they lend to you; 'target' = they borrow from you.
-      return deal.cashFrom === 'proposer'
-        ? t('negotiation.desc.loan_lend', { from, cash, rate })
-        : t('negotiation.desc.loan_borrow', { from, cash, rate })
-    }
-    case 'cash_gift': {
-      const cash = formatRupiah(deal.cashAmount ?? 0)
-      // cashFrom = giver. 'proposer' = they give you; 'target' = they ask you for.
-      return deal.cashFrom === 'proposer'
-        ? t('negotiation.desc.gift_give', { from, cash })
-        : t('negotiation.desc.gift_ask', { from, cash })
-    }
   }
 }

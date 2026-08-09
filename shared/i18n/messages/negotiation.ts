@@ -10,14 +10,6 @@ export const log: MessageMap = {
       '{{name}} and {{other}} swapped {{tile1}} ↔ {{tile2}} with {{amount}} from {{payer}}',
     'negotiation.bought': '{{name}} bought {{tile}} from {{from}} for {{amount}}',
     'negotiation.sold': '{{name}} sold {{tile}} to {{to}} for {{amount}}',
-    'negotiation.rentImmunityPaid':
-      "{{name}} paid {{amount}} to go rent-free on {{owner}}'s properties for {{laps}} lap(s)",
-    'negotiation.rentImmunityFree':
-      "{{name}} goes rent-free on {{owner}}'s properties for {{laps}} lap(s)",
-    'negotiation.revenueShare':
-      '{{name}} will share {{percent}}% of passive income with {{beneficiary}} for {{laps}} lap(s)',
-    'negotiation.playerLoan': '{{name}} borrowed {{amount}} from {{lender}} at {{rate}}%/lap',
-    'negotiation.cashGift': '{{name}} gave {{amount}} to {{to}}',
   },
   id: {
     'negotiation.proposed': '{{name}} mengajukan {{deal}} kepada {{to}}',
@@ -28,15 +20,6 @@ export const log: MessageMap = {
       '{{name}} dan {{other}} menukar {{tile1}} ↔ {{tile2}} dengan {{amount}} dari {{payer}}',
     'negotiation.bought': '{{name}} membeli {{tile}} dari {{from}} seharga {{amount}}',
     'negotiation.sold': '{{name}} menjual {{tile}} kepada {{to}} seharga {{amount}}',
-    'negotiation.rentImmunityPaid':
-      '{{name}} membayar {{amount}} untuk bebas sewa di properti {{owner}} selama {{laps}} putaran',
-    'negotiation.rentImmunityFree':
-      '{{name}} bebas sewa di properti {{owner}} selama {{laps}} putaran',
-    'negotiation.revenueShare':
-      '{{name}} akan membagi {{percent}}% pendapatan pasif kepada {{beneficiary}} selama {{laps}} putaran',
-    'negotiation.playerLoan':
-      '{{name}} meminjam {{amount}} dari {{lender}} dengan bunga {{rate}}%/putaran',
-    'negotiation.cashGift': '{{name}} memberi {{amount}} kepada {{to}}',
   },
 }
 
@@ -63,19 +46,6 @@ export const error: MessageMap = {
     'negotiation.cannotAffordOffer': 'You cannot afford this offer',
     'negotiation.selectTileToSell': 'Select a tile to sell',
     'negotiation.namedCannotAffordOffer': '{{name}} cannot afford this offer',
-    'negotiation.chooseImmune': 'Choose who is immune',
-    'negotiation.immunityMinLap': 'Immunity must last at least 1 lap',
-    'negotiation.immunityFeeNegative': 'Immunity fee cannot be negative',
-    'negotiation.shareRange': 'Share must be between 1% and 100%',
-    'negotiation.shareMinLap': 'Share must last at least 1 lap',
-    'negotiation.chooseSharer': 'Choose who shares income',
-    'negotiation.enterLoanAmount': 'Enter a loan amount',
-    'negotiation.chooseLender': 'Choose who lends the money',
-    'negotiation.interestRange': 'Interest must be between 0% and {{max}}% per lap',
-    'negotiation.lenderCannotAffordLend': '{{name}} cannot afford to lend this much',
-    'negotiation.enterAmount': 'Enter an amount',
-    'negotiation.chooseGiver': 'Choose who gives the money',
-    'negotiation.giverCannotAfford': '{{name}} cannot afford this',
     'negotiation.unknownDealType': 'Unknown deal type',
   },
   id: {
@@ -100,19 +70,6 @@ export const error: MessageMap = {
     'negotiation.cannotAffordOffer': 'Kamu tidak mampu membayar penawaran ini',
     'negotiation.selectTileToSell': 'Pilih petak untuk dijual',
     'negotiation.namedCannotAffordOffer': '{{name}} tidak mampu membayar penawaran ini',
-    'negotiation.chooseImmune': 'Pilih siapa yang kebal sewa',
-    'negotiation.immunityMinLap': 'Kekebalan harus berlangsung minimal 1 putaran',
-    'negotiation.immunityFeeNegative': 'Biaya kekebalan tidak boleh negatif',
-    'negotiation.shareRange': 'Bagi hasil harus antara 1% dan 100%',
-    'negotiation.shareMinLap': 'Bagi hasil harus berlangsung minimal 1 putaran',
-    'negotiation.chooseSharer': 'Pilih siapa yang membagi pendapatan',
-    'negotiation.enterLoanAmount': 'Masukkan jumlah pinjaman',
-    'negotiation.chooseLender': 'Pilih siapa yang meminjamkan uang',
-    'negotiation.interestRange': 'Bunga harus antara 0% dan {{max}}% per putaran',
-    'negotiation.lenderCannotAffordLend': '{{name}} tidak mampu meminjamkan sebanyak itu',
-    'negotiation.enterAmount': 'Masukkan jumlah',
-    'negotiation.chooseGiver': 'Pilih siapa yang memberi uang',
-    'negotiation.giverCannotAfford': '{{name}} tidak mampu memberi sebanyak ini',
     'negotiation.unknownDealType': 'Jenis kesepakatan tidak dikenal',
   },
 }

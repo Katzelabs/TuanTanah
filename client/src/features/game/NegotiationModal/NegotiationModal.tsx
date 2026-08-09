@@ -3,7 +3,6 @@ import {
   type GameState,
   type NegotiationDeal,
   type NegotiationDealType,
-  PLAYER_LOAN_MAX_RATE,
   type TileId,
 } from '@tuan-tanah/shared'
 import { useState } from 'react'
@@ -13,18 +12,13 @@ import { tileName } from '@/i18n/gameData.js'
 import { Button, Card, Modal } from '@/components/ui/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 
-const DEAL_TYPES: NegotiationDealType[] = [
-  'property_swap',
-  'cash_for_property',
-  'sell_property',
-  'rent_immunity',
-  'revenue_share',
-  'player_loan',
-  'cash_gift',
+const DEAL_TYPES: { type: NegotiationDealType; emoji: string }[] = [
+  { type: 'property_swap', emoji: '🔄' },
+  { type: 'cash_for_property', emoji: '🛒' },
+  { type: 'sell_property', emoji: '💰' },
 ]
 
 const JUTA = 1_000_000
-const MAX_RATE_PCT = Math.round(PLAYER_LOAN_MAX_RATE * 100)
 
 function ownedTiles(state: GameState, playerId: string): { id: TileId; name: string }[] {
   return state.tiles
@@ -36,6 +30,7 @@ const inputClass =
   'w-full rounded-lg border-2 border-ink bg-surface px-3 py-2 text-sm outline-none transition focus:shadow-brutal-sm'
 const labelClass = 'mt-3 text-[10px] font-semibold uppercase tracking-wide text-ink-faint'
 const captionClass = 'mt-1 text-[11px] font-semibold text-ink-muted'
+const warnClass = 'mt-1 text-[11px] font-semibold text-danger-strong'
 
 export interface NegotiationPrefill {
   targetId?: string
@@ -61,105 +56,88 @@ export function NegotiationModal({
   const [type, setType] = useState<NegotiationDealType>(prefill?.type ?? 'property_swap')
   const [offerTileId, setOfferTileId] = useState<number | ''>('')
   const [requestTileId, setRequestTileId] = useState<number | ''>(prefill?.requestTileId ?? '')
-  const [cashJuta, setCashJuta] = useState<number>(5)
-  const [laps, setLaps] = useState<number>(3)
-  const [sharePercent, setSharePercent] = useState<number>(20)
-  const [shareFrom, setShareFrom] = useState<'proposer' | 'target'>('proposer')
-  const [immuneFor, setImmuneFor] = useState<'proposer' | 'target'>('proposer')
-  const [cashFrom, setCashFrom] = useState<'proposer' | 'target'>('proposer')
-  const [interestPct, setInterestPct] = useState<number>(10)
+  // Buy/sell price and swap top-up are separate so switching type never leaks values.
+  const [priceJuta, setPriceJuta] = useState<number>(5)
+  const [topupJuta, setTopupJuta] = useState<number>(0)
+  const [topupFrom, setTopupFrom] = useState<'proposer' | 'target'>('proposer')
 
   if (!open || !state || !me) return null
 
   const targets = state.players.filter((p) => p.id !== me.id && !p.isEliminated)
+  const target = targets.find((p) => p.id === targetId)
   const myTiles = ownedTiles(state, me.id)
   const targetTiles = targetId ? ownedTiles(state, targetId) : []
 
-  const needsOffer = type === 'property_swap' || type === 'sell_property'
-  const needsRequest = type === 'property_swap' || type === 'cash_for_property'
-  const needsImmunity = type === 'rent_immunity'
-  const needsLaps = type === 'rent_immunity' || type === 'revenue_share'
-  const needsShare = type === 'revenue_share'
-  const needsCash =
-    type === 'cash_for_property' ||
-    type === 'sell_property' ||
-    type === 'rent_immunity' ||
-    type === 'player_loan' ||
-    type === 'cash_gift' ||
-    type === 'property_swap'
-  // Cash is required (> 0) for these; optional (0 = free) for swap top-up and immunity fee.
-  const cashRequired =
-    type === 'cash_for_property' ||
-    type === 'sell_property' ||
-    type === 'player_loan' ||
-    type === 'cash_gift'
-  const needsCashDir = type === 'property_swap' || type === 'player_loan' || type === 'cash_gift'
-  const needsInterest = type === 'player_loan'
+  const isSwap = type === 'property_swap'
+  const isBuy = type === 'cash_for_property'
+  const isSell = type === 'sell_property'
+  const needsOffer = isSwap || isSell // my tile
+  const needsRequest = isSwap || isBuy // their tile
 
-  const cashLabel =
-    type === 'rent_immunity'
-      ? t('negotiation.immunityFee')
-      : type === 'player_loan'
-        ? t('negotiation.loanAmount')
-        : type === 'cash_gift'
-          ? t('negotiation.giftAmount')
-          : type === 'property_swap'
-            ? t('negotiation.cashTopup')
-            : type === 'sell_property'
-              ? t('negotiation.sellPrice')
-              : t('negotiation.yourOffer')
+  const price = Math.round(priceJuta * JUTA)
+  const topup = Math.round(topupJuta * JUTA)
 
-  const cashDirLabels: [string, string] =
-    type === 'player_loan'
-      ? [t('negotiation.youLend'), t('negotiation.theyLend')]
-      : type === 'cash_gift'
-        ? [t('negotiation.youGive'), t('negotiation.theyGive')]
-        : [t('negotiation.youAddCash'), t('negotiation.theyAddCash')]
+  // Affordability warnings (server re-validates; this is just friendly UX).
+  const buyerBroke = isBuy && price > me.cash
+  const sellerBroke = isSell && target != null && price > target.cash
+  const topupPayerBroke =
+    isSwap &&
+    topup > 0 &&
+    (topupFrom === 'proposer' ? topup > me.cash : target != null && topup > target.cash)
 
   const canPropose =
     targetId !== '' &&
     (!needsOffer || offerTileId !== '') &&
     (!needsRequest || requestTileId !== '') &&
-    (!cashRequired || cashJuta > 0) &&
-    (!needsLaps || laps >= 1) &&
-    (!needsShare || (sharePercent > 0 && sharePercent <= 100)) &&
-    (!needsInterest || (interestPct >= 0 && interestPct <= MAX_RATE_PCT))
+    (isSwap ? topupJuta >= 0 : priceJuta > 0) &&
+    !buyerBroke &&
+    !sellerBroke &&
+    !topupPayerBroke
 
   // Build the deal object that will be sent (also drives the live preview).
-  const buildDeal = (): NegotiationDeal => {
-    const cashAmount = Math.round(cashJuta * JUTA)
-    return {
-      id: '', // assigned server-side
-      type,
-      fromPlayerId: me.id,
-      toPlayerId: targetId,
-      status: 'pending',
-      ...(needsOffer ? { offerTileId: offerTileId as TileId } : {}),
-      ...(needsRequest ? { requestTileId: requestTileId as TileId } : {}),
-      // property_swap: only include a top-up when there's actually cash.
-      ...(type === 'property_swap' && cashJuta > 0 ? { cashAmount, cashFrom } : {}),
-      ...(type === 'cash_for_property' ? { cashAmount } : {}),
-      // sell_property: proposer's own tile (offerTileId, set above) for cash from the buyer.
-      ...(type === 'sell_property' ? { cashAmount } : {}),
-      // rent_immunity: direction + laps; fee may be 0 (free gift). Covers all the
-      // other player's properties.
-      ...(needsImmunity ? { immuneFor, cashAmount, laps } : {}),
-      ...(needsShare ? { sharePercent, shareFrom, laps } : {}),
-      ...(type === 'player_loan' ? { cashAmount, cashFrom, interestRate: interestPct / 100 } : {}),
-      ...(type === 'cash_gift' ? { cashAmount, cashFrom } : {}),
-    }
-  }
+  const buildDeal = (): NegotiationDeal => ({
+    id: '', // assigned server-side
+    type,
+    fromPlayerId: me.id,
+    toPlayerId: targetId,
+    status: 'pending',
+    ...(needsOffer ? { offerTileId: offerTileId as TileId } : {}),
+    ...(needsRequest ? { requestTileId: requestTileId as TileId } : {}),
+    // Swap: only include a top-up when there's actually cash; buy/sell: the price.
+    ...(isSwap && topupJuta > 0 ? { cashAmount: topup, cashFrom: topupFrom } : {}),
+    ...(isBuy || isSell ? { cashAmount: price } : {}),
+  })
 
   const submit = () => {
     proposeDeal(buildDeal())
     onClose()
   }
 
-  const targetName = targets.find((p) => p.id === targetId)?.name ?? ''
+  const selectTile = (
+    value: number | '',
+    onChange: (v: number | '') => void,
+    tiles: { id: TileId; name: string }[],
+    placeholder: string,
+    disabled = false,
+  ) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+      disabled={disabled}
+      className={`mt-1 ${inputClass} disabled:opacity-40`}
+    >
+      <option value="">{placeholder}</option>
+      {tiles.map((tile) => (
+        <option key={tile.id} value={tile.id}>
+          {tileName(t, tile.id)}
+        </option>
+      ))}
+    </select>
+  )
 
   return (
     <Modal open={open} onClose={onClose} title={t('negotiation.title')} size="sm">
-      {/* Target player — clickable chips with token colours */}
+      {/* 1 — Target player: clickable chips with token colours */}
       <div className={labelClass}>{t('negotiation.with')}</div>
       <div className="mt-1 flex flex-wrap gap-2">
         {targets.map((p) => {
@@ -188,186 +166,115 @@ export function NegotiationModal({
         })}
       </div>
 
-      {/* Deal type */}
+      {/* 2 — Deal type: one segmented row (tukar / beli / jual) */}
       <div className={labelClass}>{t('negotiation.dealType')}</div>
-      <div className="mt-1 grid grid-cols-2 gap-2">
-        {DEAL_TYPES.map((dt) => (
+      <div className="mt-1 grid grid-cols-3 gap-2">
+        {DEAL_TYPES.map(({ type: dt, emoji }) => (
           <Button
             key={dt}
             size="sm"
             variant={type === dt ? 'primary' : 'secondary'}
             onClick={() => setType(dt)}
           >
-            {t(`negotiation.dealTypes.${dt}`)}
+            {emoji} {t(`negotiation.typeShort.${dt}`)}
           </Button>
         ))}
       </div>
+      <div className={captionClass}>{t(`negotiation.hints.${type}`)}</div>
 
-      {/* Your tile (swap only) */}
+      {/* 3 — Tiles */}
       {needsOffer && (
         <>
-          <div className={labelClass}>{t('negotiation.yourTileToGive')}</div>
-          <select
-            value={offerTileId}
-            onChange={(e) => setOfferTileId(e.target.value === '' ? '' : Number(e.target.value))}
-            className={`mt-1 ${inputClass}`}
-          >
-            <option value="">{t('negotiation.selectYourTile')}</option>
-            {myTiles.map((tile) => (
-              <option key={tile.id} value={tile.id}>
-                {tileName(t, tile.id)}
-              </option>
-            ))}
-          </select>
+          <div className={labelClass}>
+            {isSell ? t('negotiation.yourTileToSell') : t('negotiation.yourTileToGive')}
+          </div>
+          {selectTile(offerTileId, setOfferTileId, myTiles, t('negotiation.selectYourTile'))}
         </>
       )}
-
-      {/* Their tile (swap / cash-for-property) */}
       {needsRequest && (
         <>
           <div className={labelClass}>{t('negotiation.theirTileWant')}</div>
-          <select
-            value={requestTileId}
-            onChange={(e) => setRequestTileId(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!targetId}
-            className={`mt-1 ${inputClass} disabled:opacity-40`}
-          >
-            <option value="">
-              {targetId ? t('negotiation.selectTheirTile') : t('negotiation.pickPlayerFirst')}
-            </option>
-            {targetTiles.map((tile) => (
-              <option key={tile.id} value={tile.id}>
-                {tileName(t, tile.id)}
-              </option>
-            ))}
-          </select>
-        </>
-      )}
-
-      {/* Rent immunity: who is immune (covers all of the other player's properties) */}
-      {needsImmunity && (
-        <>
-          <div className={labelClass}>{t('negotiation.whoIsImmune')}</div>
-          <div className="mt-1 grid grid-cols-2 gap-2">
-            <Button
-              size="sm"
-              variant={immuneFor === 'proposer' ? 'info' : 'secondary'}
-              onClick={() => setImmuneFor('proposer')}
-            >
-              {t('negotiation.immuneMe')}
-            </Button>
-            <Button
-              size="sm"
-              variant={immuneFor === 'target' ? 'info' : 'secondary'}
-              onClick={() => setImmuneFor('target')}
-            >
-              {t('negotiation.immuneThem')}
-            </Button>
-          </div>
-        </>
-      )}
-
-      {/* Cash amount (+ live Rupiah caption + direction toggle grouped together) */}
-      {needsCash && (
-        <>
-          <div className={labelClass}>{cashLabel}</div>
-          <input
-            type="number"
-            min={cashRequired ? 1 : 0}
-            value={cashJuta}
-            onChange={(e) => setCashJuta(Number(e.target.value))}
-            className={`mt-1 ${inputClass}`}
-          />
-          <div className={captionClass}>
-            {t('negotiation.cashEquals', { amount: formatRupiah(Math.round(cashJuta * JUTA)) })}
-          </div>
-          {/* Who pays the cash (swap top-up / loan lender / gift giver) */}
-          {needsCashDir && (
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={cashFrom === 'proposer' ? 'info' : 'secondary'}
-                onClick={() => setCashFrom('proposer')}
-              >
-                {cashDirLabels[0]}
-              </Button>
-              <Button
-                size="sm"
-                variant={cashFrom === 'target' ? 'info' : 'secondary'}
-                onClick={() => setCashFrom('target')}
-              >
-                {cashDirLabels[1]}
-              </Button>
-            </div>
+          {selectTile(
+            requestTileId,
+            setRequestTileId,
+            targetTiles,
+            targetId ? t('negotiation.selectTheirTile') : t('negotiation.pickPlayerFirst'),
+            !targetId,
           )}
         </>
       )}
 
-      {/* Player loan: interest rate */}
-      {needsInterest && (
+      {/* 4 — Price (buy/sell) or optional cash top-up (swap) */}
+      {(isBuy || isSell) && (
         <>
-          <div className={labelClass}>{t('negotiation.interestRate')}</div>
+          <div className={labelClass}>
+            {isBuy ? t('negotiation.buyPrice') : t('negotiation.sellPrice')}
+          </div>
+          <input
+            type="number"
+            min={1}
+            value={priceJuta}
+            onChange={(e) => setPriceJuta(Number(e.target.value))}
+            className={`mt-1 ${inputClass}`}
+          />
+          <div className={captionClass}>
+            {t('negotiation.cashEquals', { amount: formatRupiah(price) })}
+          </div>
+          {buyerBroke && <div className={warnClass}>{t('negotiation.youCantAfford')}</div>}
+          {sellerBroke && (
+            <div className={warnClass}>
+              {t('negotiation.theyCantAfford', { name: target?.name })}
+            </div>
+          )}
+        </>
+      )}
+      {isSwap && (
+        <>
+          <div className={labelClass}>{t('negotiation.cashTopup')}</div>
           <input
             type="number"
             min={0}
-            max={MAX_RATE_PCT}
-            value={interestPct}
-            onChange={(e) => setInterestPct(Number(e.target.value))}
+            value={topupJuta}
+            onChange={(e) => setTopupJuta(Number(e.target.value))}
             className={`mt-1 ${inputClass}`}
           />
-        </>
-      )}
-
-      {/* Revenue share */}
-      {needsShare && (
-        <>
-          <div className={labelClass}>{t('negotiation.sharePercent')}</div>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            value={sharePercent}
-            onChange={(e) => setSharePercent(Number(e.target.value))}
-            className={`mt-1 ${inputClass}`}
-          />
-          <div className={labelClass}>{t('negotiation.whoShares')}</div>
-          <div className="mt-1 grid grid-cols-2 gap-2">
-            <Button
-              size="sm"
-              variant={shareFrom === 'proposer' ? 'info' : 'secondary'}
-              onClick={() => setShareFrom('proposer')}
-            >
-              {t('negotiation.youShare')}
-            </Button>
-            <Button
-              size="sm"
-              variant={shareFrom === 'target' ? 'info' : 'secondary'}
-              onClick={() => setShareFrom('target')}
-            >
-              {t('negotiation.theyShare')}
-            </Button>
-          </div>
-        </>
-      )}
-
-      {/* Laps duration */}
-      {needsLaps && (
-        <>
-          <div className={labelClass}>{t('negotiation.durationLaps')}</div>
-          <input
-            type="number"
-            min={1}
-            value={laps}
-            onChange={(e) => setLaps(Number(e.target.value))}
-            className={`mt-1 ${inputClass}`}
-          />
+          {topupJuta > 0 && (
+            <>
+              <div className={captionClass}>
+                {t('negotiation.cashEquals', { amount: formatRupiah(topup) })}
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant={topupFrom === 'proposer' ? 'info' : 'secondary'}
+                  onClick={() => setTopupFrom('proposer')}
+                >
+                  {t('negotiation.youAddCash')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={topupFrom === 'target' ? 'info' : 'secondary'}
+                  onClick={() => setTopupFrom('target')}
+                >
+                  {t('negotiation.theyAddCash')}
+                </Button>
+              </div>
+              {topupPayerBroke && (
+                <div className={warnClass}>
+                  {topupFrom === 'proposer'
+                    ? t('negotiation.youCantAfford')
+                    : t('negotiation.theyCantAfford', { name: target?.name })}
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 
       {/* Live preview — exactly what the target will see */}
       {canPropose && (
         <>
-          <div className={labelClass}>{t('negotiation.preview', { name: targetName })}</div>
+          <div className={labelClass}>{t('negotiation.preview', { name: target?.name ?? '' })}</div>
           <Card flat tone="sunken" className="mt-1 p-3 text-sm text-ink">
             {describeDeal(state, buildDeal(), t)}
           </Card>

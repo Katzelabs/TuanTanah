@@ -50,13 +50,7 @@ import type {
 import { getTileDef, ownsFullRegion, transportOwnedCount } from './board.js'
 import { drawHustle, drawKejadian } from './cards.js'
 import { charge, playerWealth, settleIfAble, tileValue } from './elimination.js'
-import {
-  applyRentEffects,
-  consumeOwnedCard,
-  effectiveTier,
-  hasRentImmunity,
-  tickLapEffects,
-} from './effects.js'
+import { applyRentEffects, consumeOwnedCard, effectiveTier } from './effects.js'
 import {
   applyKontraktorBuildCut,
   applySalesTransactionCut,
@@ -439,9 +433,6 @@ function movePlayer(
     // Passive income pays once per lap, before resolving the tile they land on
     // so the cash is on hand if they owe rent there.
     collectPassiveIncome(state, player)
-    // Decay lap-based deal effects anchored to this player. After passive income
-    // so a revenue-share still pays out for this lap before it expires.
-    tickLapEffects(state, player.id)
   }
   return resolveTile(state, player, rng)
 }
@@ -618,11 +609,6 @@ function payRent(
   // A jailed owner collects no rent — the lander passes through free of charge.
   if (owner.inJail) {
     logKey(state, 'core.ownerInJail', { owner: owner.name, tile: tileP(tileId) }, payer.id)
-    return null
-  }
-  // An accepted rent-immunity deal waives this rent entirely (no charge, no Investor cut).
-  if (hasRentImmunity(state, payer.id, tileId)) {
-    logKey(state, 'core.rentImmune', { name: payer.name, tile: tileP(tileId) }, payer.id)
     return null
   }
   if (amount <= 0) return null
