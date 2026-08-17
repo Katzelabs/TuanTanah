@@ -1,32 +1,33 @@
-# Tuan Tanah production reverse proxy + static host (Caddy v2, auto-TLS).
-# Caddy obtains and renews Let's Encrypt certs automatically for $DOMAIN and
-# redirects HTTP->HTTPS on its own. DOMAIN and ACME_EMAIL come from the prod .env
-# (passed through docker-compose). For local testing without a public domain,
-# set DOMAIN=localhost (Caddy issues an internal self-signed cert).
-
-{
-	email {$ACME_EMAIL}
-}
+# Tuan Tanah web tier — INTERNAL static host + API proxy.
+#
+# This Caddy no longer faces the internet. The platform edge
+# (Katzelabs/platform, compose/edge.yml) owns :80/:443 for the whole box,
+# terminates TLS, and reverse-proxies here over the `platform` Docker network.
+#
+# Consequences, and why this file is much smaller than it used to be:
+#
+#   - No `email` / ACME block. This server never obtains a certificate. Leaving
+#     `email {$ACME_EMAIL}` here after the variable was removed from compose is
+#     exactly what broke the first cutover attempt: it expands to nothing and
+#     Caddy refuses to start with "wrong argument count", so the container
+#     crash-looped, had no IP, and the edge's {{upstreams 80}} rendered as a
+#     bare `:80` — which made the edge proxy to ITSELF and 308-loop.
+#
+#   - No security headers or CSP. Those now live in the edge's base Caddyfile as
+#     the (security_headers) and (csp_spa) snippets, imported via docker labels,
+#     so every app on the box gets them and none can forget them.
+#
+#   - Binds {$DOMAIN}, which compose sets to `:80` — plain HTTP, no hostname
+#     matching, no TLS. The public hostname is the edge's concern.
+#
+# For local `docker compose up` without the edge, set DOMAIN=:80 and reach it
+# directly on the container port.
 
 {$DOMAIN} {
-	# Cap request bodies — this API has no large-upload routes.
+	# Cap request bodies — this API has no large-upload routes. Kept here rather
+	# than on the edge because it is a property of THIS app's routes.
 	request_body {
 		max_size 64KB
-	}
-
-	# Security headers (mirrors the previous nginx config). HSTS is safe here
-	# because Caddy always terminates TLS.
-	header {
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-		X-Frame-Options "DENY"
-		X-Content-Type-Options "nosniff"
-		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "geolocation=(), microphone=(), camera=()"
-		# SPA + same-origin websocket. 'unsafe-inline' style is needed for the
-		# framer-motion / Vite inline styles; scripts stay locked to 'self'.
-		Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; media-src 'self'; connect-src 'self' wss:"
-		# Drop the Server header.
-		-Server
 	}
 
 	# REST API (room creation, health).
@@ -34,7 +35,7 @@
 		reverse_proxy backend:3000
 	}
 
-	# Socket.io — Caddy upgrades to WebSocket automatically.
+	# Socket.io — Caddy upgrades to WebSocket automatically, at both hops.
 	handle /socket.io/* {
 		reverse_proxy backend:3000
 	}

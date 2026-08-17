@@ -3,6 +3,11 @@
 # network via DATABASE_URL in .env. Redis stays in-stack because it holds live game
 # state (hot path) and must not be shared.
 #
+# TLS and the public ports are NOT here either: the platform edge
+# (Katzelabs/platform, compose/edge.yml) is the only thing on the box that binds
+# :80/:443. This stack serves plain HTTP on the internal `platform` network and
+# declares caddy labels; the edge discovers them and routes to it. See PLATFORM.md.
+#
 #   make deploy    # pull, build, migrate, restart
 name: tuantanah
 
@@ -15,18 +20,39 @@ services:
         # Vite bakes VITE_* at build time, so this must be a build arg — setting it
         # only in `environment:` would have no effect on the shipped bundle.
         VITE_PUBLIC_URL: ${VITE_PUBLIC_URL:-}
-    ports:
-      - '80:80'
-      - '443:443'
+    # No `ports:`. The edge owns :80/:443 for the whole box (PLATFORM.md rule 1).
+    # This container is reachable only over the `platform` network.
     environment:
-      # Public domain + ACME contact for Caddy's automatic Let's Encrypt certs.
-      - DOMAIN=${DOMAIN}
-      - ACME_EMAIL=${ACME_EMAIL}
-    volumes:
-      # Persist issued certs + Caddy state across restarts (avoids re-issuing
-      # and hitting Let's Encrypt rate limits).
-      - caddy_data:/data
-      - caddy_config:/config
+      # The in-image Caddy binds this. `:80` means "plain HTTP on port 80, no
+      # hostname matching, no certificate" — the edge terminates TLS, so this
+      # container must NOT try to obtain one. Note this is a DIFFERENT value
+      # from the ${DOMAIN} used in the caddy label below: that one is the public
+      # hostname the EDGE routes, this one is the INTERNAL listener.
+      - DOMAIN=:80
+    networks:
+      - default
+      - platform
+    labels:
+      # Public hostname the edge routes to this container. Comes from .env
+      # (DOMAIN=tuantanah.fun) and is interpolated by compose at config time.
+      caddy: ${DOMAIN:?set DOMAIN in .env}
+      # Shared security headers + SPA CSP from the edge's base Caddyfile, so
+      # they cannot drift per app.
+      #
+      # TWO LABELS WITH _N SUFFIXES. Two other spellings look right and are not:
+      #   caddy.import: security_headers csp_spa   -> in a Caddyfile `import a b`
+      #     passes `b` as an ARGUMENT to snippet `a`; the second is never
+      #     imported, and you get an EMPTY Content-Security-Policy while every
+      #     other header looks fine.
+      #   caddy.import.1 / caddy.import.2         -> renders a nested `import {
+      #     1 security_headers ... }` block, which fails to serve at all.
+      # `caddy.import_0` / `caddy.import_1` renders two separate `import` lines.
+      # Verified against the running edge, not assumed.
+      caddy.import_0: security_headers
+      caddy.import_1: csp_spa
+      # Must match the internal listener above (:80) or every request 502s
+      # with "connection refused" — see PLATFORM.md.
+      caddy.reverse_proxy: '{{upstreams 80}}'
     depends_on:
       backend:
         condition: service_healthy
