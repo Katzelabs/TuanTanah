@@ -4,6 +4,7 @@
 // whether the game ends by inactivity or by a player's action.
 import { finalStandings, resolveGameOver } from '../engine/index.js'
 import { mutateRoom } from '../rooms/rooms.js'
+import { reportError } from '../observability/report.js'
 import type { GameStore } from '../rooms/store.js'
 import { persistGameResult } from '../persistence/gameHistory.js'
 import { clearAfkTimer } from './afk.js'
@@ -58,7 +59,11 @@ export async function scheduleTimeLimit(
 
   clearRoomTimer(roomId)
   const timer = setTimeout(() => {
-    void concludeIfWon(io, store, roomId)
+    // Nothing is above a timer to catch this — without the handler the game would
+    // simply never end, and no trace of why.
+    void concludeIfWon(io, store, roomId).catch((err) =>
+      reportError(err, { at: 'timeLimitTimer', roomId }),
+    )
   }, timeLimitMinutes * 60_000)
   timer.unref?.()
   roomTimers.set(roomId, timer)

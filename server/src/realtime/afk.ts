@@ -11,6 +11,7 @@ import { AFK_TIMEOUT_MS, AUCTION_TIMEOUT_MS } from '@tuan-tanah/shared'
 import type { GameState } from '@tuan-tanah/shared'
 import { applyAfkTimeout, resolveAuctionTimeout } from '../engine/index.js'
 import { mutateRoom } from '../rooms/rooms.js'
+import { reportError } from '../observability/report.js'
 import type { GameStore } from '../rooms/store.js'
 import { broadcastState, type TTServer } from './common.js'
 import { concludeIfWon } from './gameOver.js'
@@ -50,12 +51,21 @@ export async function armAfk(io: TTServer, store: GameStore, roomId: string): Pr
     }
     state.turn.deadline = Date.now() + AFK_TIMEOUT_MS
     return true
-  }).catch(() => false)
+  }).catch((err) => {
+    // Falling back to "not eligible" keeps the table alive, but silently losing
+    // the reason is how a room ends up with no clock and nobody knowing why.
+    reportError(err, { at: 'armAfk', roomId })
+    return false
+  })
 
   clearAfkTimer(roomId)
   if (!eligible) return
   const timer = setTimeout(() => {
-    void resolveAfk(io, store, roomId)
+    // A timer fires with no socket handler above it, so nothing else would catch
+    // this. Unhandled, it would reach the process-level handler in bootstrap/.
+    void resolveAfk(io, store, roomId).catch((err) =>
+      reportError(err, { at: 'resolveAfk', roomId }),
+    )
   }, AFK_TIMEOUT_MS)
   timer.unref?.()
   roomAfkTimers.set(roomId, timer)
@@ -93,12 +103,17 @@ export async function armAuction(io: TTServer, store: GameStore, roomId: string)
     if (!state.pendingAuction || state.phase !== 'playing') return false
     state.pendingAuction.deadline = Date.now() + AUCTION_TIMEOUT_MS
     return true
-  }).catch(() => false)
+  }).catch((err) => {
+    reportError(err, { at: 'armAuction', roomId })
+    return false
+  })
 
   clearAuctionTimer(roomId)
   if (!armed) return
   const timer = setTimeout(() => {
-    void resolveAuctionAfk(io, store, roomId)
+    void resolveAuctionAfk(io, store, roomId).catch((err) =>
+      reportError(err, { at: 'resolveAuctionAfk', roomId }),
+    )
   }, AUCTION_TIMEOUT_MS)
   timer.unref?.()
   roomAuctionTimers.set(roomId, timer)
@@ -114,7 +129,7 @@ async function resolveAuctionAfk(io: TTServer, store: GameStore, roomId: string)
     const auction = state.pendingAuction
     if (!auction || auction.deadline === null || Date.now() < auction.deadline) return
     resolveAuctionTimeout(state)
-  }).catch(() => undefined)
+  }).catch((err) => reportError(err, { at: 'resolveAuctionAfk.mutate', roomId }))
 
   clearAuctionTimer(roomId)
   await broadcastAndArm(io, store, roomId)
@@ -135,7 +150,12 @@ export async function resolveAfk(io: TTServer, store: GameStore, roomId: string)
     const before = state.players.filter((p) => p.isEliminated).map((p) => p.id)
     applyAfkTimeout(state, current.id)
     return state.players.filter((p) => p.isEliminated && !before.includes(p.id)).map((p) => p.id)
-  }).catch(() => [] as string[])
+  }).catch((err) => {
+    // The skip did not happen. The table is about to be re-broadcast as if it
+    // had, so this is the one report that explains a stuck turn.
+    reportError(err, { at: 'resolveAfk.mutate', roomId })
+    return [] as string[]
+  })
 
   await broadcastAndArm(io, store, roomId)
   for (const id of eliminated) io.to(roomId).emit('player_eliminated', { playerId: id })

@@ -15,7 +15,7 @@ Every in-game action follows the same path (`server/src/realtime/game.ts`, `lobb
 2. `mutateRoom(store, roomId, fn)` (`rooms/rooms.ts`) loads state, runs `fn` (mutates in place, may return a value), persists, returns fn's result. **All writes go through `mutateRoom`** — it serializes per-room via promise chains so concurrent events on one room can't race.
 3. `fn` calls a pure engine function. Invalid actions `throw new EngineError(code, params)`.
 4. `broadcastState(io, store, roomId)` re-reads and emits the full state to the room.
-5. `guard(socket, fn)` wraps the handler body and converts any thrown error into an `error` event back to the offending socket only.
+5. `guard(socket, fn)` wraps the handler body and **splits what was thrown**. An `EngineError` is a rejected player action → `error` event to the offending socket only. Anything else is a bug → reported through `observability/report.ts` (the one place an error tracker gets wired) with `roomId`/`playerId`, and the player gets a generic `core.unexpected`. Timer paths (`afk.ts`, `gameOver.ts`) have no `guard` above them, so they attach their own `.catch(reportError)`; `bootstrap/index.ts` holds the process-level `unhandledRejection`/`uncaughtException` nets.
 
 ## Use the write-path helpers, not the primitives
 

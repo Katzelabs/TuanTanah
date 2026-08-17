@@ -84,7 +84,7 @@ Every in-game action follows the same path (see `server/src/realtime/game.ts` an
 2. `mutateRoom(store, roomId, fn)` (`rooms/rooms.ts`) loads state, runs `fn` (which mutates in place and may return a value), persists, and returns fn's result. **All mutations go through `mutateRoom`** — it serializes per-room via promise chains so concurrent socket events on one room can't race on read-modify-write.
 3. `fn` calls a pure engine function from `engine/index.ts`. Invalid actions `throw new EngineError(code, params)`.
 4. `broadcastState(io, store, roomId)` re-reads and emits the full state to the room.
-5. `guard(socket, fn)` wraps handler bodies and converts any thrown error into an `error` event back to the offending socket only.
+5. `guard(socket, fn)` wraps handler bodies and **splits what was thrown**. An `EngineError` is a rejected player action — it goes back to the offending socket only, with its `code`/`params` for localization. Anything else is a bug: it's reported via `observability/report.ts` with room/player context, and the player gets a generic `core.unexpected` instead of internal failure text.
 
 Most handlers don't call these primitives directly — they use the write-path helpers in `realtime/mutations.ts`: `mutateWithEliminations` (mutate + broadcast/re-arm AFK + emit `player_eliminated`), `mutateAndBroadcast`, and `mutateAndArmAuction`. When adding a new action: add the event to **both** maps in `shared/types/events.ts`, write a pure engine function that throws `EngineError` on invalid input, and register a handler in `realtime/game.ts` using the matching helper.
 

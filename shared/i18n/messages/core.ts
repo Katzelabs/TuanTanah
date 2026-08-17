@@ -98,6 +98,12 @@ export const log: MessageMap = {
 
 export const error: MessageMap = {
   en: {
+    // Generic fault. Emitted when a handler throws something that is NOT an
+    // EngineError — i.e. a bug, not a rule. The real message is reported
+    // server-side; the player gets this, because internal failure text can carry
+    // connection strings and query fragments.
+    'core.unexpected': 'Something went wrong on our end — please try again',
+    'core.notInRoom': 'You are not in a room',
     'core.gameAlreadyStarted': 'Game already started',
     'core.roomFull': 'Room is full',
     'core.playerNotInRoom': 'Player not in room',
@@ -170,6 +176,8 @@ export const error: MessageMap = {
     'core.notRolled': 'Roll the dice before ending your turn',
   },
   id: {
+    'core.unexpected': 'Terjadi kesalahan di sisi kami — silakan coba lagi',
+    'core.notInRoom': 'Anda tidak berada di dalam ruangan',
     'core.gameAlreadyStarted': 'Permainan sudah dimulai',
     'core.roomFull': 'Ruangan penuh',
     'core.playerNotInRoom': 'Pemain tidak ada di ruangan',

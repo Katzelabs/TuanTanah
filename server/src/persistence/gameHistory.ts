@@ -4,6 +4,7 @@
 // used to compute play duration. Reimplemented on Kysely/Postgres (was Supabase).
 import type { GameState } from '@tuan-tanah/shared'
 import { playerWealth } from '../engine/index.js'
+import { reportError } from '../observability/report.js'
 import { getDb } from './db.js'
 
 export async function persistGameResult(state: GameState, now: number): Promise<void> {
@@ -25,7 +26,10 @@ export async function persistGameResult(state: GameState, now: number): Promise<
       .executeTakeFirst()
 
     if (!game) {
-      console.warn('[persistence] game insert returned no id')
+      reportError(new Error('games insert returned no id'), {
+        at: 'persistGameResult',
+        roomId: state.roomId,
+      })
       return
     }
 
@@ -43,6 +47,11 @@ export async function persistGameResult(state: GameState, now: number): Promise<
       )
       .execute()
   } catch (err) {
-    console.warn('[persistence] error persisting game result:', (err as Error).message)
+    // Still swallowed — archival must never disrupt a live game, and that part of
+    // the contract is deliberate. What was wrong is that it was also invisible: a
+    // `console.warn` into rotated Docker logs nobody reads means a permanently
+    // broken archive looks exactly like a run of games nobody finished. Reported
+    // now, and still not rethrown.
+    reportError(err, { at: 'persistGameResult', roomId: state.roomId })
   }
 }

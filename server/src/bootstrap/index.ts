@@ -8,6 +8,7 @@ import { assertSafeCors, env, isDev } from './env.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
+import { reportError } from '../observability/report.js'
 import { createStore } from '../rooms/store.js'
 
 async function main() {
@@ -57,7 +58,24 @@ async function main() {
   app.log.info(`Tuan Tanah server ready (store: ${store.backend})`)
 }
 
+// Last-resort net for faults with no handler above them — in practice a timer
+// path (AFK, auction, time limit) that threw after its socket handler had already
+// returned. Node's default since v15 is to treat an unhandled rejection as fatal,
+// which would kill every live game in every room over one room's bad await. One
+// room failing should not end the others, so this reports and keeps serving.
+process.on('unhandledRejection', (reason) => {
+  reportError(reason, { at: 'unhandledRejection' })
+})
+
+// An uncaught exception is different: control flow was interrupted at an unknown
+// point, so process state cannot be trusted. Report, then exit and let the
+// container's `restart: unless-stopped` bring back a clean one.
+process.on('uncaughtException', (err) => {
+  reportError(err, { at: 'uncaughtException' })
+  process.exit(1)
+})
+
 main().catch((err) => {
-  console.error('Fatal startup error:', err)
+  reportError(err, { at: 'startup' })
   process.exit(1)
 })

@@ -18,12 +18,19 @@ is pure and I/O-free"); deep how-to lives in the `backend`, `game`, and
   game logic. Randomness is the injectable `Rng` param (defaults to
   `Math.random`) so games stay reproducible/testable.
 - **Invalid actions `throw new EngineError(code, params)`** — never a raw error
-  or a silent return. `guard(socket, fn)` converts throws into an `error` event
-  to the offending socket only.
+  or a silent return. `guard(socket, fn)` sends those to the offending socket
+  only. A non-`EngineError` throw is treated as a **bug**: reported with
+  room/player context, and the player sees a generic `core.unexpected`. So a
+  raw `Error` for a rule violation now pollutes the fault stream — use
+  `EngineError`.
+- **Never swallow an error silently.** `catch {}`, `.catch(() => fallback)` and
+  a bare `console.warn` all mean nobody finds out. Call `reportError` from
+  `observability/report.ts` — including on paths that must not rethrow, like
+  persistence and the AFK/auction timers.
 - **Player-visible events** append via `pushLog` using `logKey(...)` (stable
   code + tagged params), never a raw string.
 - Persistence (`persistence/`) is best-effort archival only — it must never
-  throw into a live game.
+  throw into a live game, but it must still report when it fails.
 
 ## Adding a new action
 
