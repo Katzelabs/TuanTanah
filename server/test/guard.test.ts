@@ -53,6 +53,10 @@ describe('guard', () => {
     expect(report.at).toBe('socket-handler')
     expect(report.socketId).toBe('socket-under-test')
     expect(report.stack).toContain('TypeError')
+    // A bug in one handler is caught and the server keeps serving — that is
+    // `handled`. Only the process-level nets in bootstrap/ report otherwise, or
+    // every dropped action would count against the crash rate.
+    expect(report.handled).toBe(true)
   })
 
   it('emits nothing when the handler succeeds', async () => {

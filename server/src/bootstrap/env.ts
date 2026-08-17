@@ -5,6 +5,8 @@ export const env = {
   redisUrl: process.env.REDIS_URL?.trim() || '',
   // Postgres for durable game-history archival. Blank = persistence no-ops.
   databaseUrl: process.env.DATABASE_URL?.trim() || '',
+  // Sentry error tracking. Blank = disabled, same opt-in shape as databaseUrl.
+  sentryDsn: process.env.SENTRY_DSN?.trim() || '',
   roomTtlHours: Number(process.env.ROOM_TTL_HOURS ?? 24),
   // Allowed CORS origins for the client.
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173')

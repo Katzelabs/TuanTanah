@@ -5,11 +5,16 @@ import Fastify from 'fastify'
 import { Server } from 'socket.io'
 import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/shared'
 import { assertSafeCors, env, isDev } from './env.js'
+import { flushSentry, initSentry } from './sentry.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
 import { reportError } from '../observability/report.js'
 import { createStore } from '../rooms/store.js'
+
+// Before anything else can fail. `assertSafeCors` throwing on a bad production
+// config is itself worth reporting, and it runs on the first line of main().
+initSentry()
 
 async function main() {
   assertSafeCors()
@@ -64,18 +69,23 @@ async function main() {
 // which would kill every live game in every room over one room's bad await. One
 // room failing should not end the others, so this reports and keeps serving.
 process.on('unhandledRejection', (reason) => {
-  reportError(reason, { at: 'unhandledRejection' })
+  // Unhandled even though the process survives it: nothing in the app caught this,
+  // which is the distinction Sentry's crash rate is measuring.
+  reportError(reason, { at: 'unhandledRejection' }, { handled: false })
 })
 
 // An uncaught exception is different: control flow was interrupted at an unknown
 // point, so process state cannot be trusted. Report, then exit and let the
 // container's `restart: unless-stopped` bring back a clean one.
 process.on('uncaughtException', (err) => {
-  reportError(err, { at: 'uncaughtException' })
-  process.exit(1)
+  reportError(err, { at: 'uncaughtException' }, { handled: false })
+  // Drain first: the transport is async, so exiting straight away would drop the
+  // one event that explains the crash.
+  void flushSentry().finally(() => process.exit(1))
 })
 
 main().catch((err) => {
-  reportError(err, { at: 'startup' })
-  process.exit(1)
+  // Caught here, but the process never comes up — a crash by any useful measure.
+  reportError(err, { at: 'startup' }, { handled: false })
+  void flushSentry().finally(() => process.exit(1))
 })

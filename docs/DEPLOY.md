@@ -61,6 +61,7 @@ Edit `.env` and set:
 | `REDIS_URL`       | leave as-is — compose overrides it to `redis://redis:6379`                                |
 | `VITE_SERVER_URL` | leave **blank** (client talks to the API same-origin)                                     |
 | `VITE_PUBLIC_URL` | `https://tuantanah.fun` — baked into `index.html` at build time for share previews        |
+| `SENTRY_DSN`      | error tracking; blank disables it and nothing else changes                                |
 
 There is no `ACME_EMAIL`: this stack never obtains a certificate.
 
