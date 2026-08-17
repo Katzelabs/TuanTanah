@@ -1,26 +1,36 @@
-# Deploying Tuan Tanah to a VPS (production, HTTPS)
+# Deploying Tuan Tanah to the VPS (production)
 
-The production stack is `docker-compose.yml`: a **web** tier (Caddy serving the
-built React client + reverse-proxying the API, with automatic Let's Encrypt
-TLS), the **backend** (Fastify + Socket.io), and **redis**. Single instance —
-horizontal scaling is out of scope for this deploy.
+Tuan Tanah is a **tenant** of the shared platform stack
+([Katzelabs/platform](https://github.com/Katzelabs/platform)), not a self-contained
+deployment. Two things it used to own now live there:
+
+- **TLS and the public ports.** The platform **edge** (`compose/edge.yml`,
+  caddy-docker-proxy) is the only process on the box that binds `:80`/`:443`. It
+  terminates TLS once for every site and reverse-proxies over the `platform`
+  Docker network. This stack publishes **no ports**.
+- **Postgres.** One shared instance serves every project, each with its own
+  database and owning role. Tuan Tanah's is `tuantanah_prod`.
+
+What stays here: the **web** tier (an internal `caddy:2-alpine` serving the built
+SPA and proxying `/api/*` + `/socket.io/*`), the **backend** (Fastify +
+Socket.io), and **redis** — deliberately not shared, because it holds live game
+state on the hot path and a flush would drop in-flight games.
+
+Read `PLATFORM.md` in the platform repo first; it is the deploy contract every
+app on the box follows. This file is only the Tuan Tanah specifics.
 
 ## Prerequisites
 
-- VPS (Ubuntu/Debian) with Docker + docker-compose installed.
-- A **domain** with a DNS **A record** pointing at the VPS IP (AAAA too if you
-  have IPv6). Verify it resolves before the first deploy — Let's Encrypt issuance
-  fails otherwise:
+- The platform stack is up: the `platform` network exists, the edge is running,
+  and Postgres is healthy. `make net` here fails loudly if the network is missing.
+- A **DNS A record** for `DOMAIN` pointing at the VPS IP (AAAA too if you have
+  IPv6). The **edge** issues the certificate, so this must resolve before the
+  first request, not before this stack starts:
   ```bash
-  dig +short yourdomain.com   # should print the VPS IP
+  dig +short tuantanah.fun   # should print the VPS IP
   ```
-- A non-root user with Docker access (or sudo), and git access to clone the repo.
-- Firewall open on 22, 80, 443:
-  ```bash
-  sudo ufw allow 22 && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable
-  ```
-  Ports 80 **and** 443 must be reachable — Caddy uses 80 for the ACME HTTP
-  challenge and the HTTP→HTTPS redirect.
+- A non-root user in the `docker` group, and git access to clone the repo.
+- Firewall: only 22/80/443 open, and only the edge is behind 80/443.
 
 ## First deploy
 
@@ -28,47 +38,71 @@ horizontal scaling is out of scope for this deploy.
 # 1. Clone
 git clone <repo-url> tuan-tanah && cd tuan-tanah
 
-# 2. Create the prod .env (gitignored)
-cp .env.example .env
+# 2. Provision this app's database on the shared Postgres (from the platform repo)
+cd ~/projects/platform
+make provision NAME=tuantanah_prod PASS="$(openssl rand -base64 24)"
+# -> prints DATABASE_URL=postgres://tuantanah_prod:<password>@postgres:5432/tuantanah_prod
+
+# 3. Create the prod .env (gitignored, mode 600)
+cd -
+cp .env.example .env && chmod 600 .env
 ```
 
 Edit `.env` and set:
 
-| Var               | Value                                                                                               |
-| ----------------- | --------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`        | `production`                                                                                        |
-| `PORT`            | `3000`                                                                                              |
-| `CORS_ORIGINS`    | `https://yourdomain.com` (the server refuses to start if this is empty/localhost/wildcard)          |
-| `ROOM_TTL_HOURS`  | `24`                                                                                                |
-| `DOMAIN`          | `yourdomain.com`                                                                                    |
-| `ACME_EMAIL`      | your email (Let's Encrypt expiry notices)                                                           |
-| `REDIS_URL`       | leave as-is — compose overrides it to `redis://redis:6379`                                          |
-| `VITE_SERVER_URL` | leave **blank** (client talks to the API same-origin)                                               |
-| `DATABASE_URL`    | leave as-is — compose points it at the `postgres` service (run `pnpm --filter server migrate` once) |
+| Var               | Value                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| `NODE_ENV`        | `production`                                                                              |
+| `PORT`            | `3000`                                                                                    |
+| `CORS_ORIGINS`    | `https://tuantanah.fun` (the server refuses to start if this is empty/localhost/wildcard) |
+| `ROOM_TTL_HOURS`  | `24`                                                                                      |
+| `DOMAIN`          | `tuantanah.fun` — the public hostname, used for the `caddy` label the edge routes on      |
+| `DATABASE_URL`    | the string `make provision` printed. Host is `postgres`, never localhost, never a port    |
+| `REDIS_URL`       | leave as-is — compose overrides it to `redis://redis:6379`                                |
+| `VITE_SERVER_URL` | leave **blank** (client talks to the API same-origin)                                     |
+| `VITE_PUBLIC_URL` | `https://tuantanah.fun` — baked into `index.html` at build time for share previews        |
+
+There is no `ACME_EMAIL`: this stack never obtains a certificate.
 
 ```bash
-# 3. Build + start everything (Caddy auto-issues the TLS cert on first boot)
-make deploy        # == git pull + docker compose up -d --build
+# 4. Build, migrate, start
+make deploy        # git pull --ff-only + net + build + migrate + up -d
 ```
+
+The edge picks the container up within a couple of seconds. Nothing in the
+platform repo changes, and the edge is not restarted.
 
 ## Verify
 
 ```bash
-curl -fsS https://yourdomain.com/api/health   # -> {"status":"ok","store":"redis",...}
+make health        # curl https://$DOMAIN/api/health -> {"status":"ok","store":"redis",...}
 ```
 
-Then open `https://yourdomain.com` in two browser tabs, create a room in one and
-join from the other, and confirm the WebSocket stays connected and game state
-syncs. Check `store` is `redis` (not `memory`) so state survives restarts.
+Check `store` is `redis` (not `memory`) so live state survives restarts. Then open
+the site in two browser tabs, create a room in one and join from the other, and
+confirm the WebSocket stays connected and state syncs.
 
-If certs don't issue: confirm DNS resolves to this box and 80/443 are open, then
-`docker compose logs -f web` to watch the ACME exchange.
+Verify the **effect**, not the exit code — after a schema change, list the tables,
+don't trust the migration log:
+
+```bash
+cd ~/projects/platform
+docker compose --env-file .env -f compose/postgres.yml exec -T postgres \
+  psql -U postgres -d tuantanah_prod -c '\dt'
+# expect: games, game_players, kysely_migration, kysely_migration_lock
+```
 
 ## Redeploy
 
 ```bash
-make deploy        # git pull --ff-only + rebuild + restart
+make deploy
 ```
+
+`make up` runs migrations **between build and start**, against the freshly built
+image, so the schema is never behind the code. If `DATABASE_URL` is blank the
+deploy **fails** rather than skipping — that skip is the documented six-week
+silent failure in `PLATFORM.md`. To deploy without archival on purpose:
+`make up ARCHIVE=off`.
 
 ## Ops
 

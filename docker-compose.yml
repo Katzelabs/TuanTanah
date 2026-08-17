@@ -105,12 +105,14 @@ services:
     restart: unless-stopped
 
 volumes:
+  # Only redis needs one. The in-image Caddy no longer issues certificates (the
+  # edge does), so the old caddy_data/caddy_config volumes have nothing to hold.
   redis_data:
 
 networks:
   default:
-  # Owned by the platform stack. Create it once with `docker network create platform`
-  # (or `make -C infra net`) before the first deploy.
+  # Owned by the platform stack (Katzelabs/platform), not by this repo. It already
+  # exists on the box; `make net` asserts that rather than creating it.
   platform:
     external: true
     name: platform

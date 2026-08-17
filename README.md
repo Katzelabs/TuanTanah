@@ -67,13 +67,19 @@ If `REDIS_URL` is unset or unreachable, the server falls back to an in-memory ga
 
 ## Production (VPS, HTTPS)
 
-The prod stack is Docker Compose: **Caddy** (serves the built client, proxies the
-API, auto-issues Let's Encrypt TLS) + **backend** + **redis** + **postgres**. No host
-build step — the client is built inside the image.
+The prod stack is Docker Compose: an internal **Caddy** (serves the built client
+and proxies the API), the **backend**, and **redis**. No host build step — the
+client is built inside the image.
+
+TLS and Postgres are **not** here. Tuan Tanah is a tenant of the shared platform
+stack ([Katzelabs/platform](https://github.com/Katzelabs/platform)): its edge owns
+`:80`/`:443` for the whole box and terminates TLS, and one shared Postgres serves
+every project with a per-project database (`tuantanah_prod`). Redis stays in this
+stack on purpose — it holds live game state.
 
 ```bash
-cp .env.example .env      # set NODE_ENV, CORS_ORIGINS, DOMAIN, ACME_EMAIL
-make deploy               # git pull + docker compose up -d --build
+cp .env.example .env      # set NODE_ENV, CORS_ORIGINS, DOMAIN, DATABASE_URL
+make deploy               # git pull + net check + build + migrate + up -d
 ```
 
 See [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full runbook (DNS, firewall, verify, ops).

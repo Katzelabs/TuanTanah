@@ -27,9 +27,9 @@ Use **pnpm**, never npm. `pnpm check` is the authoritative gate; run it after ch
 
 ## Local dev stack
 
-`docker-compose.dev.yml` provides optional `redis` (7-alpine, :6379) and `postgres` (**17**-alpine, :5432, user/pass/db = `tuan`/`tuan`/`tuan_tanah`, healthchecked). Neither is required for basic dev — without `REDIS_URL` state is in-memory, without `DATABASE_URL` archival no-ops. The Postgres major version deliberately matches the shared platform instance; bumping it needs `docker compose -f docker-compose.dev.yml down -v`.
+`docker-compose.dev.yml` provides optional `redis` (7-alpine, :6379) and `postgres` (**18**-alpine, :5432, user/pass/db = `tuan`/`tuan`/`tuan_tanah`, healthchecked). Neither is required for basic dev — without `REDIS_URL` state is in-memory, without `DATABASE_URL` archival no-ops. The Postgres major version deliberately matches the shared platform instance; bumping it needs `docker compose -f docker-compose.dev.yml down -v`. Note the volume mounts `/var/lib/postgresql` (the **parent**), not `/var/lib/postgresql/data` — pg18 moved PGDATA into a major-version subdirectory and refuses to start on the old mount path.
 
-## Production: two stacks
+## Production: this app is a tenant, not a platform
 
 Prod on the VPS is split into a **platform stack** (shared data tier) and the **app stack**, joined by an external Docker network named `platform`. Create it once with `docker network create platform` (or `make net` in the platform repo).
 
@@ -88,13 +88,13 @@ The platform repo has its own separate `.env` (`POSTGRES_SUPERUSER`, `POSTGRES_S
 ```bash
 make deploy   # git pull --ff-only && make up
 make up       # net + docker compose build + make migrate + docker compose up -d
-make migrate  # one-shot `docker compose run --rm --no-deps backend pnpm migrate`; skipped if DATABASE_URL blank
-make net      # create the shared `platform` network (idempotent)
+make migrate  # one-shot `docker compose run --rm --no-deps backend pnpm migrate`
+make net      # assert the shared `platform` network exists (never creates it)
 make down / restart / logs / ps
-make health   # curl -fsS https://${DOMAIN}/api/health
+make health   # curl -fsS https://${DOMAIN}/api/health, host read out of .env
 ```
 
-Migrations run **between build and up**, so the schema is never behind the running code.
+Migrations run **between build and up**, so the schema is never behind the running code. A blank `DATABASE_URL` **fails** the deploy rather than skipping — the skip-and-continue version is the silent failure `PLATFORM.md` documents (it printed "skipping" while the app ran against a schema-less database for six weeks, swallowing every write). `make up ARCHIVE=off` is the deliberate opt-out.
 
 ## CI/CD (`.github/workflows/`)
 

@@ -65,8 +65,8 @@ client/src/
   components/ui/ # shared design-system primitives (+ a few cross-feature widgets)
   hooks/ lib/ sound/ i18n/ store/   # shared infra; store/ backs lobby AND game
 
-infra/           # VPS platform stack: shared Postgres + backups, provisioning
-                 #   scripts, the external `platform` Docker network (see its README)
+infra/           # README only — the platform stack (shared Postgres, backups,
+                 #   provisioning) moved to its own repo, Katzelabs/platform
 ```
 
 Cross-directory client imports use the `@/` alias (→ `client/src`); same-directory
@@ -112,7 +112,7 @@ UI building blocks: a neobrutalist design system under `components/ui/`, framer-
 
 `server/src/persistence/` persists **final game history** (game row + per-player standings) on game-over via `persistGameResult`, called from `realtime/gameOver.ts`. It's a self-hosted **Postgres** archive accessed through **Kysely** (`persistence/db.ts` client, `schema.ts` types, `migrations/` + a `pnpm --filter server migrate` CLI). It's optional: with `DATABASE_URL` blank, `getDb()` returns null and persistence silently no-ops — and a persistence failure never disrupts a live game (wrapped in try/catch, never throws). This is durable archival only — live game state lives in Redis/memory, not Postgres.
 
-In production Postgres is **not** part of this project's compose stack: it lives in the shared platform stack (`infra/`) alongside every other project on the VPS, reached over an external `platform` Docker network with a per-project database + owning role. Redis stays in-stack (hot path, must not be shared). `make deploy` runs migrations between build and restart. See `infra/README.md` and the `devops` skill.
+In production Postgres is **not** part of this project's compose stack: it lives in the shared platform stack ([Katzelabs/platform](https://github.com/Katzelabs/platform)) alongside every other project on the VPS, reached as `postgres:5432` over an external `platform` Docker network with a per-project database + owning role (`tuantanah_prod`). TLS and the public ports belong to that stack's edge too — this app publishes none and its in-image Caddy is internal. Redis stays in-stack (hot path, must not be shared). `make deploy` runs migrations between build and restart, and **fails** if `DATABASE_URL` is blank. That repo's `PLATFORM.md` is the deploy contract; see also `infra/README.md` and the `devops` skill.
 
 ## Implementation status
 
@@ -128,32 +128,39 @@ Remaining gaps are balance/content TODOs, not missing systems — search for `TO
 
 ## Project management — ClickUp is the source of truth
 
-This project is managed in ClickUp under the **Nekobytes** workspace → **TuanTanah** space, via the connected ClickUp MCP (`mcp__clickup__*`). Tasks and design docs live there, not in the repo. Use ClickUp for PM; use the repo for code.
+This project is managed in ClickUp via the connected ClickUp MCP (`mcp__clickup__*`). Tasks and design docs live there, not in the repo. Use ClickUp for PM; use the repo for code.
 
-**Canonical IDs** (ClickUp's hierarchy is Workspace › Space › Folder › List › Task — most MCP tools also resolve names, so IDs are for disambiguation):
+**Reorganized 2026-08-17:** the standalone _TuanTanah space_ is **gone**. Every Katzelabs project is now a **folder** inside one **Development & Engineering** space, so cross-project work (the VPS/platform migration in particular) sits next to the app work instead of in its own silo.
 
-| Thing                               | ID                                                    |
-| ----------------------------------- | ----------------------------------------------------- |
-| Workspace "Nekobytes"               | `90182053080`                                         |
-| Space "TuanTanah"                   | `901811581330`                                        |
-| **Tasks** list (the default list)   | `901819061453` (named "List"; rename when convenient) |
-| Docs location (Document Hub equiv.) | _not created yet_                                     |
-| Game Design doc (master spec)       | _not created yet_                                     |
+**Canonical IDs** (hierarchy is Workspace › Space › Folder › List › Task — most MCP tools also resolve names, so IDs are for disambiguation):
 
-> **Space is freshly provisioned:** the TuanTanah space currently holds a single default list with no folders, no ClickUp Docs, and **no custom fields** yet. The task list uses ClickUp's stock statuses **`to do` / `in progress` / `complete`** and the built-in **Priority** field (`Urgent` / `High` / `Normal` / `Low`). The `Effort` / `Task type` custom fields and the Docs/Game-Design pages described below don't exist yet — create them in ClickUp before relying on them.
+| Thing                                      | ID                              |
+| ------------------------------------------ | ------------------------------- |
+| Workspace                                  | `90182053080`                   |
+| Space "Development & Engineering"          | `901812517803`                  |
+| Folder "Tuan Tanah"                        | `901816136872`                  |
+| **Tuan Tanah tasks** list (in that folder) | `901820494126` (named "List")   |
+| Folder "VPS Infra" → its list              | `901816137075` → `901820494345` |
+| Sibling project folders                    | Rinciku, Kasbon, Konku          |
+| Docs location / Game Design doc            | _not created yet_               |
+
+> Two workspaces exist on this account, so ClickUp MCP calls **must pass `workspace_id: 90182053080`** or they fail with a "multiple workspaces" error. Infra/deploy/platform work goes in **VPS Infra**, not the Tuan Tanah folder — e.g. the shared-Postgres migration is `86eyn3n07`.
+
+**Statuses** (space-wide, replacing the old stock `to do`/`in progress`/`complete`):
+`backlog` → `scoping` → `in design` → `in development` → `in review` → `testing` → `ready for development` → `shipped` (done) / `cancelled` (closed).
 
 **Tasks schema** — when creating a task, set:
 
-- `Name` (title), `Status` (`to do` / `in progress` / `complete`), `Priority` (`Urgent` / `High` / `Normal` / `Low`), `Description`, `Due date`, `Assignee`. Once added in ClickUp: an `Effort` custom field (`Small` / `Medium` / `Large`) and a `Task type` tag/field (`🐞 Bug` / `💬 Feature request` / `💅 Polish`).
+- `Name` (title), `Status` (from the list above), `Priority` (`Urgent` / `High` / `Normal` / `Low`), `Description`, `Due date`, `Assignee`. There are still **no custom fields** in the space — the `Effort` / `Task type` fields described below don't exist yet; create them in ClickUp before relying on them.
 
 **Docs schema** (once a Docs space/folder exists) — `Doc name` (title), `Category` tag (`Proposal` / `Customer research` / `Strategy doc` / `Planning`).
 
 **CRUD mapping** (via the ClickUp MCP):
 
-- **Read** → `clickup_search` / `clickup_filter_tasks` (scope by List ID `901819061453`) or `clickup_get_task` by ID. `clickup_get_workspace_hierarchy` for structure.
-- **Create** → `clickup_create_task` under the Tasks list.
+- **Read** → `clickup_search` / `clickup_filter_tasks` (scope by List ID `901820494126`, or the space `901812517803` for everything) or `clickup_get_task` by ID. `clickup_get_workspace_hierarchy` for structure.
+- **Create** → `clickup_create_task` under the Tuan Tanah list (or VPS Infra for platform work).
 - **Update** (status, fields, body) → `clickup_update_task` by ID.
-- **Delete** → `clickup_delete_task` (prefer setting status to `complete` / archiving over hard-deleting).
+- **Delete** → `clickup_delete_task` (prefer setting status to `shipped` / `cancelled` over hard-deleting).
 
 **Permissions:** read-only ClickUp tools are allowlisted in `.claude/settings.json` (run without prompting). Write tools (`clickup_create_task`, `clickup_update_task`, `clickup_delete_task`, `clickup_create_document`, etc.) intentionally prompt for confirmation each time — don't add writes to the allowlist without asking. Notion's MCP allowlists and references have been removed.
 

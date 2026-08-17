@@ -1,5 +1,7 @@
 # Web tier: build the React client, then serve it (and reverse-proxy the API)
-# with Caddy, which handles auto-TLS. Build context must be the repo root
+# with an INTERNAL Caddy — it binds plain HTTP on :80 and never obtains a
+# certificate; the platform edge terminates TLS in front of it (see Caddyfile).
+# Build context must be the repo root
 # (docker-compose sets context: . / dockerfile: client/Dockerfile) because the
 # build copies workspace manifests and the shared package from the root.
 FROM node:20-alpine AS build

@@ -1,5 +1,5 @@
 # Manual deploy to the VPS. Intentionally workflow_dispatch-only for now: the
-# shared platform Postgres (infra/) has to be provisioned on the box before the
+# shared platform Postgres (Katzelabs/platform) has to be provisioned on the box before the
 # first run, and auto-deploying on push to main is a decision to make separately.
 #
 # Required repository secrets:
