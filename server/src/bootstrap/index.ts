@@ -22,11 +22,20 @@ async function main() {
   // socket layer, which has its own limiter in security.ts).
   await app.register(rateLimit, { max: 100, timeWindow: '1 minute' })
 
-  app.get('/api/health', async () => ({
-    status: 'ok',
-    store: store.backend,
-    uptime: process.uptime(),
-  }))
+  // Probes the store on every call rather than reporting `store.backend`, which
+  // is fixed at startup and stays 'redis' even when the connection is dead. A
+  // 503 makes the container healthcheck fail, so an unreachable store surfaces
+  // instead of the process sitting there looking healthy and serving nothing.
+  app.get('/api/health', async (_request, reply) => {
+    const storeReachable = await store.ping()
+    if (!storeReachable) reply.code(503)
+    return {
+      status: storeReachable ? 'ok' : 'degraded',
+      store: store.backend,
+      storeReachable,
+      uptime: process.uptime(),
+    }
+  })
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(app.server, {
     path: '/socket.io',
