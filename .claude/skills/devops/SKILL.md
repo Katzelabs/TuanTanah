@@ -60,7 +60,7 @@ Don't scale `backend` past one replica — there's no `@socket.io/redis-adapter`
 
 ## Caddy (`Caddyfile`)
 
-**Internal only — this Caddy never faces the internet and never obtains a certificate.** It binds `{$DOMAIN}`, which compose sets to `:80` (plain HTTP, no hostname matching). It does three things: reverse-proxy `/api/*` and `/socket.io/*` to `backend:3000`, serve the built SPA from `/srv` with `try_files {path} /index.html`, and cap request bodies at 64KB (kept here because it is a property of *this* app's routes).
+**Internal only — this Caddy never faces the internet and never obtains a certificate.** It binds `{$DOMAIN}`, which compose sets to `:80` (plain HTTP, no hostname matching). It does three things: reverse-proxy `/api/*` and `/socket.io/*` to `backend:3000`, serve the built SPA from `/srv` with `try_files {path} /index.html`, and cap request bodies at 64KB (kept here because it is a property of _this_ app's routes).
 
 Security headers, HSTS and the CSP are **not** in this file. They live in the platform edge's base Caddyfile as the `(security_headers)` and `(csp_spa)` snippets and are pulled in via the `caddy.import_0` / `caddy.import_1` docker labels in `docker-compose.yml`, so every app on the box gets them and none can forget them. **Edit headers in the platform repo, not here.**
 

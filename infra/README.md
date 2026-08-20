@@ -7,7 +7,7 @@ backup sidecar, and `provision-db.sh` — now lives in its own repository:
 
 ## Why
 
-This directory held the shared data tier for *every* project on the VPS, not just Tuan
+This directory held the shared data tier for _every_ project on the VPS, not just Tuan
 Tanah. Konku, Kasbon and Rinciku all connect to that Postgres, which meant changing it
 required opening a Monopoly game's repo. Same category of mistake as an app owning the
 edge proxy.
