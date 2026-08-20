@@ -75,13 +75,18 @@ make deploy        # git pull --ff-only + rebuild + restart
 - **Logs:** `make logs` (or `docker compose logs -f web|backend|redis`).
 - **Survives reboot:** every service is `restart: unless-stopped`; ensure Docker
   starts on boot — `sudo systemctl enable docker`.
-- **Cert renewal:** automatic — Caddy renews in the background; no cron needed.
+- **Cert renewal:** not this stack's job — the platform edge terminates TLS and
+  renews in the background. See `PLATFORM.md` in Katzelabs/platform.
 - **Persistence:** Redis uses a named volume (`redis_data`) with AOF on, so game
-  state survives restarts (bounded by `ROOM_TTL_HOURS`). Caddy's certs live in
-  `caddy_data`. Back these volumes up if persistence matters.
+  state survives restarts (bounded by `ROOM_TTL_HOURS`). It is the only stateful
+  volume this stack owns — back it up if persistence matters. Postgres lives in
+  the platform stack and is backed up there by the `pg_dumpall` sidecar.
 
 ## Local test of the prod stack (optional)
 
-Set `DOMAIN=localhost`, `ACME_EMAIL=you@example.com`, and
-`CORS_ORIGINS=https://localhost` in `.env`, then `docker compose up --build`.
-Caddy serves an internal self-signed cert on https://localhost (browser will warn).
+This stack no longer binds `:80`/`:443` or terminates TLS, so it cannot be
+exercised end-to-end on its own — `web` listens on plain HTTP `:80` on the
+internal `platform` network and expects the edge in front of it. To test the
+containers in isolation, `docker compose up --build` and hit `web` directly over
+the compose network; for a full HTTPS path you need the platform edge running
+too. Use `docker-compose.dev.yml` for ordinary local development.

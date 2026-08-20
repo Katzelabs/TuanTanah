@@ -1,6 +1,6 @@
 ---
 name: devops
-description: Build, deploy, and tooling for Tuan Tanah — pnpm monorepo scripts, the check gate, the shared platform stack in infra/ (Postgres + backups), the app Docker Compose stack (Caddy + backend + Redis), Caddy reverse proxy/TLS, env vars, GitHub Actions, and the deploy Makefile. Use for CI/build/deploy/env/config changes.
+description: Build, deploy, and tooling for Tuan Tanah — pnpm monorepo scripts, the check gate, the shared platform stack in Katzelabs/platform (Postgres + backups + TLS edge), the app Docker Compose stack (internal Caddy + backend + Redis), the internal Caddy reverse proxy, env vars, GitHub Actions, and the deploy Makefile. Use for CI/build/deploy/env/config changes.
 ---
 
 # DevOps — Tuan Tanah
@@ -31,22 +31,28 @@ Use **pnpm**, never npm. `pnpm check` is the authoritative gate; run it after ch
 
 ## Production: two stacks
 
-Prod on the VPS is split into a **platform stack** (shared data tier) and the **app stack**, joined by an external Docker network named `platform`. Create it once with `docker network create platform` (or `make -C infra net`).
+Prod on the VPS is split into a **platform stack** (shared data tier) and the **app stack**, joined by an external Docker network named `platform`. Create it once with `docker network create platform` (or `make net` in the platform repo).
 
-### Platform stack: `infra/docker-compose.yml`
+### Platform stack: Katzelabs/platform (`compose/postgres.yml`, `compose/edge.yml`)
 
-Shared across every project on the VPS. See `infra/README.md`.
+Shared across every project on the VPS. **It no longer lives in this repo** — `infra/` here is a
+pointer stub only. Clone https://github.com/Katzelabs/platform; `PLATFORM.md` there is the deploy
+contract every app on the box follows.
 
-- **postgres** — `${POSTGRES_IMAGE:-pgvector/pgvector:pg17}`, `postgres_data` volume, published on **`127.0.0.1:5432` only** (app traffic goes over the `platform` network). Superuser creds in `infra/.env`.
-- **postgres-backup** — same image (a `pg_dumpall` client older than the server refuses to run), loops dumps into `infra/backups/` (`BACKUP_INTERVAL_SECONDS`, `BACKUP_RETENTION_DAYS`).
+- **postgres** — `${POSTGRES_IMAGE:-pgvector/pgvector:pg18}`, `platform_postgres_data` volume, published on **`127.0.0.1:5432` only** (app traffic goes over the `platform` network). Superuser creds in the platform repo's `.env`.
+  - pg18 moved `PGDATA` to `/var/lib/postgresql/18/docker`, so the volume mounts `/var/lib/postgresql`, **not** `.../data`. Mounting the old path silently yields an empty cluster.
+- **postgres-backup** — same image (a `pg_dumpall` client older than the server refuses to run), loops dumps into the platform repo's `backups/` (`BACKUP_INTERVAL_SECONDS`, `BACKUP_RETENTION_DAYS`).
+- **edge** — `lucaslorentz/caddy-docker-proxy`, the **only** container on the box binding `:80`/`:443`. Apps declare `caddy*` labels and it discovers them.
 
-**Version policy:** all tenants share one major version and one upgrade window, so the image tracks the most demanding tenant — currently konku (pg17 + pgvector). `docker-compose.dev.yml` here uses `postgres:17-alpine` to match. A major bump is a coordinated dump/restore for every tenant, not a per-project call.
+**Version policy:** all tenants share one major version and one upgrade window, so the image tracks the most demanding tenant — currently konku (pg18 + pgvector). A major bump is a coordinated dump/restore for every tenant, not a per-project call.
 
-Each project gets its **own database + owning login role**, never a shared database — Kysely's `kysely_migration` tables and generic names like `games` collide otherwise. Provision with `make -C infra provision NAME=tuantanah_prod PASS='...'` (add `EXT=vector` for extension-needing tenants; extensions are per-database and untrusted ones need superuser). It prints the `DATABASE_URL` — host is `postgres`, not localhost.
+> **Known drift:** production moved to **pg18** on 2026-08-17, but `docker-compose.dev.yml` here is still on `postgres:17-alpine`. Dev and CI therefore test against a different major than prod — exactly what this policy exists to prevent. Bumping it needs a volume reset (`docker compose -f docker-compose.dev.yml down -v`; the local archive is throwaway).
+
+Each project gets its **own database + owning login role**, never a shared database — Kysely's `kysely_migration` tables and generic names like `games` collide otherwise. Provision with `make provision NAME=tuantanah_prod PASS='...'` in the platform repo (add `EXT=vector` for extension-needing tenants; extensions are per-database and untrusted ones need superuser). It prints the `DATABASE_URL` — host is `postgres`, not localhost.
 
 ### App stack: `docker-compose.yml` (project name `tuantanah`)
 
-- **web** — multi-stage build (Node 20 build → `caddy:2-alpine`), serves the SPA from `/srv` and reverse-proxies `/api/*` + `/socket.io/*` to `backend:3000`. Auto-TLS via Caddy. `caddy_data`/`caddy_config` volumes persist certs. `VITE_PUBLIC_URL` is a **build arg** (Vite bakes `VITE_*` at build time) — so prod and staging need separate image builds.
+- **web** — multi-stage build (Node 20 build → `caddy:2-alpine`), serves the SPA from `/srv` and reverse-proxies `/api/*` + `/socket.io/*` to `backend:3000`. **Does not terminate TLS and owns no volumes**: it listens on plain HTTP `:80` (`DOMAIN=:80`) on the `platform` network and declares `caddy` labels for the edge to discover. TLS and certs belong to the platform edge (`edge_caddy_data`). `VITE_PUBLIC_URL` is a **build arg** (Vite bakes `VITE_*` at build time) — so prod and staging need separate image builds.
 - **backend** — `server/Dockerfile` (Node 20, corepack, `pnpm install --frozen-lockfile --prod`, `tsx src/bootstrap/index.ts`), :3000, healthcheck on `/api/health`. On both `default` and `platform` networks. `DATABASE_URL` comes from `.env` and is **not** overridden in compose; `REDIS_URL` is.
 - **redis** — 7, `redis_data` volume, healthcheck `redis-cli ping`. Deliberately **not** shared between projects: it holds live game state.
 
@@ -54,7 +60,11 @@ Don't scale `backend` past one replica — there's no `@socket.io/redis-adapter`
 
 ## Caddy (`Caddyfile`)
 
-Reverse proxy + static SPA fallback (`try_files {path} /index.html`) with hardened headers set at the edge: HSTS, `X-Frame-Options DENY`, `X-Content-Type-Options nosniff`, a strict CSP (`script-src 'self'`, `connect-src 'self' wss:`), 64KB request-body cap, `-Server`. Edit headers here, not in the app.
+**Internal only — this Caddy never faces the internet and never obtains a certificate.** It binds `{$DOMAIN}`, which compose sets to `:80` (plain HTTP, no hostname matching). It does three things: reverse-proxy `/api/*` and `/socket.io/*` to `backend:3000`, serve the built SPA from `/srv` with `try_files {path} /index.html`, and cap request bodies at 64KB (kept here because it is a property of *this* app's routes).
+
+Security headers, HSTS and the CSP are **not** in this file. They live in the platform edge's base Caddyfile as the `(security_headers)` and `(csp_spa)` snippets and are pulled in via the `caddy.import_0` / `caddy.import_1` docker labels in `docker-compose.yml`, so every app on the box gets them and none can forget them. **Edit headers in the platform repo, not here.**
+
+Do not re-add an `email` / ACME block: `email {$ACME_EMAIL}` with the variable no longer set by compose expands to nothing, Caddy refuses to start ("wrong argument count"), the container crash-loops with no IP, and the edge's `{{upstreams 80}}` renders as a bare `:80` — making the edge proxy to itself and 308-loop. This broke the first cutover.
 
 ## Environment variables (`.env.example`)
 
@@ -68,10 +78,10 @@ ROOM_TTL_HOURS=24
 VITE_SERVER_URL=                    # blank → dev proxy / same-origin
 VITE_PUBLIC_URL=                    # blank → root-relative; set for social previews (build arg)
 DOMAIN=tuantanah.fun               # prod
-ACME_EMAIL=you@example.com         # prod (Caddy TLS)
+ACME_EMAIL=you@example.com         # vestigial — the edge owns TLS; nothing here reads it
 ```
 
-`infra/.env` is separate (`POSTGRES_SUPERUSER`, `POSTGRES_SUPERUSER_PASSWORD`, backup knobs). `.gitignore` ignores `.env` and `.env.*` with `!.env.example`, so per-environment files are safe to add.
+The platform repo has its own separate `.env` (`POSTGRES_SUPERUSER`, `POSTGRES_SUPERUSER_PASSWORD`, backup knobs). `.gitignore` ignores `.env` and `.env.*` with `!.env.example`, so per-environment files are safe to add.
 
 ## Deploy (`Makefile`)
 

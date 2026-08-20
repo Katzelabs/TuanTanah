@@ -28,14 +28,20 @@ idle.
 
 ## Migration status
 
-The move is tracked in ClickUp task `86eyn3n07`.
+**Complete as of 2026-08-20.** Tuan Tanah runs as a platform tenant:
 
-**Do not run `docker compose up -d` in this repo until P2.3 is done.** The compose file
-on `main` has no `postgres` service and joins the external `platform` network, but the
-box is still running a *older* stack that includes `tuantanah-postgres-1` and the
-`platform` network does not exist yet. A deploy from current `main` would fail on the
-missing network — and if that network were created first, it would bring the app up
-pointing at a Postgres that has no `tuantanah_prod` database.
+- `tuantanah_prod` lives on the shared platform Postgres (`pgvector/pgvector:pg18`) and is
+  reached as `postgres:5432` over the external `platform` network.
+- The `platform` network and the edge exist; the app declares `caddy` labels and the edge
+  routes `tuantanah.fun` to it. `web` no longer binds `:80`/`:443`.
+- The legacy `tuantanah-postgres-1` container and its `tuantanah_postgres_data` volume were
+  **removed on 2026-08-20**. At removal the legacy `tuan_tanah` database contained **no
+  application tables** — schema and data had already been re-established on the platform
+  instance. A `pg_dumpall` of the legacy cluster is archived in the platform repo under
+  `backups/legacy_tuantanah_pg16_20260820T120502Z.sql.gz`.
 
-The live data (`tuan_tanah`, ~7.5 MB, PostgreSQL 16.14, superuser `tuan`) lives in the
-`tuantanah_postgres_data` volume and is migrated to the platform instance in P2.3.
+`docker compose up -d` in this repo is safe again, with one prerequisite: the external
+`platform` network must exist (`make net` in the platform repo) and the platform stack must
+be up, since `backend` resolves `postgres` over it.
+
+The move was tracked in ClickUp task `86eyn3n07`.
