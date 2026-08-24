@@ -8,6 +8,7 @@ import { flushSentry, initSentry } from './sentry.js'
 import { authEnabled } from '../modules/auth/index.js'
 import { registerAuthRoutes } from '../modules/auth/routes.js'
 import { authGate } from '../modules/auth/socket.js'
+import { registerHistoryRoutes } from '../modules/history/index.js'
 import type { TTServer } from '../realtime/common.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
@@ -49,6 +50,10 @@ async function main() {
       uptime: process.uptime(),
     }
   })
+
+  // Read-only account routes. Registered here rather than inline like /api/health
+  // because they belong to a feature, not to the bootstrap.
+  registerHistoryRoutes(app)
 
   const io: TTServer = new Server(app.server, {
     path: '/socket.io',

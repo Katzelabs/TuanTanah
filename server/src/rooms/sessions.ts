@@ -5,9 +5,11 @@ export interface Session {
   roomId: string
   playerId: string
   /**
-   * The signed-in account behind this seat, when there is one. Absent for guests,
-   * which stays the norm — seat reclaim runs on `reconnectTokens`, not on this,
-   * so an account is extra information about a player and never a requirement.
+   * The signed-in account behind this seat, when there is one. Populated by the
+   * auth middleware and absent for guests, which stays the norm — seat reclaim
+   * runs on `reconnectTokens`, not on this, so an account is extra information
+   * about a player and never a requirement. Read at game-over to attribute an
+   * archived result to an account.
    */
   userId?: UserId
 }

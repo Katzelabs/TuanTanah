@@ -495,6 +495,23 @@
     "mute": "Bisukan suara",
     "unmute": "Nyalakan suara"
   },
+  "history": {
+    "title": "Riwayat pertandingan",
+    "subtitle": "Permainan yang kamu selesaikan sambil masuk akun",
+    "loading": "Memuat permainanmu…",
+    "signedOut": "Masuk untuk menyimpan riwayat pertandingan",
+    "signedOutHint": "Permainan sebagai tamu diarsipkan anonim, jadi tidak ada yang bisa ditampilkan di sini.",
+    "error": "Gagal memuat riwayat pertandingan",
+    "retry": "Coba lagi",
+    "empty": "Belum ada permainan yang selesai",
+    "emptyHint": "Selesaikan satu permainan sampai akhir dan hasilnya muncul di sini.",
+    "won": "Menang",
+    "lost": "Kalah",
+    "eliminated": "Tereliminasi",
+    "wealth": "Kekayaan akhir",
+    "players": "{{count}} pemain",
+    "noRole": "Tanpa peran"
+  },
   "data": {
     "tiles": {
       "4": "Pajak Penghasilan",

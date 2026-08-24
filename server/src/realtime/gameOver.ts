@@ -2,11 +2,13 @@
 // final state, and emits `game_over`. Both the per-room time-limit timer and the
 // end_turn handler call `concludeIfWon`, so the resolution path is identical
 // whether the game ends by inactivity or by a player's action.
+import type { UserId } from '@tuan-tanah/shared'
 import { finalStandings, resolveGameOver } from '../engine/index.js'
 import { mutateRoom } from '../rooms/rooms.js'
 import { reportError } from '../observability/report.js'
+import { getSession } from '../rooms/sessions.js'
 import type { GameStore } from '../rooms/store.js'
-import { persistGameResult } from '../persistence/gameHistory.js'
+import { persistGameResult, type AccountAttribution } from '../persistence/gameHistory.js'
 import { clearAfkTimer } from './afk.js'
 import { broadcastState, type TTServer } from './common.js'
 
@@ -39,7 +41,33 @@ export async function concludeIfWon(io: TTServer, store: GameStore, roomId: stri
     finalStandings: finalStandings(state),
   })
   // Fire-and-forget: archive completed-game stats (no-op unless DATABASE_URL is set).
-  await persistGameResult(state, now)
+  await persistGameResult(state, now, await accountsInRoom(io, roomId))
+}
+
+/**
+ * Which seats were being played by a signed-in account, read from the sockets
+ * still in the room at game-over.
+ *
+ * Deliberately a snapshot, not a ledger: a player who joined as a guest and
+ * signed in mid-game is credited, one who signed out is not, and one who closed
+ * the tab before the final turn is archived anonymously. Tracking identity
+ * changes across a whole game would buy a rare edge case at the cost of state
+ * that has to stay correct through every reconnect.
+ *
+ * Attribution failing must not break the end of a game, so a bad adapter read
+ * costs the archive its user_ids and nothing else.
+ */
+async function accountsInRoom(io: TTServer, roomId: string): Promise<AccountAttribution> {
+  const accounts = new Map<string, UserId>()
+  try {
+    for (const socket of await io.in(roomId).fetchSockets()) {
+      const session = getSession(socket.id)
+      if (session?.userId) accounts.set(session.playerId, session.userId)
+    }
+  } catch (err) {
+    reportError(err, { at: 'accountsInRoom', roomId })
+  }
+  return accounts
 }
 
 /**

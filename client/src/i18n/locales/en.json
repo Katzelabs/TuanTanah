@@ -495,6 +495,23 @@
     "mute": "Mute sound",
     "unmute": "Unmute sound"
   },
+  "history": {
+    "title": "Match history",
+    "subtitle": "Games you finished while signed in",
+    "loading": "Loading your games…",
+    "signedOut": "Sign in to keep a match history",
+    "signedOutHint": "Games played as a guest are archived anonymously, so there is nothing to list here.",
+    "error": "Couldn't load your match history",
+    "retry": "Try again",
+    "empty": "No finished games yet",
+    "emptyHint": "Play a game through to the end and it shows up here.",
+    "won": "Won",
+    "lost": "Lost",
+    "eliminated": "Eliminated",
+    "wealth": "Final wealth",
+    "players": "{{count}} players",
+    "noRole": "No role"
+  },
   "data": {
     "tiles": {
       "4": "Income Tax",

@@ -56,7 +56,9 @@ server/src/
   engine/        # pure I/O-free rules (index.ts + submodules incl. lawoffice.ts)
   rooms/         # rooms.ts, sessions.ts, store.ts (room lifecycle + live state)
   persistence/   # Postgres: Kysely db/schema, migrations/, gameHistory repo
-  modules/       # feature seams (stubs): auth, social, matchmaking, bots
+  modules/       # feature modules: auth (Google sign-in + sessions),
+                 #   history (match history API); stubs for social,
+                 #   matchmaking, bots
   security.ts
 
 client/src/
