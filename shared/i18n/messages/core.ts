@@ -104,6 +104,9 @@ export const error: MessageMap = {
     // connection strings and query fragments.
     'core.unexpected': 'Something went wrong on our end — please try again',
     'core.notInRoom': 'You are not in a room',
+    // Account-gated features (friends, room invites). Guests stay first-class
+    // everywhere else, so this is a nudge, not a wall.
+    'core.requiresAccount': 'Sign in to use this feature',
     'core.gameAlreadyStarted': 'Game already started',
     'core.roomFull': 'Room is full',
     'core.playerNotInRoom': 'Player not in room',
@@ -178,6 +181,7 @@ export const error: MessageMap = {
   id: {
     'core.unexpected': 'Terjadi kesalahan di sisi kami — silakan coba lagi',
     'core.notInRoom': 'Anda tidak berada di dalam ruangan',
+    'core.requiresAccount': 'Masuk untuk memakai fitur ini',
     'core.gameAlreadyStarted': 'Permainan sudah dimulai',
     'core.roomFull': 'Ruangan penuh',
     'core.playerNotInRoom': 'Pemain tidak ada di ruangan',

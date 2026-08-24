@@ -774,5 +774,32 @@
       "unavailable": "Ada yang salah. Coba lagi sebentar.",
       "network": "Tidak bisa menghubungi server. Cek koneksi kamu."
     }
+  },
+  "friends": {
+    "title": "Teman",
+    "loading": "Memuat…",
+    "addByCode": "Tambah lewat kode teman",
+    "codePlaceholder": "AB12CD34",
+    "send": "Kirim",
+    "requestSent": "Permintaan terkirim.",
+    "incoming": "Permintaan masuk",
+    "outgoing": "Permintaan terkirim",
+    "yourFriends": "Teman",
+    "blocked": "Diblokir",
+    "accept": "Terima",
+    "decline": "Tolak",
+    "cancel": "Batalkan",
+    "remove": "Hapus",
+    "block": "Blokir",
+    "unblock": "Buka blokir",
+    "online": "Online",
+    "offline": "Offline",
+    "inRoom": "Di ruangan {{roomId}}",
+    "empty": "Belum ada teman — tambahkan seseorang lewat kode temannya.",
+    "signedOut": "Masuk untuk menambah teman dan melihat siapa yang online.",
+    "requestFrom": "{{name}} mengirim permintaan pertemanan",
+    "error": {
+      "generic": "Gagal — silakan coba lagi."
+    }
   }
 }

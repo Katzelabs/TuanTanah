@@ -11,6 +11,7 @@ import { registerAuthRoutes } from '../modules/auth/routes.js'
 import { authGate } from '../modules/auth/socket.js'
 import { registerHistoryRoutes } from '../modules/history/index.js'
 import type { TTServer } from '../realtime/common.js'
+import { registerFriendHandlers } from '../realtime/friends.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
@@ -80,6 +81,9 @@ async function main() {
     trackConnection(socket)
     registerLobbyHandlers(io, socket, store)
     registerGameHandlers(io, socket, store)
+    // Account-scoped, not room-scoped: presence and friends outlive any room, so
+    // these are wired for every socket including ones that never join one.
+    registerFriendHandlers(io, socket)
   })
 
   await app.listen({ port: env.port, host: '0.0.0.0' })
