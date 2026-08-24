@@ -8,6 +8,7 @@ import { TurnBanner } from '@/features/game/TurnBanner/TurnBanner.js'
 import { VotingModal } from '@/features/game/VotingModal/VotingModal.js'
 import { DevMultiplayer } from '@/app/DevMultiplayer.js'
 import { Home } from '@/features/home/Home.js'
+import { MatchHistory } from '@/features/history/MatchHistory.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
 import { StyleGuide } from '@/app/StyleGuide.js'
 import { useGame } from '@/store/gameStore.js'
@@ -27,6 +28,7 @@ export function App() {
             bounce the bare home URL into that room so returning resumes play. */}
         <Route path="/" element={roomId ? <Navigate to={`/room/${roomId}`} replace /> : <Home />} />
         <Route path="/room/:roomId" element={<RoomGate />} />
+        <Route path="/history" element={<MatchHistory />} />
         <Route path="/design" element={<StyleGuide />} />
         {/* DEV-only: run several isolated clients (one per iframe) in one tab. */}
         {import.meta.env.DEV && <Route path="/dev" element={<DevMultiplayer />} />}

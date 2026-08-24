@@ -2,12 +2,25 @@
 // no-ops when Postgres is unconfigured, and never throws — persistence failures
 // must not disrupt the live game. `now` is the game-over wall-clock (epoch ms),
 // used to compute play duration. Reimplemented on Kysely/Postgres (was Supabase).
-import type { GameState } from '@tuan-tanah/shared'
+import type { GameState, UserId } from '@tuan-tanah/shared'
 import { playerWealth } from '../engine/index.js'
 import { reportError } from '../observability/report.js'
 import { getDb } from './db.js'
 
-export async function persistGameResult(state: GameState, now: number): Promise<void> {
+/**
+ * playerId → the account that played that seat. Only the seats whose socket had
+ * a signed-in session at game-over appear; everyone else is archived anonymously,
+ * which is the guest case and stays the default.
+ */
+export type AccountAttribution = ReadonlyMap<string, UserId>
+
+const NO_ACCOUNTS: AccountAttribution = new Map()
+
+export async function persistGameResult(
+  state: GameState,
+  now: number,
+  accounts: AccountAttribution = NO_ACCOUNTS,
+): Promise<void> {
   const db = getDb()
   if (!db) return
   if (!state.winner) return
@@ -43,6 +56,7 @@ export async function persistGameResult(state: GameState, now: number): Promise<
           final_cash: p.cash,
           final_wealth: playerWealth(state, p),
           eliminated: p.isEliminated,
+          user_id: accounts.get(p.id) ?? null,
         })),
       )
       .execute()

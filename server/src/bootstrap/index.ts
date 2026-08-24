@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/shared'
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
+import { registerHistoryRoutes } from '../modules/history/index.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
@@ -42,6 +43,10 @@ async function main() {
       uptime: process.uptime(),
     }
   })
+
+  // Read-only account routes. Registered here rather than inline like /api/health
+  // because they belong to a feature, not to the bootstrap.
+  registerHistoryRoutes(app)
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(app.server, {
     path: '/socket.io',
