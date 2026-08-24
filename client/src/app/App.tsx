@@ -10,15 +10,18 @@ import { DevMultiplayer } from '@/app/DevMultiplayer.js'
 import { Home } from '@/features/home/Home.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
 import { StyleGuide } from '@/app/StyleGuide.js'
+import { RoomInviteToast, useInvites } from '@/features/invites/index.js'
 import { useGame } from '@/store/gameStore.js'
 
 export function App() {
   const init = useGame((s) => s.init)
+  const initInvites = useInvites((s) => s.init)
   const roomId = useGame((s) => s.roomId)
 
   useEffect(() => {
     init()
-  }, [init])
+    initInvites()
+  }, [init, initInvites])
 
   return (
     <div className="min-h-screen">
@@ -38,6 +41,7 @@ export function App() {
       <VotingModal />
       <AuctionModal />
       <IncomingDealModal />
+      <RoomInviteToast />
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { roleAbility, roleName } from '@/i18n/gameData.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 import { LeaveButton, ShareLinkButton } from '@/components/RoomActions.js'
+import { InviteFriendButton } from '@/features/invites/index.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 
@@ -57,6 +58,7 @@ export function Lobby() {
             </div>
           </Card>
           <div className="flex gap-2">
+            <InviteFriendButton />
             <ShareLinkButton code={state.roomId} />
             <LeaveButton label={t('lobby.leaveRoom')} />
           </div>

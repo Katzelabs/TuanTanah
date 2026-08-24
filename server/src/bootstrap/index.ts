@@ -7,9 +7,11 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/sha
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
 import { registerGameHandlers } from '../realtime/game.js'
+import { registerInviteHandlers } from '../realtime/invites.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
 import { reportError } from '../observability/report.js'
+import { registerRoomRoutes } from '../rooms/routes.js'
 import { createStore } from '../rooms/store.js'
 
 // Before anything else can fail. `assertSafeCors` throwing on a bad production
@@ -43,6 +45,8 @@ async function main() {
     }
   })
 
+  registerRoomRoutes(app, store)
+
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(app.server, {
     path: '/socket.io',
     cors: { origin: env.corsOrigins },
@@ -57,6 +61,7 @@ async function main() {
     trackConnection(socket)
     registerLobbyHandlers(io, socket, store)
     registerGameHandlers(io, socket, store)
+    registerInviteHandlers(io, socket, store)
   })
 
   await app.listen({ port: env.port, host: '0.0.0.0' })
