@@ -7,6 +7,17 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL?.trim() || '',
   // Sentry error tracking. Blank = disabled, same opt-in shape as databaseUrl.
   sentryDsn: process.env.SENTRY_DSN?.trim() || '',
+  // Google OAuth for player accounts. Blank = accounts disabled and the game stays
+  // fully guest-playable, the same opt-in shape as sentryDsn / databaseUrl.
+  googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() || '',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim() || '',
+  // Origin the browser reaches this app at. The OAuth redirect URI is built from
+  // it and must match what is registered in the Google console byte-for-byte, so
+  // any trailing slash is stripped rather than silently producing `//api/...`.
+  publicOrigin: (process.env.PUBLIC_ORIGIN?.trim() || 'http://localhost:5173').replace(/\/+$/, ''),
+  // Lifetime of a signed-in session. Sliding: refreshed on every use, so this is
+  // an idle timeout rather than a hard cap.
+  sessionTtlDays: Number(process.env.SESSION_TTL_DAYS ?? 30),
   roomTtlHours: Number(process.env.ROOM_TTL_HOURS ?? 24),
   // Allowed CORS origins for the client.
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173')
