@@ -6,14 +6,16 @@ import {
   TIME_LIMIT_OPTIONS,
   type Role,
 } from '@tuan-tanah/shared'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { roleAbility, roleName } from '@/i18n/gameData.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
-import { LeaveButton, ShareLinkButton } from '@/components/RoomActions.js'
+import { LeaveButton } from '@/components/RoomActions.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
+import { InviteModal } from './InviteModal.js'
 
 const SETTINGS_TABS = ['general', 'roles', 'rules'] as const
 type SettingsTab = (typeof SETTINGS_TABS)[number]
@@ -26,6 +28,18 @@ export function Lobby() {
   const updateSettings = useGame((s) => s.updateSettings)
   const startGame = useGame((s) => s.startGame)
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('general')
+
+  // Home hands over `state.created` after a create (never after a join), so the
+  // room master's first sight of the lobby is the "send this link" sheet.
+  const location = useLocation()
+  const navigate = useNavigate()
+  const createdHere = (location.state as { created?: boolean } | null)?.created === true
+  const [invite, setInvite] = useState<'created' | 'manual' | null>(createdHere ? 'created' : null)
+
+  // Drop the flag once consumed, so a refresh doesn't re-open the sheet.
+  useEffect(() => {
+    if (createdHere) navigate(location.pathname, { replace: true, state: null })
+  }, [createdHere, location.pathname, navigate])
 
   if (!state) return <Centered>{t('lobby.loading')}</Centered>
 
@@ -57,11 +71,25 @@ export function Lobby() {
             </div>
           </Card>
           <div className="flex gap-2">
-            <ShareLinkButton code={state.roomId} />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="text-xs"
+              onClick={() => setInvite('manual')}
+            >
+              {t('invite.button')}
+            </Button>
             <LeaveButton label={t('lobby.leaveRoom')} />
           </div>
         </div>
       </div>
+
+      <InviteModal
+        open={invite !== null}
+        created={invite === 'created'}
+        onClose={() => setInvite(null)}
+        code={state.roomId}
+      />
 
       <div className="mt-8 grid gap-6 md:grid-cols-[1fr_280px]">
         {/* Roles grid */}

@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 import { Button, Card } from '@/components/ui/index.js'
+import { useAuthUser } from '@/hooks/useAuthUser.js'
 import { useGame } from '@/store/gameStore.js'
+
+/** Matches the server's player-name cap. */
+const NAME_MAX_LENGTH = 20
 
 export function Home() {
   const { t } = useTranslation()
@@ -12,11 +16,18 @@ export function Home() {
   const joining = useGame((s) => s.joining)
   const connected = useGame((s) => s.connected)
   const navigate = useNavigate()
-  const [name, setName] = useState('')
+  const account = useAuthUser()
+  // `null` means "untouched", so the field follows the account name as it loads
+  // instead of needing an effect to sync into state. Guests start on ''.
+  const [typedName, setTypedName] = useState<string | null>(null)
   const [code, setCode] = useState('')
 
+  const name = typedName ?? account?.displayName.slice(0, NAME_MAX_LENGTH) ?? ''
   const canSubmit = name.trim().length > 0 && connected && !joining
   const goToRoom = (roomId: string) => navigate(`/room/${roomId}`)
+  // Creating is the only path that gets the post-create share prompt.
+  const goToCreatedRoom = (roomId: string) =>
+    navigate(`/room/${roomId}`, { state: { created: true } })
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
@@ -37,13 +48,13 @@ export function Home() {
           <input
             className="mt-1 w-full rounded-lg border-2 border-ink bg-surface px-3 py-2 font-medium outline-none transition focus:shadow-brutal-sm"
             value={name}
-            maxLength={20}
+            maxLength={NAME_MAX_LENGTH}
             placeholder={t('home.namePlaceholder')}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setTypedName(e.target.value)}
           />
         </label>
 
-        <Button block disabled={!canSubmit} onClick={() => join(name, undefined, goToRoom)}>
+        <Button block disabled={!canSubmit} onClick={() => join(name, undefined, goToCreatedRoom)}>
           {t('home.createRoom')}
         </Button>
 

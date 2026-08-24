@@ -43,6 +43,21 @@
     "surrenderTitle": "Surrender?",
     "confirmSurrender": "Surrender"
   },
+  "invite": {
+    "button": "🔗 Invite",
+    "title": "Invite players",
+    "subtitle": "Send this link — anyone who opens it lands straight in your room.",
+    "createdTitle": "Room created!",
+    "createdSubtitle": "Send the link now — your friends join in one tap.",
+    "scan": "Or scan to join",
+    "qrAlt": "QR code for room {{code}}",
+    "roomCode": "Room code",
+    "codeHint": "No link? Enter this code on the home screen.",
+    "copyLink": "📋 Copy link",
+    "share": "📤 Share…",
+    "shareTitle": "Join my Tuan Tanah room",
+    "shareText": "Join my Tuan Tanah room — code {{code}}"
+  },
   "lobby": {
     "loading": "Loading lobby…",
     "title": "Lobby",
