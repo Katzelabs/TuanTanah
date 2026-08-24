@@ -12,6 +12,7 @@ import type {
   TileId,
 } from './game.js'
 import type { LogParams } from '../i18n/params.js'
+import type { FriendSummary, RoomInvite, User, UserId } from './auth.js'
 
 export type MetaActionType =
   | 'judol'
@@ -96,6 +97,30 @@ export interface ClientToServerEvents {
   // DEV-only: move the current player straight to a tile (no dice) and resolve it.
   // The server ignores this outside dev builds (see `isDev`).
   dev_teleport: (payload: { tileId: TileId }) => void
+
+  // ---- Accounts: friends (subtask F) ----
+  // All of these require an authenticated socket; the server rejects them with
+  // an `error` (code `core.requiresAccount`) for guests.
+  //
+  // Send a friend request by the target's short code (never by display name —
+  // name search would allow enumerating players).
+  friend_request: (payload: { friendCode: string }, ack: (res: AckResult<null>) => void) => void
+  friend_respond: (
+    payload: { userId: UserId; accept: boolean },
+    ack: (res: AckResult<null>) => void,
+  ) => void
+  friend_remove: (payload: { userId: UserId }, ack: (res: AckResult<null>) => void) => void
+  friend_block: (
+    payload: { userId: UserId; blocked: boolean },
+    ack: (res: AckResult<null>) => void,
+  ) => void
+  // Subscribe to the viewer's friends list. The server replies with the current
+  // list and pushes `friends_updated` on every later change.
+  friend_list: (ack: (res: AckResult<{ friends: FriendSummary[] }>) => void) => void
+
+  // ---- Accounts: room invites (subtask G) ----
+  // Invite an accepted friend into the room the caller is currently seated in.
+  invite_to_room: (payload: { userId: UserId }, ack: (res: AckResult<null>) => void) => void
 }
 
 // ---- Server → Client ----
@@ -117,6 +142,18 @@ export interface ServerToClientEvents {
   game_over: (payload: { winner: string; finalStandings: FinalStanding[] }) => void
   // `message` is the English fallback; `code` + `params` let the client localize.
   error: (payload: { message: string; code?: string; params?: LogParams }) => void
+
+  // ---- Accounts: friends (subtask F) ----
+  // The viewer's full friends list after any change (add/accept/remove/block) or
+  // any presence transition. Sent only to the affected user's presence room.
+  friends_updated: (payload: { friends: FriendSummary[] }) => void
+  // A new incoming friend request arrived, for a toast/badge.
+  friend_request_received: (payload: { from: User }) => void
+
+  // ---- Accounts: room invites (subtask G) ----
+  // A friend invited the viewer into a room. Delivered to every socket of the
+  // target user, wherever they are in the app.
+  room_invite: (payload: RoomInvite) => void
 }
 
 // Generic ack envelope for request/response style events.

@@ -21,9 +21,46 @@ export interface GamePlayersTable {
   final_cash: number
   final_wealth: number
   eliminated: boolean
+  // Account that played this seat, or null for a guest. Also NULLed when an
+  // account is deleted, so archived games survive as anonymous. See 0002_auth.
+  user_id: string | null
+}
+
+// ---- Player accounts (ClickUp epic 86ey2z15b, migration 0002_auth) ----
+
+export interface UsersTable {
+  id: Generated<string>
+  display_name: string
+  avatar_url: string | null
+  friend_code: string
+  email: string | null
+  created_at: Generated<Date>
+}
+
+export interface AuthIdentitiesTable {
+  id: Generated<number>
+  user_id: string
+  /** Only 'google' for v1. A second provider is a new row, not a schema change. */
+  provider: string
+  /** The provider's stable subject id. Never key on email. */
+  subject: string
+  created_at: Generated<Date>
+}
+
+export interface FriendshipsTable {
+  id: Generated<number>
+  /** Stored once per pair — readers must check BOTH columns. */
+  requester_id: string
+  addressee_id: string
+  /** 'pending' | 'accepted' | 'blocked' — see FriendshipStatus in shared. */
+  status: string
+  created_at: Generated<Date>
 }
 
 export interface Database {
   games: GamesTable
   game_players: GamePlayersTable
+  users: UsersTable
+  auth_identities: AuthIdentitiesTable
+  friendships: FriendshipsTable
 }
