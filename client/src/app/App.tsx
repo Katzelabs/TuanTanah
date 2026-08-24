@@ -7,6 +7,7 @@ import { IncomingDealModal } from '@/features/game/NegotiationModal/IncomingDeal
 import { TurnBanner } from '@/features/game/TurnBanner/TurnBanner.js'
 import { VotingModal } from '@/features/game/VotingModal/VotingModal.js'
 import { DevMultiplayer } from '@/app/DevMultiplayer.js'
+import { useAuth } from '@/features/auth/index.js'
 import { Home } from '@/features/home/Home.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
 import { StyleGuide } from '@/app/StyleGuide.js'
@@ -15,10 +16,17 @@ import { useGame } from '@/store/gameStore.js'
 export function App() {
   const init = useGame((s) => s.init)
   const roomId = useGame((s) => s.roomId)
+  const refreshAuth = useAuth((s) => s.refresh)
 
   useEffect(() => {
     init()
   }, [init])
+
+  // Hydrate the session once on boot. Also the return path from the Google
+  // redirect: that comes back as a full page load, so this reads the new cookie.
+  useEffect(() => {
+    void refreshAuth()
+  }, [refreshAuth])
 
   return (
     <div className="min-h-screen">

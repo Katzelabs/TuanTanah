@@ -1,4 +1,11 @@
 {
+  "auth": {
+    "signIn": "Masuk dengan Google",
+    "accountMenu": "Menu akun",
+    "signedInAs": "Masuk sebagai",
+    "account": "Pengaturan akun",
+    "signOut": "Keluar"
+  },
   "common": {
     "cancel": "Batal",
     "close": "Tutup",
