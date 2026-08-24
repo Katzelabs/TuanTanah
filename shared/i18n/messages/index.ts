@@ -9,12 +9,13 @@ import * as actions from './actions.js'
 import * as cards from './cards.js'
 import * as core from './core.js'
 import * as elimination from './elimination.js'
+import * as friends from './friends.js'
 import * as negotiation from './negotiation.js'
 import * as pinjol from './pinjol.js'
 import * as roles from './roles.js'
 import * as turn from './turn.js'
 
-const MODULES = [actions, cards, core, elimination, negotiation, pinjol, roles, turn]
+const MODULES = [actions, cards, core, elimination, friends, negotiation, pinjol, roles, turn]
 
 function merge(pick: (m: { log: MessageMap; error: MessageMap }) => MessageMap): MessageMap {
   const out: MessageMap = { en: {}, id: {} }

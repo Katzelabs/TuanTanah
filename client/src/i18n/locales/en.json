@@ -681,5 +681,32 @@
       "rounds_other": "{{count}} rounds left",
       "sabotageSource": "Sabotage"
     }
+  },
+  "friends": {
+    "title": "Friends",
+    "loading": "Loading…",
+    "addByCode": "Add by friend code",
+    "codePlaceholder": "AB12CD34",
+    "send": "Send",
+    "requestSent": "Request sent.",
+    "incoming": "Requests received",
+    "outgoing": "Requests sent",
+    "yourFriends": "Friends",
+    "blocked": "Blocked",
+    "accept": "Accept",
+    "decline": "Decline",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "block": "Block",
+    "unblock": "Unblock",
+    "online": "Online",
+    "offline": "Offline",
+    "inRoom": "In room {{roomId}}",
+    "empty": "No friends yet — add someone with their friend code.",
+    "signedOut": "Sign in to add friends and see who's online.",
+    "requestFrom": "{{name}} sent you a friend request",
+    "error": {
+      "generic": "That didn't work — please try again."
+    }
   }
 }

@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/shared'
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
+import { registerFriendHandlers } from '../realtime/friends.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
@@ -57,6 +58,9 @@ async function main() {
     trackConnection(socket)
     registerLobbyHandlers(io, socket, store)
     registerGameHandlers(io, socket, store)
+    // Account-scoped, not room-scoped: presence and friends outlive any room, so
+    // these are wired for every socket including ones that never join one.
+    registerFriendHandlers(io, socket)
   })
 
   await app.listen({ port: env.port, host: '0.0.0.0' })
