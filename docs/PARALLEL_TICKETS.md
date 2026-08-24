@@ -59,6 +59,24 @@ pnpm install                    # workspace symlinks can't be shared
 Then set this worktree's ports in its `.env` (`PORT=300N`) and start the client
 with `pnpm --filter client dev -- --port 518N`.
 
+### Starting a worktree
+
+```sh
+./scripts/dev-worktree.sh     # exports .env, picks this worktree's ports, runs pnpm dev
+```
+
+### Google only accepts redirect URIs it already knows
+
+Each worktree serves the client on its own port, so its callback URL is
+`http://localhost:518N/api/auth/google/callback` — which is **not** what was
+registered in the console (only `5173` was). Sign-in there fails with
+`redirect_uri_mismatch`.
+
+Only ticket **A** actually exercises the Google flow. Either add
+`http://localhost:5181/api/auth/google/callback` to the OAuth client's
+authorized redirect URIs (30 seconds, and the tidier option), or run A from the
+main checkout on the already-registered `5173`.
+
 ### `.env` is NOT auto-loaded in local dev
 
 There is no `dotenv` in the server — `bootstrap/env.ts` reads `process.env`
