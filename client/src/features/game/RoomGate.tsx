@@ -2,9 +2,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { Button, Card } from '@/components/ui/index.js'
+import { useAuthUser } from '@/hooks/useAuthUser.js'
 import { useGame } from '@/store/gameStore.js'
 import { Game } from './Game.js'
 import { Lobby } from '@/features/lobby/Lobby.js'
+
+/** Matches the server's player-name cap. */
+const NAME_MAX_LENGTH = 20
 
 /**
  * Resolves a `/room/:roomId` URL into the right view:
@@ -51,8 +55,11 @@ function JoinRoomForm({ code }: { code: string }) {
   const joining = useGame((s) => s.joining)
   const connected = useGame((s) => s.connected)
   const error = useGame((s) => s.error)
-  const [name, setName] = useState('')
+  const account = useAuthUser()
+  // `null` = untouched, so the field follows the account name as it loads.
+  const [typedName, setTypedName] = useState<string | null>(null)
 
+  const name = typedName ?? account?.displayName.slice(0, NAME_MAX_LENGTH) ?? ''
   const canSubmit = name.trim().length > 0 && connected && !joining
   const submit = () => {
     if (canSubmit) join(name, code)
@@ -84,10 +91,10 @@ function JoinRoomForm({ code }: { code: string }) {
           <input
             className="mt-1 w-full rounded-lg border-2 border-ink bg-surface px-3 py-2 font-medium outline-none transition focus:shadow-brutal-sm"
             value={name}
-            maxLength={20}
+            maxLength={NAME_MAX_LENGTH}
             placeholder={t('home.namePlaceholder')}
             autoFocus
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setTypedName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
         </label>

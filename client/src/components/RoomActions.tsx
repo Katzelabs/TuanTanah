@@ -1,16 +1,32 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { roomUrl } from '@/lib/roomLink.js'
 import { useGame } from '@/store/gameStore.js'
 import { Button, Modal } from './ui/index.js'
 
 /** Copies the shareable room link (`/room/CODE`) to the clipboard. */
-export function ShareLinkButton({ code, className }: { code: string; className?: string }) {
+export function ShareLinkButton({
+  code,
+  className,
+  label,
+  variant = 'secondary',
+  size = 'sm',
+  block,
+}: {
+  code: string
+  className?: string
+  /** Overrides the default "Share link" text (e.g. "Copy link" in the invite sheet). */
+  label?: string
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md'
+  block?: boolean
+}) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const share = async () => {
-    const url = `${window.location.origin}/room/${code}`
+    const url = roomUrl(code)
     try {
       await navigator.clipboard.writeText(url)
     } catch {
@@ -23,8 +39,14 @@ export function ShareLinkButton({ code, className }: { code: string; className?:
   }
 
   return (
-    <Button variant="secondary" size="sm" onClick={share} className={`text-xs ${className ?? ''}`}>
-      {copied ? t('roomActions.linkCopied') : t('roomActions.shareLink')}
+    <Button
+      variant={variant}
+      size={size}
+      block={block}
+      onClick={share}
+      className={`${size === 'sm' ? 'text-xs' : ''} ${className ?? ''}`}
+    >
+      {copied ? t('roomActions.linkCopied') : (label ?? t('roomActions.shareLink'))}
     </Button>
   )
 }

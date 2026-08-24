@@ -50,6 +50,21 @@
     "surrenderTitle": "Menyerah?",
     "confirmSurrender": "Menyerah"
   },
+  "invite": {
+    "button": "🔗 Undang",
+    "title": "Undang pemain",
+    "subtitle": "Kirim tautan ini — siapa pun yang membukanya langsung masuk ke ruanganmu.",
+    "createdTitle": "Ruangan dibuat!",
+    "createdSubtitle": "Kirim tautannya sekarang — temanmu gabung sekali ketuk.",
+    "scan": "Atau pindai untuk gabung",
+    "qrAlt": "Kode QR untuk ruangan {{code}}",
+    "roomCode": "Kode ruangan",
+    "codeHint": "Tidak ada tautan? Masukkan kode ini di beranda.",
+    "copyLink": "📋 Salin tautan",
+    "share": "📤 Bagikan…",
+    "shareTitle": "Gabung ruangan Tuan Tanah-ku",
+    "shareText": "Gabung ruangan Tuan Tanah-ku — kode {{code}}"
+  },
   "lobby": {
     "loading": "Memuat lobi…",
     "title": "Lobi",
