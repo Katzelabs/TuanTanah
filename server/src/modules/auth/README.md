@@ -31,3 +31,24 @@ signatures other subtasks import. Subtask A fills in the implementations.
 
 Guests keep the existing `reconnectTokens` seat flow unchanged — do **not**
 rework seat reclaim around `userId`.
+
+## What is here now (subtask A)
+
+| File              | Role                                                                 |
+| ----------------- | -------------------------------------------------------------------- |
+| `index.ts`        | the contract — `authEnabled`, session CRUD, `getUser`                |
+| `routes.ts`       | the four HTTP routes; registered from `bootstrap/index.ts`           |
+| `socket.ts`       | `authGate`, the `io.use()` middleware, and the `socket.data` shape   |
+| `sessionStore.ts` | `sess:<id>` → userId in Redis, in-memory fallback                    |
+| `users.ts`        | the only writer of `users` / `auth_identities`                       |
+| `google.ts`       | scopes, callback URI, the single userinfo call                       |
+| `cookie.ts`       | the session cookie's name and flags, shared by routes and the socket |
+
+For B–G: read identity off `socket.data.userId` (typed via `TTSocket` in
+`realtime/common.ts`) or off `Session.userId` in `rooms/sessions.ts` — both are
+**optional**, and absent means guest, which is a normal state and not an error.
+
+`authEnabled()` requires `DATABASE_URL` as well as the Google credentials:
+accounts are rows in Postgres, so credentials without a database would render a
+sign-in button that fails at the callback. The server logs which of the two is
+missing at startup.

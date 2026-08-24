@@ -43,7 +43,9 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
         return { player, token }
       })
 
-      setSession(socket.id, { roomId, playerId: player.id })
+      // `socket.data.userId` is set at handshake by the auth middleware and is
+      // undefined for guests — seats never depend on it.
+      setSession(socket.id, { roomId, playerId: player.id, userId: socket.data.userId })
       await socket.join(roomId)
       ack?.({ ok: true, data: { roomId, playerId: player.id, token } })
       socket.emit('room_joined', { roomId, playerId: player.id })
@@ -74,7 +76,7 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
         return
       }
 
-      setSession(socket.id, { roomId, playerId: payload.playerId })
+      setSession(socket.id, { roomId, playerId: payload.playerId, userId: socket.data.userId })
       await socket.join(roomId)
       ack?.({ ok: true, data: { roomId, playerId: payload.playerId, token: payload.token } })
       socket.emit('room_joined', { roomId, playerId: payload.playerId })

@@ -1,13 +1,26 @@
-import type { Server, Socket } from 'socket.io'
+import type { DefaultEventsMap, Server, Socket } from 'socket.io'
 import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/shared'
 import type { GameStore } from '../rooms/store.js'
 import { isDev } from '../bootstrap/env.js'
 import { EngineError } from '../engine/index.js'
+import type { AuthSocketData } from '../modules/auth/socket.js'
 import { reportError } from '../observability/report.js'
 import { getSession } from '../rooms/sessions.js'
 
-export type TTServer = Server<ClientToServerEvents, ServerToClientEvents>
-export type TTSocket = Socket<ClientToServerEvents, ServerToClientEvents>
+// The 4th generic is `socket.data`: the account id `authGate` attaches at
+// handshake, or nothing at all for a guest.
+export type TTServer = Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  DefaultEventsMap,
+  AuthSocketData
+>
+export type TTSocket = Socket<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  DefaultEventsMap,
+  AuthSocketData
+>
 
 /** Broadcast the canonical game state to everyone in a room. */
 export async function broadcastState(
