@@ -681,5 +681,59 @@
       "rounds_other": "{{count}} ronde lagi",
       "sabotageSource": "Sabotase"
     }
+  },
+  "account": {
+    "title": "Akun",
+    "loading": "Memuat akun kamu…",
+    "profile": {
+      "heading": "Profil",
+      "hint": "Nama ini yang dilihat pemain lain di papan.",
+      "displayName": "Nama tampilan",
+      "save": "Simpan",
+      "saving": "Menyimpan…",
+      "saved": "✓ Nama diperbarui"
+    },
+    "friendCode": {
+      "heading": "Kode teman",
+      "hint": "Bagikan ini supaya bisa ditambahkan sebagai teman. Pemain tidak bisa dicari lewat nama.",
+      "copy": "Salin",
+      "copied": "✓ Tersalin",
+      "copyPrompt": "Salin kode teman kamu:"
+    },
+    "connected": {
+      "heading": "Akun tertaut",
+      "provider": "Masuk lewat",
+      "email": "Email",
+      "noEmail": "Tidak dibagikan",
+      "memberSince": "Bergabung sejak"
+    },
+    "preferences": {
+      "heading": "Preferensi",
+      "hint": "Disimpan di perangkat ini, hanya untuk kamu.",
+      "language": "Bahasa",
+      "sound": "Suara"
+    },
+    "session": {
+      "heading": "Sesi",
+      "hint": "Kamu bisa masuk lagi kapan saja — tidak ada yang dihapus.",
+      "signOut": "Keluar"
+    },
+    "danger": {
+      "heading": "Hapus akun",
+      "hint": "Permanen. Tidak bisa dibatalkan.",
+      "delete": "Hapus akun",
+      "confirmTitle": "Hapus akun kamu?",
+      "confirmBody": "Akun, daftar teman, dan permintaan pertemanan kamu dihapus permanen. Ini tidak bisa dibatalkan.",
+      "confirmHistory": "Permainan yang sudah selesai tetap tersimpan di riwayat, tapi tidak lagi terhubung ke kamu.",
+      "confirm": "Ya, hapus",
+      "deleting": "Menghapus…"
+    },
+    "errors": {
+      "unauthenticated": "Sesi kamu berakhir. Masuk lagi ya.",
+      "invalid_name": "Pakai nama sepanjang 1–20 karakter.",
+      "not_found": "Akun ini sudah tidak ada.",
+      "unavailable": "Ada yang salah. Coba lagi sebentar.",
+      "network": "Tidak bisa menghubungi server. Cek koneksi kamu."
+    }
   }
 }

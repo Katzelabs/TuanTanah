@@ -6,6 +6,8 @@ import { Server } from 'socket.io'
 import type { ClientToServerEvents, ServerToClientEvents } from '@tuan-tanah/shared'
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
+import * as auth from '../modules/auth/index.js'
+import { registerAccountRoutes } from '../modules/auth/accountRoutes.js'
 import { registerGameHandlers } from '../realtime/game.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
@@ -42,6 +44,16 @@ async function main() {
       uptime: process.uptime(),
     }
   })
+
+  // Account settings (ClickUp 86ey2z15r). Accounts are opt-in — blank Google
+  // credentials leave the game fully guest-playable — so the routes only mount
+  // when the auth module says they are configured. A namespace import is
+  // deliberate: `modules/auth/index.ts` is the epic's contract and is still
+  // declaration-only until subtask A lands, and a named import of a member that
+  // doesn't exist at runtime yet would stop the server from booting at all.
+  if (typeof auth.authEnabled === 'function' && auth.authEnabled()) {
+    registerAccountRoutes(app, auth)
+  }
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(app.server, {
     path: '/socket.io',

@@ -681,5 +681,59 @@
       "rounds_other": "{{count}} rounds left",
       "sabotageSource": "Sabotage"
     }
+  },
+  "account": {
+    "title": "Account",
+    "loading": "Loading your account…",
+    "profile": {
+      "heading": "Profile",
+      "hint": "This is the name other players see on the board.",
+      "displayName": "Display name",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "✓ Name updated"
+    },
+    "friendCode": {
+      "heading": "Friend code",
+      "hint": "Share this to get friend requests. Players can't be found by name.",
+      "copy": "Copy",
+      "copied": "✓ Copied",
+      "copyPrompt": "Copy your friend code:"
+    },
+    "connected": {
+      "heading": "Connected account",
+      "provider": "Signed in with",
+      "email": "Email",
+      "noEmail": "Not shared",
+      "memberSince": "Member since"
+    },
+    "preferences": {
+      "heading": "Preferences",
+      "hint": "Saved on this device, for you only.",
+      "language": "Language",
+      "sound": "Sound"
+    },
+    "session": {
+      "heading": "Session",
+      "hint": "You can sign back in any time — nothing is deleted.",
+      "signOut": "Sign out"
+    },
+    "danger": {
+      "heading": "Delete account",
+      "hint": "Permanent. This cannot be undone.",
+      "delete": "Delete account",
+      "confirmTitle": "Delete your account?",
+      "confirmBody": "Your account, friends and friend requests are deleted permanently. This cannot be undone.",
+      "confirmHistory": "Games you already finished stay in the records, but they will no longer be linked to you.",
+      "confirm": "Yes, delete it",
+      "deleting": "Deleting…"
+    },
+    "errors": {
+      "unauthenticated": "Your session expired. Sign in again.",
+      "invalid_name": "Pick a name of 1–20 characters.",
+      "not_found": "This account no longer exists.",
+      "unavailable": "Something went wrong. Try again in a moment.",
+      "network": "Couldn't reach the server. Check your connection."
+    }
   }
 }
