@@ -5,7 +5,8 @@ import Fastify from 'fastify'
 import { Server } from 'socket.io'
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
-import { authEnabled } from '../modules/auth/index.js'
+import { registerAccountRoutes } from '../modules/auth/accountRoutes.js'
+import { authEnabled, destroySession, resolveSession } from '../modules/auth/index.js'
 import { registerAuthRoutes } from '../modules/auth/routes.js'
 import { authGate } from '../modules/auth/socket.js'
 import { registerHistoryRoutes } from '../modules/history/index.js'
@@ -54,6 +55,12 @@ async function main() {
   // Read-only account routes. Registered here rather than inline like /api/health
   // because they belong to a feature, not to the bootstrap.
   registerHistoryRoutes(app)
+
+  // Account settings mutations. Accounts are opt-in — blank Google credentials
+  // leave the game fully guest-playable — so these only mount when configured.
+  if (authEnabled()) {
+    registerAccountRoutes(app, { resolveSession, destroySession })
+  }
 
   const io: TTServer = new Server(app.server, {
     path: '/socket.io',
