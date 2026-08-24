@@ -13,9 +13,11 @@ import { registerHistoryRoutes } from '../modules/history/index.js'
 import type { TTServer } from '../realtime/common.js'
 import { registerFriendHandlers } from '../realtime/friends.js'
 import { registerGameHandlers } from '../realtime/game.js'
+import { registerInviteHandlers } from '../realtime/invites.js'
 import { registerLobbyHandlers } from '../realtime/lobby.js'
 import { connectionGate, trackConnection } from '../security.js'
 import { reportError } from '../observability/report.js'
+import { registerRoomRoutes } from '../rooms/routes.js'
 import { createStore } from '../rooms/store.js'
 
 // Before anything else can fail. `assertSafeCors` throwing on a bad production
@@ -56,6 +58,7 @@ async function main() {
   // Read-only account routes. Registered here rather than inline like /api/health
   // because they belong to a feature, not to the bootstrap.
   registerHistoryRoutes(app)
+  registerRoomRoutes(app, store)
 
   // Account settings mutations. Accounts are opt-in — blank Google credentials
   // leave the game fully guest-playable — so these only mount when configured.
@@ -84,6 +87,7 @@ async function main() {
     // Account-scoped, not room-scoped: presence and friends outlive any room, so
     // these are wired for every socket including ones that never join one.
     registerFriendHandlers(io, socket)
+    registerInviteHandlers(io, socket, store)
   })
 
   await app.listen({ port: env.port, host: '0.0.0.0' })

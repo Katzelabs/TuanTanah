@@ -13,16 +13,19 @@ import { Home } from '@/features/home/Home.js'
 import { MatchHistory } from '@/features/history/MatchHistory.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
 import { StyleGuide } from '@/app/StyleGuide.js'
+import { RoomInviteToast, useInvites } from '@/features/invites/index.js'
 import { useGame } from '@/store/gameStore.js'
 
 export function App() {
   const init = useGame((s) => s.init)
+  const initInvites = useInvites((s) => s.init)
   const roomId = useGame((s) => s.roomId)
   const refreshAuth = useAuth((s) => s.refresh)
 
   useEffect(() => {
     init()
-  }, [init])
+    initInvites()
+  }, [init, initInvites])
 
   // Hydrate the session once on boot. Also the return path from the Google
   // redirect: that comes back as a full page load, so this reads the new cookie.
@@ -51,6 +54,7 @@ export function App() {
       <VotingModal />
       <AuctionModal />
       <IncomingDealModal />
+      <RoomInviteToast />
     </div>
   )
 }

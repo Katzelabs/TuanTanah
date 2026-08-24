@@ -63,7 +63,33 @@
     "copyLink": "📋 Copy link",
     "share": "📤 Share…",
     "shareTitle": "Join my Tuan Tanah room",
-    "shareText": "Join my Tuan Tanah room — code {{code}}"
+    "shareText": "Join my Tuan Tanah room — code {{code}}",
+    "friends": {
+      "button": "Invite friend",
+      "title": "Invite a friend",
+      "loading": "Loading your friends…",
+      "unavailable": "Friends aren't available right now. Share the room link instead.",
+      "empty": "No friends yet — add someone with their friend code first.",
+      "invite": "Invite",
+      "sending": "Sending…",
+      "sent": "Invited",
+      "offline": "Offline",
+      "alreadyHere": "In this room",
+      "roomFull": "This room is full — no one else can be invited.",
+      "offlineHint": "Offline friends can't be invited. Send them the room link instead."
+    },
+    "incoming": {
+      "title": "{{name}} invited you to play",
+      "body": "Join their room now?",
+      "accept": "Join",
+      "joining": "Joining…",
+      "ignore": "Ignore"
+    },
+    "blocked": {
+      "missing": "That room no longer exists.",
+      "started": "That game has already started.",
+      "full": "That room is full."
+    }
   },
   "lobby": {
     "loading": "Loading lobby…",

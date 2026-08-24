@@ -63,7 +63,33 @@
     "copyLink": "📋 Salin tautan",
     "share": "📤 Bagikan…",
     "shareTitle": "Gabung ruangan Tuan Tanah-ku",
-    "shareText": "Gabung ruangan Tuan Tanah-ku — kode {{code}}"
+    "shareText": "Gabung ruangan Tuan Tanah-ku — kode {{code}}",
+    "friends": {
+      "button": "Undang teman",
+      "title": "Undang teman",
+      "loading": "Memuat daftar teman…",
+      "unavailable": "Daftar teman sedang tidak tersedia. Bagikan tautan ruangan saja.",
+      "empty": "Belum ada teman — tambahkan seseorang dengan kode temannya dulu.",
+      "invite": "Undang",
+      "sending": "Mengirim…",
+      "sent": "Terkirim",
+      "offline": "Offline",
+      "alreadyHere": "Sudah di ruangan ini",
+      "roomFull": "Ruangan ini penuh — tidak ada yang bisa diundang lagi.",
+      "offlineHint": "Teman yang offline tidak bisa diundang. Kirimkan tautan ruangan saja."
+    },
+    "incoming": {
+      "title": "{{name}} mengundang Anda bermain",
+      "body": "Gabung ke ruangannya sekarang?",
+      "accept": "Gabung",
+      "joining": "Bergabung…",
+      "ignore": "Abaikan"
+    },
+    "blocked": {
+      "missing": "Ruangan itu sudah tidak ada.",
+      "started": "Permainan itu sudah dimulai.",
+      "full": "Ruangan itu penuh."
+    }
   },
   "lobby": {
     "loading": "Memuat lobi…",

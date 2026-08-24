@@ -13,6 +13,7 @@ import { roleAbility, roleName } from '@/i18n/gameData.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 import { LeaveButton } from '@/components/RoomActions.js'
+import { InviteFriendButton } from '@/features/invites/index.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { AuthMenu } from '@/features/auth/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
@@ -73,6 +74,7 @@ export function Lobby() {
             </div>
           </Card>
           <div className="flex gap-2">
+            <InviteFriendButton />
             <Button
               variant="secondary"
               size="sm"
