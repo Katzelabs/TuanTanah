@@ -22,10 +22,17 @@ set -a
 source ./.env
 set +a
 
-# PORT is this worktree's backend (set when the worktree was created); the client
-# sits 2180 above it, matching the table in docs/PARALLEL_TICKETS.md.
+# PORT is this worktree's backend (set when the worktree was created).
 export DEV_SERVER_PORT="${PORT:-3000}"
-export DEV_CLIENT_PORT="${DEV_CLIENT_PORT:-$((DEV_SERVER_PORT + 2180))}"
+
+# The client port comes from PUBLIC_ORIGIN, not from arithmetic on PORT.
+# PUBLIC_ORIGIN is what the OAuth redirect_uri is built from, so it is the one
+# place that already knows where a browser reaches this app — deriving the port
+# any other way lets the two drift, and the failure is nasty: sign-in sends the
+# user to a port nothing is serving, long after the config looked fine. Falls
+# back to the worktree offset in docs/PARALLEL_TICKETS.md when unset.
+_origin_port="$(printf '%s' "${PUBLIC_ORIGIN:-}" | sed -nE 's#^https?://[^:/]+:([0-9]+).*#\1#p')"
+export DEV_CLIENT_PORT="${DEV_CLIENT_PORT:-${_origin_port:-$((DEV_SERVER_PORT + 2180))}}"
 
 echo "worktree : $(git branch --show-current)"
 echo "backend  : http://localhost:${DEV_SERVER_PORT}"
@@ -33,8 +40,8 @@ echo "client   : http://localhost:${DEV_CLIENT_PORT}"
 if [[ -n "${GOOGLE_CLIENT_ID:-}" ]]; then
   echo "accounts : enabled"
   echo "           NOTE: Google only accepts redirect URIs registered in the console."
-  echo "           http://localhost:${DEV_CLIENT_PORT}/api/auth/google/callback must be"
-  echo "           added there, or sign-in fails with redirect_uri_mismatch."
+  echo "           ${PUBLIC_ORIGIN}/api/auth/google/callback must be registered"
+  echo "           there, or sign-in fails with redirect_uri_mismatch."
 else
   echo "accounts : DISABLED (no GOOGLE_CLIENT_ID) — guest-only"
 fi
