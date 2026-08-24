@@ -22,4 +22,13 @@ export interface AuthState {
   refresh: () => Promise<void>
 }
 
-export declare const useAuth: <T>(selector: (s: AuthState) => T) => T
+// Implementation (subtask B). The store honours the `<T>(selector) => T` shape
+// this seam promised, and adds zustand's own API (`getState`, `subscribe`) on top.
+export { useAuth } from './authStore.js'
+
+// Header UI, exported so the other subtasks reuse this chip/button rather than
+// building a second one.
+export { AuthMenu } from './AuthMenu.js'
+export { SignInButton } from './SignInButton.js'
+export { Avatar } from './Avatar.js'
+export { initialsOf } from './lib/initials.js'

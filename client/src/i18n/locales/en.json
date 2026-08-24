@@ -1,4 +1,11 @@
 {
+  "auth": {
+    "signIn": "Sign in with Google",
+    "accountMenu": "Account menu",
+    "signedInAs": "Signed in as",
+    "account": "Account settings",
+    "signOut": "Sign out"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

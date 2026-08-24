@@ -13,6 +13,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 import { LeaveButton, ShareLinkButton } from '@/components/RoomActions.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
+import { AuthMenu } from '@/features/auth/index.js'
 import { formatRupiah, useGame } from '@/store/gameStore.js'
 
 const SETTINGS_TABS = ['general', 'roles', 'rules'] as const
@@ -47,6 +48,7 @@ export function Lobby() {
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
+            <AuthMenu />
             <SoundToggle />
             <LanguageSwitcher />
           </div>
