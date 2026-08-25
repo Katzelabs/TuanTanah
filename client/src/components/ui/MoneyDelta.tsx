@@ -38,7 +38,7 @@ export function MoneyDelta({ cash, rise = 18 }: { cash: number; rise?: number })
     <FloatUp
       id={pop?.id ?? null}
       rise={rise}
-      className={`pointer-events-none absolute -top-3.5 right-0 whitespace-nowrap font-mono text-[11px] font-extrabold ${
+      className={`pointer-events-none absolute -top-3.5 right-0 whitespace-nowrap font-mono text-2xs font-extrabold ${
         pop && pop.delta > 0 ? 'text-success-strong' : 'text-danger-strong'
       }`}
     >

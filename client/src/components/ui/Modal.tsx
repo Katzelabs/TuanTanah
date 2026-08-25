@@ -13,14 +13,30 @@ export interface ModalProps {
   children: ReactNode
   /** Optional header title rendered in the framed bar. */
   title?: ReactNode
-  /** Tailwind max-width class for the panel. */
-  size?: 'sm' | 'md' | 'lg'
+  /** Panel width step — see `MAX_W` for what each one is for. */
+  size?: ModalSize
   /** Disable backdrop-click / Escape close (e.g. forced decisions). */
   dismissable?: boolean
   className?: string
 }
 
-const MAX_W = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' } as const
+export type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+/**
+ * Width steps. The panel is `w-full` up to this cap, so on phone portrait every
+ * size collapses to the same near-full-width sheet (backdrop `p-4` aside) —
+ * pick by content, not by screen.
+ *   xs  a single confirm sentence      sm  a short form or confirm + detail
+ *   md  the standard dialog            lg  lists, deal builders
+ *   xl  wide tables (property rent schedules)
+ */
+const MAX_W = {
+  xs: 'max-w-xs',
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-2xl',
+} as const
 
 /**
  * Brutalist modal: dimmed backdrop + framed panel with consistent enter/exit

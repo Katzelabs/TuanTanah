@@ -40,7 +40,7 @@ export function Tooltip({ content, children, side = 'top', className = '' }: Too
           <motion.span
             {...tip}
             role="tooltip"
-            className={`pointer-events-none absolute left-1/2 z-tooltip w-max max-w-[200px] -translate-x-1/2 rounded-md border-2 border-ink bg-ink px-2 py-1 text-center text-[11px] font-semibold leading-snug text-surface shadow-brutal-sm ${
+            className={`pointer-events-none absolute left-1/2 z-tooltip w-max max-w-[200px] -translate-x-1/2 rounded-md border-2 border-ink bg-ink px-2 py-1 text-center text-2xs font-semibold leading-snug text-surface shadow-brutal-sm ${
               side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
             }`}
           >
