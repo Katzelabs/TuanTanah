@@ -19,17 +19,61 @@
   },
   "connection": {
     "connected": "Connected to server",
-    "connecting": "Connecting…"
+    "connecting": "Connecting…",
+    "connectingHint": "Creating and joining unlock as soon as the connection is up."
+  },
+  "controls": {
+    "label": "Settings",
+    "more": "More controls"
   },
   "home": {
     "title": "Tuan Tanah",
-    "subtitle": "Indonesian-flavored Monopoly 🇮🇩",
     "yourName": "Your name",
     "namePlaceholder": "e.g. Budi",
     "createRoom": "Create new room",
-    "orJoin": "or join",
     "roomCodePlaceholder": "ROOM CODE",
-    "join": "Join"
+    "join": "Join",
+    "pitch": "Indonesian-flavored Monopoly 🇮🇩 — buy up the archipelago, collect the rent, and bankrupt your friends.",
+    "tag": {
+      "players": "{{min}}–{{max}} players",
+      "browser": "Plays in your browser",
+      "free": "Free — no install"
+    },
+    "nameHint": "This is what other players see on the board.",
+    "nameFromAccount": "From your account — change it here just for this game.",
+    "creating": "Creating room…",
+    "haveCode": "Got a room code?",
+    "guest": {
+      "title": "Playing as a guest",
+      "body": "Guests can play everything. An account just remembers you between games.",
+      "perkFriends": "Add friends and see who's online",
+      "perkHistory": "Keep a match history",
+      "perkName": "Your name is filled in every time"
+    },
+    "account": {
+      "welcome": "Welcome back",
+      "history": "Match history",
+      "settings": "Account settings",
+      "friendsHint": "Tap the friends icon up top to see who's online."
+    },
+    "how": {
+      "title": "How it plays",
+      "own": {
+        "title": "Own the map",
+        "body": "Roll, land, and buy properties across nine Indonesian regions. Upgrade them to raise the rent."
+      },
+      "roles": {
+        "title": "Pick a role",
+        "body": "Pengusaha, Pengacara, Ojol Driver — each one earns differently and skims a different part of the economy."
+      },
+      "deals": {
+        "title": "Deal or drown",
+        "body": "Trade properties, take a pinjol loan, or vote someone out — go bankrupt and you're out of the game."
+      }
+    },
+    "regions": {
+      "title": "Nine regions on the board"
+    }
   },
   "roomGate": {
     "invited": "You've been invited to a room",

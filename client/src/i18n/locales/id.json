@@ -19,17 +19,61 @@
   },
   "connection": {
     "connected": "Terhubung ke server",
-    "connecting": "Menghubungkan…"
+    "connecting": "Menghubungkan…",
+    "connectingHint": "Buat dan gabung room aktif begitu koneksi tersambung."
+  },
+  "controls": {
+    "label": "Pengaturan",
+    "more": "Kontrol lainnya"
   },
   "home": {
     "title": "Tuan Tanah",
-    "subtitle": "Monopoli rasa Indonesia 🇮🇩",
     "yourName": "Nama kamu",
     "namePlaceholder": "mis. Budi",
     "createRoom": "Buat ruangan baru",
-    "orJoin": "atau gabung",
     "roomCodePlaceholder": "KODE RUANGAN",
-    "join": "Gabung"
+    "join": "Gabung",
+    "pitch": "Monopoli rasa Indonesia 🇮🇩 — borong Nusantara, tagih sewanya, dan bikin temanmu bangkrut.",
+    "tag": {
+      "players": "{{min}}–{{max}} pemain",
+      "browser": "Main langsung di browser",
+      "free": "Gratis — tanpa instal"
+    },
+    "nameHint": "Nama ini yang dilihat pemain lain di papan.",
+    "nameFromAccount": "Diambil dari akunmu — ubah di sini khusus untuk permainan ini.",
+    "creating": "Membuat room…",
+    "haveCode": "Punya kode room?",
+    "guest": {
+      "title": "Main sebagai tamu",
+      "body": "Tamu bisa main semuanya. Akun cuma bikin kamu diingat antar permainan.",
+      "perkFriends": "Tambah teman dan lihat siapa yang online",
+      "perkHistory": "Simpan riwayat pertandingan",
+      "perkName": "Namamu terisi otomatis tiap main"
+    },
+    "account": {
+      "welcome": "Selamat datang kembali",
+      "history": "Riwayat pertandingan",
+      "settings": "Pengaturan akun",
+      "friendsHint": "Ketuk ikon teman di pojok atas untuk melihat siapa yang online."
+    },
+    "how": {
+      "title": "Cara mainnya",
+      "own": {
+        "title": "Kuasai peta",
+        "body": "Lempar dadu, mendarat, lalu beli properti di sembilan wilayah Indonesia. Naikkan tiernya biar sewanya makin mahal."
+      },
+      "roles": {
+        "title": "Pilih peran",
+        "body": "Pengusaha, Pengacara, Ojol Driver — tiap peran punya gaji dan cara cari cuan sendiri."
+      },
+      "deals": {
+        "title": "Nego atau tenggelam",
+        "body": "Tukar properti, ambil pinjol, atau voting keluarkan pemain — kalau bangkrut, kamu tamat."
+      }
+    },
+    "regions": {
+      "title": "Sembilan wilayah di papan"
+    }
   },
   "roomGate": {
     "invited": "Kamu diundang ke sebuah ruangan",
