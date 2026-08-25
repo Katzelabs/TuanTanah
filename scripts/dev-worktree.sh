@@ -2,12 +2,11 @@
 # Start this worktree's dev stack on its OWN ports, so several tickets from the
 # player-accounts epic can run side by side (docs/PARALLEL_TICKETS.md).
 #
-# Exists because there is no dotenv in this project: bootstrap/env.ts reads
-# process.env directly, and in prod compose supplies the file (env_file: .env).
-# Locally nothing does — so a .env sitting right there is invisible, and blank
-# Google creds are a SUPPORTED state meaning "accounts disabled". The failure is
-# therefore silent: the app boots fine and the feature you're building is simply
-# off. This script exports the file before handing over to pnpm.
+# The server now loads the repo-root .env itself (bootstrap/env.ts), so this is
+# no longer what makes credentials reach it. What this script still owns is the
+# PORT wiring — one worktree per ticket, each on its own ports — and printing
+# whether accounts actually came up enabled, which is worth seeing rather than
+# assuming.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

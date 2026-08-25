@@ -77,24 +77,13 @@ Only ticket **A** actually exercises the Google flow. Either add
 authorized redirect URIs (30 seconds, and the tidier option), or run A from the
 main checkout on the already-registered `5173`.
 
-### `.env` is NOT auto-loaded in local dev
-
-There is no `dotenv` in the server — `bootstrap/env.ts` reads `process.env`
-directly. In production compose supplies the file (`env_file: .env`); locally
-nothing does. So copying `.env` into your worktree is **not** enough:
-
-```sh
-export $(grep -vE '^#|^$' .env | xargs)   # then pnpm dev / pnpm --filter server migrate
-```
-
-Subtask **A** should decide whether to add `dotenv` to the server's dev path and
-remove this footgun for everyone. Until then, export explicitly.
-
 Gotchas:
 
-- **Without the env actually exported, accounts are silently disabled** (blank
-  Google creds is a supported state, not an error) and you'll spend an hour
-  debugging a feature that was never switched on.
+- **`.env` does not come with a worktree** — it is gitignored. Copy it first.
+  The server loads it from the repo root once it is there (`bootstrap/env.ts`),
+  so `pnpm dev` and `pnpm --filter server migrate` both see it; but with no file
+  at all, accounts are silently disabled rather than erroring, because blank
+  Google credentials are a supported state.
 - **`DATABASE_URL` must point at local Postgres**, never the VPS. Check before
   running `pnpm --filter server migrate`.
 - Redis can be shared across worktrees; room codes are random enough not to clash.

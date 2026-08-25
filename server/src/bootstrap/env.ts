@@ -1,4 +1,19 @@
 // Environment configuration with sensible local-dev defaults.
+import { fileURLToPath } from 'node:url'
+import { config } from 'dotenv'
+
+// Load the repo-root .env before anything reads process.env.
+//
+// In production compose supplies the file (`env_file: .env`) and these variables
+// are already in the environment; `override: false` (the default) means this call
+// is then a no-op, and a missing file is not an error. It exists for local dev,
+// where nothing else loads it — and where the failure was silent rather than
+// loud: blank Google credentials are a SUPPORTED state meaning "accounts
+// disabled", so the server booted happily with sign-in switched off and no
+// indication why. The path is resolved from this module, not from cwd, because
+// the server runs with cwd=server/ while the file lives at the repo root.
+config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) })
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
