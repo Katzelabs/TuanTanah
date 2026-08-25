@@ -22,7 +22,7 @@ export function InviteFriendButton() {
 
   return (
     <>
-      <Button variant="secondary" size="sm" onClick={() => setOpen(true)} className="text-xs">
+      <Button variant="secondary" size="xs" onClick={() => setOpen(true)}>
         <UserPlus size={14} />
         {t('invite.friends.button')}
       </Button>
@@ -91,23 +91,25 @@ function FriendRow({ friend, disabled }: { friend: FriendSummary; disabled: bool
   const busy = sending === friend.user.id
 
   return (
-    <li className="flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-2 shadow-brutal-sm">
+    <li className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-lg border-2 border-ink bg-surface px-3 py-2 shadow-brutal-sm">
       <span
         aria-hidden
         className={`h-2.5 w-2.5 shrink-0 rounded-full border-2 border-ink ${
           friend.online ? 'bg-success' : 'bg-surface-sunken'
         }`}
       />
-      <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink">
+      <span className="min-w-0 flex-1 basis-32 truncate text-sm font-bold text-ink">
         {friend.user.displayName}
       </span>
       {alreadyHere ? (
-        <Badge tone="success">{t('invite.friends.alreadyHere')}</Badge>
+        <Badge tone="success" className="ml-auto">
+          {t('invite.friends.alreadyHere')}
+        </Badge>
       ) : (
         <Button
           variant={sent ? 'ghost' : 'primary'}
-          size="sm"
-          className="shrink-0 text-xs"
+          size="xs"
+          className="ml-auto shrink-0"
           disabled={disabled || busy || sent || !friend.online}
           onClick={() => invite(friend.user.id)}
         >

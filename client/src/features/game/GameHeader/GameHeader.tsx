@@ -23,7 +23,11 @@ export function GameHeader() {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-3">
+      {/* Stacks by default so the brand plate and the room/round line each get a
+        full line on a phone. In short landscape that costs ~28px of the little
+        vertical budget the board is competing for, so it goes back to one row
+        there regardless of width — the same reason `md` does it. */}
+      <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-3 hud:short:flex-row hud:short:items-center">
         <span className="rounded-xl border-2 border-ink bg-accent px-3 py-1 font-display text-lg uppercase tracking-tight text-ink shadow-brutal">
           {t('home.title')}
         </span>

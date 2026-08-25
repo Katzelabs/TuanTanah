@@ -62,7 +62,7 @@ function AddByCode() {
     <div className="space-y-2">
       <label className="block">
         <span className="text-sm font-bold text-ink">{t('friends.addByCode')}</span>
-        <span className="mt-1 flex gap-2">
+        <span className="mt-1 flex flex-col gap-2 xs:flex-row">
           <input
             className="w-full rounded-lg border-2 border-ink bg-surface px-3 py-2 font-mono font-bold uppercase tracking-widest outline-none transition focus:shadow-brutal-sm"
             value={code}
@@ -78,7 +78,7 @@ function AddByCode() {
             }}
           />
           <Button
-            className="shrink-0"
+            className="w-full shrink-0 xs:w-auto"
             disabled={code.trim().length === 0 || sending}
             onClick={() => void submit()}
           >

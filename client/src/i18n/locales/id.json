@@ -895,5 +895,9 @@
     "error": {
       "generic": "Gagal — silakan coba lagi."
     }
+  },
+  "hud": {
+    "showPanel": "Tampilkan panel permainan",
+    "hidePanel": "Sembunyikan panel permainan"
   }
 }

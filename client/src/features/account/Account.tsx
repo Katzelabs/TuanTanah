@@ -50,7 +50,7 @@ function AccountSettings({ user }: { user: AuthUser }) {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <h1 className="-rotate-1 rounded-xl border-2 border-ink bg-accent px-4 py-1.5 font-display text-2xl uppercase tracking-tight text-ink shadow-brutal">
           {t('account.title')}
         </h1>
@@ -68,7 +68,10 @@ function AccountSettings({ user }: { user: AuthUser }) {
         <ConnectedAccountCard user={user} />
         <PreferencesCard />
 
-        <Card className="flex items-center justify-between gap-4 p-5">
+        <Card
+          pad="lg"
+          className="flex flex-col gap-4 xs:flex-row xs:items-center xs:justify-between"
+        >
           <div>
             <h2 className="font-display text-lg uppercase tracking-tight">
               {t('account.session.heading')}
@@ -77,7 +80,7 @@ function AccountSettings({ user }: { user: AuthUser }) {
           </div>
           <Button
             variant="secondary"
-            className="shrink-0"
+            className="w-full shrink-0 xs:w-auto"
             onClick={() => void signOut().then(leaveForHome)}
           >
             {t('account.session.signOut')}
@@ -104,7 +107,7 @@ function SectionCard({
   children: ReactNode
 }) {
   return (
-    <Card className="p-5">
+    <Card pad="lg">
       <h2 className="font-display text-lg uppercase tracking-tight">{heading}</h2>
       {hint && <p className="mt-1 text-xs text-ink-muted">{hint}</p>}
       <div className="mt-4">{children}</div>
@@ -148,8 +151,8 @@ function DisplayNameCard({
 
   return (
     <SectionCard heading={t('account.profile.heading')} hint={t('account.profile.hint')}>
-      <div className="flex items-end gap-3">
-        <label className="block flex-1">
+      <div className="flex flex-col gap-3 xs:flex-row xs:items-end">
+        <label className="block min-w-0 flex-1">
           <span className="text-sm font-bold text-ink">{t('account.profile.displayName')}</span>
           <input
             className="mt-1 w-full rounded-lg border-2 border-ink bg-surface px-3 py-2 font-medium outline-none transition focus:shadow-brutal-sm"
@@ -161,7 +164,11 @@ function DisplayNameCard({
             }}
           />
         </label>
-        <Button className="shrink-0" disabled={!canSave} onClick={() => void save()}>
+        <Button
+          className="w-full shrink-0 xs:w-auto"
+          disabled={!canSave}
+          onClick={() => void save()}
+        >
           {saving ? t('account.profile.saving') : t('account.profile.save')}
         </Button>
       </div>
@@ -191,11 +198,15 @@ function FriendCodeCard({ friendCode }: { friendCode: string }) {
 
   return (
     <SectionCard heading={t('account.friendCode.heading')} hint={t('account.friendCode.hint')}>
-      <div className="flex items-center gap-3">
-        <code className="flex-1 rounded-lg border-2 border-ink bg-surface-sunken px-3 py-2 text-center font-bold uppercase tracking-widest text-ink">
+      <div className="flex flex-col gap-3 xs:flex-row xs:items-center">
+        <code className="min-w-0 flex-1 overflow-x-auto rounded-lg border-2 border-ink bg-surface-sunken px-3 py-2 text-center font-bold uppercase tracking-widest text-ink">
           {friendCode}
         </code>
-        <Button variant="secondary" className="shrink-0" onClick={() => void copy()}>
+        <Button
+          variant="secondary"
+          className="w-full shrink-0 xs:w-auto"
+          onClick={() => void copy()}
+        >
           {copied ? t('account.friendCode.copied') : t('account.friendCode.copy')}
         </Button>
       </div>
@@ -278,14 +289,22 @@ function DangerZoneCard({
 
   return (
     <>
-      <Card tone="danger" className="flex items-center justify-between gap-4 p-5">
+      <Card
+        tone="danger"
+        pad="lg"
+        className="flex flex-col gap-4 xs:flex-row xs:items-center xs:justify-between"
+      >
         <div>
           <h2 className="font-display text-lg uppercase tracking-tight">
             {t('account.danger.heading')}
           </h2>
           <p className="mt-1 text-xs text-ink-muted">{t('account.danger.hint')}</p>
         </div>
-        <Button variant="danger" className="shrink-0" onClick={() => setConfirming(true)}>
+        <Button
+          variant="danger"
+          className="w-full shrink-0 xs:w-auto"
+          onClick={() => setConfirming(true)}
+        >
           {t('account.danger.delete')}
         </Button>
       </Card>

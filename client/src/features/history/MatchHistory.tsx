@@ -36,9 +36,9 @@ export function MatchHistory() {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-2xl px-4 py-8">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="-rotate-1">
-          <h1 className="rounded-xl border-2 border-ink bg-accent px-4 py-1.5 font-display text-3xl uppercase tracking-tight text-ink shadow-brutal">
+          <h1 className="rounded-xl border-2 border-ink bg-accent px-4 py-1.5 font-display text-2xl uppercase tracking-tight text-ink shadow-brutal xs:text-3xl">
             {t('history.title')}
           </h1>
         </div>
@@ -118,7 +118,7 @@ function MatchRow({ game }: { game: MatchHistoryEntry }) {
   const { t, i18n } = useTranslation()
 
   return (
-    <Card className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+    <Card pad="md" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div>
         <div className="flex items-center gap-2">
           <Outcome game={game} />
@@ -131,7 +131,7 @@ function MatchRow({ game }: { game: MatchHistoryEntry }) {
           {t('history.players', { count: game.playerCount })}
         </p>
       </div>
-      <div className="text-right">
+      <div className="xs:text-right">
         <p className="text-xs font-bold uppercase text-ink-faint">{t('history.wealth')}</p>
         <p className="font-display text-lg text-ink">{`Rp ${game.finalWealth.toLocaleString('id-ID')}`}</p>
       </div>

@@ -895,5 +895,9 @@
     "error": {
       "generic": "That didn't work — please try again."
     }
+  },
+  "hud": {
+    "showPanel": "Show game panel",
+    "hidePanel": "Hide game panel"
   }
 }

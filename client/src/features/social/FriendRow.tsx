@@ -14,7 +14,7 @@ export function FriendRow({ entry, children }: { entry: FriendSummary; children?
   const showPresence = status === 'accepted'
 
   return (
-    <li className="flex items-center gap-3 rounded-lg border-2 border-ink bg-surface px-3 py-2 shadow-brutal-sm">
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border-2 border-ink bg-surface px-3 py-2 shadow-brutal-sm">
       <span
         aria-hidden
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-accent-soft font-display text-base uppercase text-ink"
@@ -22,7 +22,7 @@ export function FriendRow({ entry, children }: { entry: FriendSummary; children?
         {user.displayName.slice(0, 1)}
       </span>
 
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 flex-1 basis-40">
         <span className="flex items-center gap-1.5">
           {showPresence && (
             <span
@@ -38,8 +38,8 @@ export function FriendRow({ entry, children }: { entry: FriendSummary; children?
           )}
           <span className="truncate font-bold text-ink">{user.displayName}</span>
         </span>
-        <span className="flex items-center gap-2">
-          <span className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="font-mono text-2xs uppercase tracking-wider text-ink-faint">
             {user.friendCode}
           </span>
           {showPresence && online && currentRoomId && (
@@ -48,7 +48,7 @@ export function FriendRow({ entry, children }: { entry: FriendSummary; children?
         </span>
       </span>
 
-      {children && <span className="flex shrink-0 items-center gap-1.5">{children}</span>}
+      {children && <span className="ml-auto flex shrink-0 items-center gap-1.5">{children}</span>}
     </li>
   )
 }

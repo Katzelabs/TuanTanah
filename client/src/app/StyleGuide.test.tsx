@@ -42,6 +42,10 @@ describe('StyleGuide', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('600px')).toBeInTheDocument()
+    // `short` is the companion guard for a phone held sideways. It is easy to
+    // mistake for a width step, so the page has to keep saying it isn't one.
+    expect(screen.getByText('landscape ≤540px tall')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /short.*companion to.*hud/i })).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: /hud.*phone-portrait HUD switch/i }),
     ).toBeInTheDocument()

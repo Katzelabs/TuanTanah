@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 /**
  * Tuan Tanah design system — light "paper" neobrutalism.
@@ -58,6 +59,10 @@ export default {
       lg: '1024px',
       xl: '1280px',
       '2xl': '1536px',
+      // `short` is deliberately NOT here — see the plugin at the bottom of this
+      // file. A `raw` entry in `screens` makes Tailwind stop generating the
+      // `max-*` variant for EVERY screen, which would silently break
+      // `max-hud:` and friends.
     },
     extend: {
       fontFamily: {
@@ -219,5 +224,30 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    /**
+     * `short:` — a landscape phone. NOT part of the mobile-first width ladder:
+     * it is an orientation + height guard, and the companion to `hud`. `hud`
+     * handles "too narrow"; `short` handles "too flat". Always stack the two as
+     * `hud:short:` so a small landscape *window* on a desktop can't be given a
+     * layout too wide for it.
+     *
+     * What it fixes: the board already caps itself at `max-w-[min(90vh,1024px)]`,
+     * so in phone landscape it shrinks correctly and does fit. The bug is that
+     * the panels are stacked *underneath* it and therefore below the fold — you
+     * would have to scroll away from the board to roll. That is a viewport
+     * *height* condition, so no width breakpoint can express it.
+     *
+     * 540px separates phone landscape (heights 320–430) from tablet landscape
+     * (iPad mini 744, iPad 768), so tablets keep the normal ladder.
+     *
+     * Why a plugin and not a `raw` entry in `screens`: a single `raw` screen
+     * makes Tailwind stop emitting the `max-*` variant for *every* screen, so
+     * `max-hud:` — which the phone-portrait HUD depends on — silently vanishes.
+     * Registering the variant here leaves the `screens` ladder untouched.
+     */
+    plugin(({ addVariant }) => {
+      addVariant('short', '@media (orientation: landscape) and (max-height: 540px)')
+    }),
+  ],
 } satisfies Config

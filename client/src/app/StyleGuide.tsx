@@ -96,6 +96,12 @@ export function StyleGuide() {
                 width="1536px"
                 desc="Wide desktop; the page is capped at max-w-[1400px] anyway."
               />
+              <BreakRow
+                name="short"
+                width="landscape ≤540px tall"
+                desc="★ A phone held sideways. Not a width step — always stack it as hud:short:."
+                highlight
+              />
             </tbody>
           </table>
         </Card>
@@ -137,6 +143,37 @@ export function StyleGuide() {
             <Code>Board/geometry.ts</Code>) — it needs no breakpoints. Tailwind’s built-in{' '}
             <Code>portrait:</Code> / <Code>landscape:</Code> variants are available when a rule
             needs orientation on top of width.
+          </p>
+        </Card>
+
+        <Card tone="info" pad="md" className="mt-3">
+          <h3 className="font-display text-lg uppercase tracking-tight">
+            <Code>short</Code> — the companion to <Code>hud</Code>
+          </h3>
+          <p className="mt-2 text-sm font-medium leading-relaxed">
+            <Code>hud</Code> handles “too narrow”; <Code>short</Code> handles “too flat”. It is{' '}
+            <em>not</em> a width step — it is{' '}
+            <Code>(orientation: landscape) and (max-height: 540px)</Code>, i.e. a phone held
+            sideways.{' '}
+            <strong>
+              Always stack it as <Code>hud:short:</Code>
+            </strong>{' '}
+            so a small landscape window on a desktop can’t be handed a layout too wide for it.
+          </p>
+          <p className="mt-2 text-sm font-medium leading-relaxed">
+            What it fixes: the board already caps itself at <Code>max-w-[min(90vh,1024px)]</Code>,
+            so in phone landscape it shrinks correctly and does fit. The bug was that the panels
+            were stacked <em>underneath</em> it and therefore below the fold — you had to scroll
+            away from the board to roll. That is a viewport <em>height</em> condition, so no width
+            breakpoint can express it. 540px separates phone landscape (heights 320–430) from tablet
+            landscape (iPad mini 744, iPad 768).
+          </p>
+          <p className="mt-2 text-sm font-medium leading-relaxed">
+            It is registered as a <strong>plugin variant</strong>, not a <Code>raw</Code> entry in{' '}
+            <Code>screens</Code>. A single <Code>raw</Code> screen makes Tailwind stop emitting the{' '}
+            <Code>max-*</Code> variant for <em>every</em> screen — <Code>max-hud:</Code>, which the
+            phone-portrait HUD depends on, silently disappears. Add future non-width variants the
+            same way.
           </p>
         </Card>
       </Section>

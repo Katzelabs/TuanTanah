@@ -34,7 +34,7 @@ export function RoomInviteToast() {
         <motion.div
           {...toastSlide}
           role="alert"
-          className="fixed bottom-4 right-4 z-toast w-[min(20rem,calc(100vw-2rem))] rounded-xl border-2 border-ink bg-surface p-4 shadow-brutal"
+          className="fixed bottom-4 right-4 z-toast w-[min(20rem,calc(100vw-2rem))] max-hud:bottom-[5.5rem] rounded-xl border-2 border-ink bg-surface p-4 shadow-brutal"
         >
           <p className="text-sm font-bold text-ink">
             {t('invite.incoming.title', { name: invite.from.displayName })}
@@ -48,10 +48,10 @@ export function RoomInviteToast() {
           )}
 
           <div className="mt-3 flex gap-2">
-            <Button variant="ghost" size="sm" block className="text-xs" onClick={dismiss}>
+            <Button variant="ghost" size="xs" block onClick={dismiss}>
               {t('invite.incoming.ignore')}
             </Button>
-            <Button size="sm" block className="text-xs" disabled={accepting} onClick={onAccept}>
+            <Button size="xs" block disabled={accepting} onClick={onAccept}>
               {accepting ? t('invite.incoming.joining') : t('invite.incoming.accept')}
             </Button>
           </div>

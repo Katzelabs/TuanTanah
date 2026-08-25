@@ -18,6 +18,7 @@ import { Board } from '@/features/game/Board/Board.js'
 import { DebtPanel } from '@/features/game/DebtPanel/DebtPanel.js'
 import { EventLog } from '@/features/game/EventLog/EventLog.js'
 import { GameHeader } from '@/features/game/GameHeader/GameHeader.js'
+import { HudDrawer, HUD_PEEK_PX } from '@/features/game/HudDrawer/HudDrawer.js'
 import { MetaActionBar, type MetaActionDef } from '@/features/game/MetaActionBar/MetaActionBar.js'
 import { JudolModal } from '@/features/game/JudolModal/JudolModal.js'
 import { KantorHukumModal } from '@/features/game/KantorHukumModal/KantorHukumModal.js'
@@ -82,6 +83,10 @@ export function Game() {
   // dice where attention already is, leaving a lighter sidebar. On phones the
   // board center is too cramped, so they stay in the sidebar (previous layout).
   const actionsOnBoard = useMediaQuery('(min-width: 768px)')
+  // Phone portrait: below the `hud` breakpoint the sidebar stops being a column
+  // beside/under the board and becomes a swipe-up drawer over it. Kept in sync
+  // with Tailwind's `max-hud:` (which compiles to `not (min-width: 600px)`).
+  const phoneHud = useMediaQuery('(max-width: 599.98px)')
 
   const metaActionsLeft = META_ACTIONS_PER_LAP - (me?.metaActionsUsed.length ?? 0)
   // Clear any in-progress target selection when it's no longer actionable.
@@ -329,71 +334,118 @@ export function Game() {
           ? 'status'
           : 'actions'
 
-  return (
-    <div className="mx-auto flex max-w-[1400px] flex-col gap-4 p-4">
-      {/* Full-width page header */}
-      <GameHeader />
+  // Everything that isn't the board. Rendered once and placed either in the
+  // desktop/tablet sidebar column or inside the phone-portrait drawer — the
+  // content is identical, only its container differs.
+  const sidebarBody = (
+    <>
+      <AfkCountdown />
 
-      <div className="flex flex-col gap-4 lg:flex-row">
-        {/* Board */}
-        <div className="flex flex-1 items-start justify-center">
+      {pauseBanner}
+
+      {targetHint}
+
+      {/* Tabbed sidebar body. The tab strip and panels below it swap by
+        selection; the room/pause card above stays pinned. */}
+      <Tabs
+        tabs={sidebarTabs}
+        active={activeTab}
+        onChange={(id) => setSidebarTab(id as 'actions' | 'status' | 'log')}
+      />
+
+      {/* Actions (phones only): turn controls live in the sidebar here, since
+        the board center is too cramped for them on small screens. */}
+      {activeTab === 'actions' && (
+        <div className="space-y-2">
+          {turnControls ?? waitingHint}
+          {negotiateButton}
+        </div>
+      )}
+
+      {/* Status: the player's own panel (cash, properties, loans) plus the
+        full player list. */}
+      {activeTab === 'status' && (
+        <>
+          {showStatusPanel && <PlayerStatus onOpenProperty={(tileId) => setSelectedTile(tileId)} />}
+          <PlayerPanel
+            state={state}
+            myId={me?.id ?? null}
+            onSelect={
+              pendingMeta?.target === 'player'
+                ? handleSelectPlayer
+                : canNegotiate
+                  ? (id) => openNegotiate({ targetId: id })
+                  : undefined
+            }
+          />
+        </>
+      )}
+
+      {/* Log */}
+      {activeTab === 'log' && (
+        <Card className="h-[28rem] p-3">
+          <EventLog state={state} />
+        </Card>
+      )}
+    </>
+  )
+
+  // Status line on the closed drawer handle, so a phone player can follow the
+  // game without opening it.
+  const hudTitle = myDebt
+    ? t('debt.title')
+    : phase === 'ended'
+      ? t('game.gameOver.title')
+      : isMyTurn
+        ? t('turnBanner.yourTurn')
+        : `${t('game.waitingFor')} ${current?.name ?? t('common.dash')}…`
+
+  return (
+    /*
+     * Three layouts, one tree:
+     *   phone portrait (max-hud) — fixed-height shell, board on top, drawer over it
+     *   short landscape (hud+short) — fixed-height shell, board beside the panels
+     *   everything else — the original scrolling page
+     * The two fixed-height shells stop the page itself from scrolling so the
+     * board can't be pushed off screen; their inner regions scroll instead.
+     */
+    <div className="mx-auto flex max-w-[1400px] flex-col gap-4 p-4 max-hud:h-[100dvh] max-hud:gap-2 max-hud:overflow-hidden max-hud:p-3 hud:short:h-[100dvh] hud:short:gap-2 hud:short:overflow-hidden hud:short:p-3">
+      {/* Full-width page header */}
+      <div className="shrink-0">
+        <GameHeader />
+      </div>
+
+      <div className="flex flex-col gap-4 lg:flex-row max-hud:min-h-0 max-hud:flex-1 max-hud:overflow-y-auto hud:short:min-h-0 hud:short:flex-1 hud:short:flex-row">
+        {/* Board. Its own container-query geometry is untouched — it just gets
+          the width it's given. The phone-portrait bottom padding keeps it clear
+          of the closed drawer; short landscape caps it by viewport height so the
+          square never outgrows the screen. */}
+        <div
+          className="flex flex-1 items-start justify-center hud:short:min-w-0 hud:short:max-w-[calc(100dvh-5rem)]"
+          style={phoneHud ? { paddingBottom: HUD_PEEK_PX } : undefined}
+        >
           <Board state={state} onSelectTile={handleTileClick} centerSlot={boardActions} />
         </div>
 
-        {/* Sidebar */}
-        <aside className="flex w-full flex-col gap-4 lg:w-80">
-          <AfkCountdown />
-
-          {pauseBanner}
-
-          {targetHint}
-
-          {/* Tabbed sidebar body. The tab strip and panels below it swap by
-            selection; the room/pause card above stays pinned. */}
-          <Tabs
-            tabs={sidebarTabs}
-            active={activeTab}
-            onChange={(id) => setSidebarTab(id as 'actions' | 'status' | 'log')}
-          />
-
-          {/* Actions (phones only): turn controls live in the sidebar here, since
-            the board center is too cramped for them on small screens. */}
-          {activeTab === 'actions' && (
-            <div className="space-y-2">
-              {turnControls ?? waitingHint}
-              {negotiateButton}
-            </div>
-          )}
-
-          {/* Status: the player's own panel (cash, properties, loans) plus the
-            full player list. */}
-          {activeTab === 'status' && (
-            <>
-              {showStatusPanel && (
-                <PlayerStatus onOpenProperty={(tileId) => setSelectedTile(tileId)} />
-              )}
-              <PlayerPanel
-                state={state}
-                myId={me?.id ?? null}
-                onSelect={
-                  pendingMeta?.target === 'player'
-                    ? handleSelectPlayer
-                    : canNegotiate
-                      ? (id) => openNegotiate({ targetId: id })
-                      : undefined
-                }
-              />
-            </>
-          )}
-
-          {/* Log */}
-          {activeTab === 'log' && (
-            <Card className="h-[28rem] p-3">
-              <EventLog state={state} />
-            </Card>
-          )}
-        </aside>
+        {/* Sidebar — replaced by the drawer on phone portrait. */}
+        {!phoneHud && (
+          <aside className="flex w-full flex-col gap-4 lg:w-80 hud:short:w-80 hud:short:min-h-0 hud:short:overflow-y-auto">
+            {sidebarBody}
+          </aside>
+        )}
       </div>
+
+      {phoneHud && (
+        <HudDrawer
+          title={hudTitle}
+          // Open itself when the player has to act, and get out of the way when
+          // they've been asked to tap a tile on the board.
+          demandsAttention={Boolean(turnActive || myDebt)}
+          yieldToBoard={pendingMeta?.target === 'tile'}
+        >
+          {sidebarBody}
+        </HudDrawer>
+      )}
 
       <PinjolModal open={showPinjol} onClose={() => setShowPinjol(false)} />
       <ForcePinjolModal open={showForcePinjol} onClose={() => setShowForcePinjol(false)} />
