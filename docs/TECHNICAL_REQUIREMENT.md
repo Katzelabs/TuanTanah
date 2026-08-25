@@ -487,8 +487,8 @@ MAX_PLAYERS_PER_ROOM=8
 
 ```bash
 # On Contabo VPS — initial setup
-git clone https://github.com/your-org/tuan-tanah.git
-cd tuan-tanah
+git clone https://github.com/Katzelabs/TuanTanah.git
+cd TuanTanah
 cp .env.example .env && nano .env   # set DATABASE_URL (+ run `pnpm --filter server migrate`)
 
 # Build frontend
