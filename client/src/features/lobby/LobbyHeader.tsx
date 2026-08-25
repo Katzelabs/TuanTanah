@@ -61,7 +61,7 @@ export function LobbyHeader({ roomId, onInvite }: { roomId: string; onInvite: ()
 
         <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
           <InviteFriendButton />
-          <Button variant="secondary" size="sm" className="text-xs" onClick={onInvite}>
+          <Button variant="secondary" size="xs" onClick={onInvite}>
             {t('invite.button')}
           </Button>
           {/* Icon-only below `md` — three labelled buttons don't fit a phone row. */}

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button, Card, Modal } from '@/components/ui/index.js'
 import { useGame } from '@/store/gameStore.js'
-import { useAuthUser } from './authBridge.js'
+import { useAuthUser } from '@/hooks/useAuthUser.js'
 import { invitableFriends } from './friends.js'
 import { useInvites } from './store.js'
 

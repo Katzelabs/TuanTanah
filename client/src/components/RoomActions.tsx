@@ -86,10 +86,10 @@ export function LeaveButton({
     <>
       <Button
         variant="danger"
-        size="sm"
+        size="xs"
         onClick={onClick}
         aria-label={icon ? text : undefined}
-        className={`text-xs ${className ?? ''}`}
+        className={className}
       >
         {icon}
         <span className={icon ? 'hidden md:inline' : undefined}>{text}</span>
@@ -142,10 +142,10 @@ export function SurrenderButton({
     <>
       <Button
         variant="ghost"
-        size="sm"
+        size="xs"
         onClick={() => setConfirming(true)}
         aria-label={icon ? t('game.surrender') : undefined}
-        className={`text-xs ${className ?? ''}`}
+        className={className}
       >
         {icon}
         <span className={icon ? 'hidden md:inline' : undefined}>{t('game.surrender')}</span>

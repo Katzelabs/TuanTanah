@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/index.js'
 import { toastSlide } from '@/lib/motion.js'
-import { useAuthUser } from './authBridge.js'
+import { useAuthUser } from '@/hooks/useAuthUser.js'
 import { useInvites } from './store.js'
 
 /**
