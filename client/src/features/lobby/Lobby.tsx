@@ -1,27 +1,24 @@
-import {
-  ALL_ROLES,
-  ROLES,
-  STARTING_CASH_MAX,
-  STARTING_CASH_MIN,
-  TIME_LIMIT_OPTIONS,
-  type Role,
-} from '@tuan-tanah/shared'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { roleAbility, roleName } from '@/i18n/gameData.js'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
-import { SoundToggle } from '@/components/SoundToggle.js'
-import { LeaveButton } from '@/components/RoomActions.js'
-import { InviteFriendButton } from '@/features/invites/index.js'
-import { Badge, Button, Card } from '@/components/ui/index.js'
-import { AuthMenu } from '@/features/auth/index.js'
-import { formatRupiah, useGame } from '@/store/gameStore.js'
+import { useGame } from '@/store/gameStore.js'
 import { InviteModal } from './InviteModal.js'
+import { LobbyHeader } from './LobbyHeader.js'
+import { PlayerList } from './PlayerList.js'
+import { RolePicker } from './RolePicker.js'
+import { RoomSettings } from './RoomSettings.js'
+import { StartPanel } from './StartPanel.js'
 
-const SETTINGS_TABS = ['general', 'roles', 'rules'] as const
-type SettingsTab = (typeof SETTINGS_TABS)[number]
-
+/**
+ * The pre-game room. Composition only — every panel below owns its own layout,
+ * and every state change goes through the store to the server.
+ *
+ * Reading order differs by size, which is the point of the `order-*` / explicit
+ * grid placement pairing below. On a phone the column runs roster → roles →
+ * start → settings, so you see who's here, do the one thing you're here to do,
+ * and only then scroll into host controls. From `lg` the roles board takes the
+ * main column and the other three stack in a sidebar beside it.
+ */
 export function Lobby() {
   const { t } = useTranslation()
   const state = useGame((s) => s.state)
@@ -29,7 +26,6 @@ export function Lobby() {
   const pickRole = useGame((s) => s.pickRole)
   const updateSettings = useGame((s) => s.updateSettings)
   const startGame = useGame((s) => s.startGame)
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>('general')
 
   // Home hands over `state.created` after a create (never after a join), so the
   // room master's first sight of the lobby is the "send this link" sheet.
@@ -45,48 +41,9 @@ export function Lobby() {
 
   if (!state) return <Centered>{t('lobby.loading')}</Centered>
 
-  const isMaster = !!me?.isRoomMaster
-  const roleOwner = (role: Role) => state.players.find((p) => p.role === role)
-  const everyoneReady = state.players.every((p) => p.role !== null)
-  const canStart = isMaster && state.players.length >= 2 && everyoneReady
-
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="-rotate-1">
-            <h1 className="inline-block rounded-xl border-2 border-ink bg-accent px-4 py-1 font-display text-3xl uppercase tracking-tight text-ink shadow-brutal">
-              {t('lobby.title')}
-            </h1>
-          </div>
-          <p className="mt-3 font-semibold text-ink-muted">{t('lobby.subtitle')}</p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
-            <AuthMenu />
-            <SoundToggle />
-            <LanguageSwitcher />
-          </div>
-          <Card tone="sunken" className="px-5 py-3 text-center">
-            <div className="text-xs font-bold uppercase text-ink-faint">{t('lobby.roomCode')}</div>
-            <div className="font-mono text-2xl font-bold tracking-[0.3em] text-ink">
-              {state.roomId}
-            </div>
-          </Card>
-          <div className="flex gap-2">
-            <InviteFriendButton />
-            <Button
-              variant="secondary"
-              size="sm"
-              className="text-xs"
-              onClick={() => setInvite('manual')}
-            >
-              {t('invite.button')}
-            </Button>
-            <LeaveButton label={t('lobby.leaveRoom')} />
-          </div>
-        </div>
-      </div>
+    <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
+      <LobbyHeader roomId={state.roomId} onInvite={() => setInvite('manual')} />
 
       <InviteModal
         open={invite !== null}
@@ -95,292 +52,33 @@ export function Lobby() {
         code={state.roomId}
       />
 
-      <div className="mt-8 grid gap-6 md:grid-cols-[1fr_280px]">
-        {/* Roles grid */}
-        <div>
-          <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">{t('lobby.roles')}</h2>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {ALL_ROLES.map((role) => {
-              const def = ROLES[role]
-              const owner = roleOwner(role)
-              const enabled = state.settings.enabledRoles.includes(role)
-              const mine = owner?.id === me?.id
-              const takenByOther = owner && !mine
-              return (
-                <button
-                  key={role}
-                  disabled={!enabled || !!takenByOther}
-                  onClick={() => pickRole(mine ? null : role)}
-                  className={`rounded-xl border-2 border-ink p-3 text-left transition ${
-                    mine
-                      ? 'bg-accent-soft shadow-brutal'
-                      : takenByOther || !enabled
-                        ? 'bg-surface-sunken opacity-50'
-                        : 'bg-surface shadow-brutal-sm brutal-press'
-                  }`}
-                >
-                  <div className="font-bold text-ink">{roleName(t, role)}</div>
-                  <div className="text-[11px] text-ink-muted">
-                    {t('lobby.salary', { amount: formatRupiah(def.salary) })}
-                  </div>
-                  <div className="mt-1 text-[11px] leading-tight text-ink-faint">
-                    {roleAbility(t, role)}
-                  </div>
-                  {owner && (
-                    <div className="mt-2">
-                      <Badge color={owner.color}>{mine ? t('common.you') : owner.name}</Badge>
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Players + settings */}
-        <div className="space-y-6">
-          <div>
-            <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-              {t('lobby.players', { count: state.players.length })}
-            </h2>
-            <ul className="space-y-1">
-              {state.players.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-2 text-sm shadow-brutal-sm"
-                >
-                  <span
-                    className="h-3 w-3 rounded-full border-2 border-ink"
-                    style={{ background: p.color }}
-                  />
-                  <span className="font-bold text-ink">{p.name}</span>
-                  {p.isRoomMaster && (
-                    <Badge tone="accent" className="text-[10px]">
-                      ★ {t('common.host')}
-                    </Badge>
-                  )}
-                  {!p.isConnected && (
-                    <Badge tone="danger" className="text-[10px]">
-                      {t('common.offline')}
-                    </Badge>
-                  )}
-                  <span className="ml-auto text-xs font-medium text-ink-muted">
-                    {p.role ? roleName(t, p.role) : t('common.dash')}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-              {t('lobby.settings')}
-            </h2>
-            <div className="grid grid-cols-3 gap-1 rounded-xl border-2 border-ink bg-surface-sunken p-1">
-              {SETTINGS_TABS.map((tab) => {
-                const active = settingsTab === tab
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setSettingsTab(tab)}
-                    className={`rounded-lg py-1.5 text-xs font-bold uppercase transition ${
-                      active
-                        ? 'border-2 border-ink bg-accent text-ink shadow-brutal-sm'
-                        : 'text-ink-muted hover:text-ink'
-                    }`}
-                  >
-                    {t(`lobby.tabs.${tab}`)}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="mt-4 space-y-6">
-              {settingsTab === 'general' && (
-                <>
-                  <SettingSlider
-                    label={t('lobby.startingCash')}
-                    value={state.settings.startingCash}
-                    min={STARTING_CASH_MIN}
-                    max={STARTING_CASH_MAX}
-                    step={1_000_000}
-                    editable={isMaster}
-                    format={formatRupiah}
-                    onCommit={(startingCash) => updateSettings({ startingCash })}
-                  />
-
-                  <div>
-                    <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-                      {t('lobby.timeLimit')}
-                    </h3>
-                    <div className="grid grid-cols-3 gap-1">
-                      {TIME_LIMIT_OPTIONS.map((min) => {
-                        const active = state.settings.timeLimitMinutes === min
-                        return (
-                          <button
-                            key={min}
-                            disabled={!isMaster}
-                            onClick={() => updateSettings({ timeLimitMinutes: min })}
-                            className={`rounded-lg border-2 border-ink py-1.5 text-xs font-bold transition ${
-                              active
-                                ? 'bg-accent text-ink shadow-brutal-sm'
-                                : 'bg-surface-sunken text-ink-muted enabled:hover:bg-surface disabled:opacity-60'
-                            }`}
-                          >
-                            {t('lobby.timeLimitValue', { count: min })}
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <p className="mt-1 text-xs text-ink-faint">{t('lobby.timeLimitHint')}</p>
-                  </div>
-                </>
-              )}
-
-              {settingsTab === 'roles' && (
-                <div>
-                  <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-                    {t('lobby.enabledRoles')}
-                  </h3>
-                  <ul className="space-y-1">
-                    {ALL_ROLES.map((role) => {
-                      const enabled = state.settings.enabledRoles.includes(role)
-                      return (
-                        <li key={role}>
-                          <label
-                            className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
-                              isMaster ? 'cursor-pointer' : ''
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={enabled}
-                              disabled={!isMaster}
-                              onChange={() =>
-                                updateSettings({
-                                  enabledRoles: enabled
-                                    ? state.settings.enabledRoles.filter((r) => r !== role)
-                                    : [...state.settings.enabledRoles, role],
-                                })
-                              }
-                              className="accent-accent-strong"
-                            />
-                            <span
-                              className={
-                                enabled ? 'font-medium text-ink' : 'text-ink-faint line-through'
-                              }
-                            >
-                              {roleName(t, role)}
-                            </span>
-                          </label>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              )}
-
-              {settingsTab === 'rules' && (
-                <div>
-                  <h3 className="mb-2 text-sm font-bold uppercase text-ink-muted">
-                    {t('lobby.buildRules')}
-                  </h3>
-                  <label
-                    className={`flex items-center gap-2 rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm shadow-brutal-sm ${
-                      isMaster ? 'cursor-pointer' : ''
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={state.settings.requireFullRegionToBuild}
-                      disabled={!isMaster}
-                      onChange={(e) =>
-                        updateSettings({ requireFullRegionToBuild: e.target.checked })
-                      }
-                      className="accent-accent-strong"
-                    />
-                    <span className="font-medium text-ink">{t('lobby.requireFullRegion')}</span>
-                  </label>
-                  <p className="mt-1 text-xs text-ink-faint">{t('lobby.requireFullRegionHint')}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {isMaster ? (
-            <Button block size="lg" disabled={!canStart} onClick={startGame}>
-              {everyoneReady ? t('lobby.startGame') : t('lobby.waitingForRoles')}
-            </Button>
-          ) : (
-            <Card tone="sunken" flat className="p-3 text-center text-sm font-medium text-ink-muted">
-              {t('lobby.waitingForHost')}
-            </Card>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * A range slider that stays visually responsive while dragging but only emits
- * `onCommit` once the value is released (mouse up / touch end / key up). This
- * keeps the slider smooth without flooding the server with one `update_settings`
- * per pixel of drag — which would otherwise trip the per-socket rate limiter.
- */
-function SettingSlider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  editable,
-  format,
-  onCommit,
-}: {
-  label: string
-  value: number
-  min: number
-  max: number
-  step: number
-  editable: boolean
-  format: (n: number) => string
-  onCommit: (n: number) => void
-}) {
-  // While dragging we track the value locally; `null` means "follow the
-  // authoritative server value". The local override is dropped whenever the
-  // confirmed server value changes (adjusting state during render, per the
-  // React "you might not need an effect" guidance).
-  const [local, setLocal] = useState<number | null>(null)
-  const [prevValue, setPrevValue] = useState(value)
-  if (value !== prevValue) {
-    setPrevValue(value)
-    setLocal(null)
-  }
-  const display = local ?? value
-
-  const commit = (n: number) => {
-    if (n !== value) onCommit(n)
-  }
-
-  return (
-    <div>
-      <h2 className="mb-2 text-sm font-bold uppercase text-ink-muted">{label}</h2>
-      <div className="text-lg font-bold text-ink">{format(display)}</div>
-      {editable && (
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={display}
-          onChange={(e) => setLocal(Number(e.target.value))}
-          onMouseUp={(e) => commit(Number(e.currentTarget.value))}
-          onTouchEnd={(e) => commit(Number(e.currentTarget.value))}
-          onKeyUp={(e) => commit(Number(e.currentTarget.value))}
-          className="mt-2 w-full accent-accent-strong"
+      <div className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-6">
+        <PlayerList
+          players={state.players}
+          meId={me?.id}
+          className="order-1 lg:col-start-2 lg:row-start-1"
         />
-      )}
+        <RolePicker
+          players={state.players}
+          meId={me?.id}
+          enabledRoles={state.settings.enabledRoles}
+          onPick={pickRole}
+          className="order-2 lg:col-start-1 lg:row-span-3 lg:row-start-1"
+        />
+        <StartPanel
+          players={state.players}
+          settings={state.settings}
+          me={me}
+          onStart={startGame}
+          className="order-3 lg:col-start-2 lg:row-start-2"
+        />
+        <RoomSettings
+          settings={state.settings}
+          isMaster={!!me?.isRoomMaster}
+          onChange={updateSettings}
+          className="order-4 lg:col-start-2 lg:row-start-3"
+        />
+      </div>
     </div>
   )
 }

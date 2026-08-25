@@ -143,7 +143,6 @@
     "leaveRoom": "Keluar ruangan",
     "roles": "Peran",
     "salary": "Gaji {{amount}}",
-    "players": "Pemain ({{count}})",
     "settings": "Pengaturan permainan",
     "tabs": {
       "general": "Umum",
@@ -159,8 +158,33 @@
     "requireFullRegion": "Wajib miliki satu kawasan penuh untuk membangun",
     "requireFullRegionHint": "Pemain harus memiliki semua petak dalam satu kawasan sebelum membangun rumah atau properti di sana.",
     "startGame": "Mulai permainan",
-    "waitingForRoles": "Menunggu pemilihan peran…",
-    "waitingForHost": "Menunggu host memulai…"
+    "waitingForHost": "Menunggu host memulai…",
+    "you": "Kamu",
+    "playersTitle": "Pemain",
+    "readyCount": "{{ready}}/{{total}} siap",
+    "choosing": "memilih…",
+    "seatsLeft_one": "{{count}} kursi masih kosong",
+    "seatsLeft_other": "{{count}} kursi masih kosong",
+    "rolesHint": "Satu peran per pemain — ketuk kartu untuk mengambil, ketuk lagi untuk melepas.",
+    "rolesOpen": "{{count}} kosong",
+    "roleOpen": "Kosong",
+    "roleOff": "Nonaktif",
+    "hostOnly": "Hanya host yang bisa mengubahnya — ini pengaturan ruangan saat ini.",
+    "startingCashHint": "Jumlah uang yang dipegang setiap pemain saat permainan dimulai.",
+    "enabledRolesCount": "{{count}}/{{total}} aktif",
+    "enabledRolesHint": "Peran yang nonaktif tidak bisa dipilih. Sisakan minimal satu peran per pemain.",
+    "on": "Aktif",
+    "off": "Nonaktif",
+    "pickYourRole": "Pilih peran supaya kamu siap.",
+    "waitingForHostName": "Menunggu {{name}} memulai…",
+    "cantStart": "Belum bisa mulai",
+    "blockers": {
+      "needPlayers_one": "Kurang {{count}} pemain lagi — bagikan kode ruangan.",
+      "needPlayers_other": "Kurang {{count}} pemain lagi — bagikan kode ruangan.",
+      "needRoles_one": "Masih memilih peran: {{names}}",
+      "needRoles_other": "Masih memilih peran: {{names}}",
+      "notEnoughRoles": "Hanya {{enabled}} peran aktif untuk {{players}} pemain — aktifkan lebih banyak di Pengaturan › Peran."
+    }
   },
   "game": {
     "room": "Ruangan {{code}}",

@@ -143,7 +143,6 @@
     "leaveRoom": "Leave room",
     "roles": "Roles",
     "salary": "Salary {{amount}}",
-    "players": "Players ({{count}})",
     "settings": "Game settings",
     "tabs": {
       "general": "General",
@@ -159,8 +158,33 @@
     "requireFullRegion": "Require full region to build",
     "requireFullRegionHint": "Players must own every tile in a region before building houses or properties there.",
     "startGame": "Start game",
-    "waitingForRoles": "Waiting for roles…",
-    "waitingForHost": "Waiting for the host to start…"
+    "waitingForHost": "Waiting for the host to start…",
+    "you": "You",
+    "playersTitle": "Players",
+    "readyCount": "{{ready}}/{{total}} ready",
+    "choosing": "choosing…",
+    "seatsLeft_one": "{{count}} seat still open",
+    "seatsLeft_other": "{{count}} seats still open",
+    "rolesHint": "One role per player — tap a card to claim it, tap again to let it go.",
+    "rolesOpen": "{{count}} open",
+    "roleOpen": "Open",
+    "roleOff": "Off",
+    "hostOnly": "Only the host can change these — you're seeing the room's current setup.",
+    "startingCashHint": "What every player starts the game with.",
+    "enabledRolesCount": "{{count}}/{{total}} on",
+    "enabledRolesHint": "Roles that are off can't be picked. Keep at least one on per player.",
+    "on": "On",
+    "off": "Off",
+    "pickYourRole": "Pick a role to be ready.",
+    "waitingForHostName": "Waiting for {{name}} to start…",
+    "cantStart": "Not ready yet",
+    "blockers": {
+      "needPlayers_one": "Needs {{count}} more player — share the room code.",
+      "needPlayers_other": "Needs {{count}} more players — share the room code.",
+      "needRoles_one": "Still choosing a role: {{names}}",
+      "needRoles_other": "Still choosing roles: {{names}}",
+      "notEnoughRoles": "Only {{enabled}} roles are on for {{players}} players — turn more on under Settings › Roles."
+    }
   },
   "game": {
     "room": "Room {{code}}",
