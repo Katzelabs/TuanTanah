@@ -1,5 +1,6 @@
 import {
   BOARD,
+  JAIL_DURATION_TURNS,
   JAIL_EXIT_COST,
   LAHAN_LAND_PRICE,
   META_ACTIONS_PER_LAP,
@@ -151,27 +152,36 @@ export function Game() {
   const turnControls = turnActive ? (
     <>
       {me?.inJail && !turn.hasRolled && (
-        <Button variant="secondary" size="sm" block onClick={payJail}>
-          {t('game.payBail', { amount: formatRupiah(JAIL_EXIT_COST) })}
-        </Button>
+        <Tooltip content={t('game.payBailDesc', { turns: JAIL_DURATION_TURNS })} className="w-full">
+          <Button variant="secondary" size="sm" block onClick={payJail}>
+            {t('game.payBail', { amount: formatRupiah(JAIL_EXIT_COST) })}
+          </Button>
+        </Tooltip>
       )}
       {(!turn.hasRolled || turn.rolledDoubles) && (
-        <Button block onClick={roll} disabled={rolling}>
-          🎲{' '}
-          {me?.inJail
-            ? t('game.rollForDoubles')
-            : turn.rolledDoubles
-              ? t('game.rollAgain')
-              : t('game.rollDice')}
-        </Button>
+        <Tooltip
+          content={me?.inJail ? t('game.rollForDoublesDesc') : t('game.rollDiceDesc')}
+          className="w-full"
+        >
+          <Button block onClick={roll} disabled={rolling}>
+            🎲{' '}
+            {me?.inJail
+              ? t('game.rollForDoubles')
+              : turn.rolledDoubles
+                ? t('game.rollAgain')
+                : t('game.rollDice')}
+          </Button>
+        </Tooltip>
       )}
       {turn.hasRolled && !rolling && pending !== null && (
-        <Button variant="success" block onClick={() => buy(pending)}>
-          {t('game.buy', {
-            name: tileName(t, pending),
-            price: formatRupiah(basePrice(pending)),
-          })}
-        </Button>
+        <Tooltip content={t('game.buyDesc')} className="w-full">
+          <Button variant="success" block onClick={() => buy(pending)}>
+            {t('game.buy', {
+              name: tileName(t, pending),
+              price: formatRupiah(basePrice(pending)),
+            })}
+          </Button>
+        </Tooltip>
       )}
       {turn.pendingLawOffice && !rolling && lawOfficeDismissed && (
         <Button block onClick={() => setLawOfficeDismissed(false)}>
@@ -179,9 +189,11 @@ export function Game() {
         </Button>
       )}
       {turn.hasRolled && !rolling && (
-        <Button variant="secondary" size="sm" block onClick={endTurn}>
-          {t('game.endTurn')}
-        </Button>
+        <Tooltip content={t('game.endTurnDesc')} className="w-full">
+          <Button variant="secondary" size="sm" block onClick={endTurn}>
+            {t('game.endTurn')}
+          </Button>
+        </Tooltip>
       )}
       {metaActionsLeft > 0 && !rolling && me && (
         <MetaActionBar

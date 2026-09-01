@@ -970,7 +970,11 @@
       "roll": "Lempar dadu dan maju sebanyak angkanya.",
       "resolve": "Selesaikan petak tempatmu mendarat — beli, bayar sewa, ambil kartu, atau bayar pajak.",
       "act": "Boleh pakai satu aksi (lihat di bawah).",
-      "end": "Akhiri giliran. Dapat dadu kembar? Lempar sekali lagi dulu."
+      "end": "Akhiri giliran. Dapat dadu kembar? Lempar sekali lagi dulu.",
+      "progress": "Langkah {{current}} dari {{total}}",
+      "back": "Langkah sebelumnya",
+      "next": "Langkah berikutnya",
+      "goTo": "Ke langkah {{current}}"
     },
     "money": {
       "title": "Cari cuan",

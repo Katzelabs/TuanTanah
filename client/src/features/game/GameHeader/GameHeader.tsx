@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/gameStore.js'
 import { GameTimer } from '@/features/game/GameTimer/GameTimer.js'
 import { FeedbackButton } from '@/features/feedback/index.js'
+import { HelpButton } from '@/features/help/index.js'
 import { LeaveButton, SurrenderButton } from '@/components/RoomActions.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 
@@ -39,6 +40,9 @@ export function GameHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {/* The mid-match rules escape hatch: the player who needs it most is
+            mid-turn and can't afford to leave the room to look something up. */}
+        <HelpButton />
         {/* The whole point of the modal: reporting mid-game costs the player
             nothing, because nothing here navigates away from the match. */}
         <FeedbackButton />

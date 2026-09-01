@@ -970,7 +970,11 @@
       "roll": "Roll the dice and move that many tiles.",
       "resolve": "Resolve where you land — buy it, pay the rent, draw a card, or pay tax.",
       "act": "Optionally use one action (below).",
-      "end": "End your turn. Rolled doubles? Take another roll first."
+      "end": "End your turn. Rolled doubles? Take another roll first.",
+      "progress": "Step {{current}} of {{total}}",
+      "back": "Previous step",
+      "next": "Next step",
+      "goTo": "Go to step {{current}}"
     },
     "money": {
       "title": "Making money",
