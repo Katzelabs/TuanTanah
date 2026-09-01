@@ -72,7 +72,7 @@ export function StyleGuide() {
               <BreakRow
                 name="hud"
                 width="600px"
-                desc="★ The HUD switch — the one breakpoint with layout meaning. See below."
+                desc="The phone-portrait width guard. Its job is to floor short — see below."
                 highlight
               />
               <BreakRow
@@ -108,34 +108,33 @@ export function StyleGuide() {
 
         <Card tone="accent" pad="md" className="mt-4">
           <h3 className="font-display text-lg uppercase tracking-tight">
-            <Code>hud</Code> — the phone-portrait HUD switch
+            <Code>hud</Code> — the phone-portrait width guard
           </h3>
           <p className="mt-2 text-sm font-medium leading-relaxed">
-            <strong>
-              Below <Code>hud</Code>
-            </strong>{' '}
-            (<Code>max-hud:</Code>) the game screen is phone-portrait: the board sits on top at full
-            width, and the player panel, action bar and event log move into a swipe-up bottom drawer
-            (<Code>z-drawer</Code>).{' '}
-            <strong>
-              At <Code>hud</Code> and up
-            </strong>{' '}
-            the current layout stands — board with panels beside it (<Code>lg</Code>) or stacked
-            beneath it (below <Code>lg</Code>).
+            It marks where “a phone in portrait” ends. Nothing keys on it alone: the game screen is
+            one scrolling page at every width — board on top, panels beside it (<Code>lg</Code>) or
+            stacked beneath it — and on phones the turn controls stay in the sidebar’s Actions tab
+            directly under the board. Its live use is as the width floor of <Code>short</Code>,
+            stacked as <Code>hud:short:</Code>.
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm font-medium">
             <li>
               600px clears every mainstream phone-portrait width with headroom — the widest is
-              ~430px — so all of them, plus foldable portrait, get the drawer.
+              ~430px — so all of them, plus foldable portrait, count as phone portrait.
             </li>
             <li>
               It sits below the narrowest phone <em>landscape</em> width (667px) and below every
-              tablet-portrait width (744px+), so neither is dragged into a drawer layout that
-              assumes a tall viewport.
+              tablet-portrait width (744px+), so neither is dragged into a layout that assumes a
+              tall viewport.
             </li>
             <li>
               It is deliberately <em>not</em> an alias of <Code>sm</Code>: <Code>sm</Code> tunes
-              grids across the app, and retuning the HUD threshold must not reflow them.
+              grids across the app, and retuning this threshold must not reflow them.
+            </li>
+            <li>
+              A phone-portrait HUD drawer used to hang off <Code>max-hud:</Code>. It was removed —
+              hiding the roll button behind a swipe cost a tap on the game’s most repeated action.
+              Don’t reintroduce a disclosure here.
             </li>
           </ul>
           <p className="mt-3 text-sm font-medium">
@@ -171,9 +170,8 @@ export function StyleGuide() {
           <p className="mt-2 text-sm font-medium leading-relaxed">
             It is registered as a <strong>plugin variant</strong>, not a <Code>raw</Code> entry in{' '}
             <Code>screens</Code>. A single <Code>raw</Code> screen makes Tailwind stop emitting the{' '}
-            <Code>max-*</Code> variant for <em>every</em> screen — <Code>max-hud:</Code>, which the
-            phone-portrait HUD depends on, silently disappears. Add future non-width variants the
-            same way.
+            <Code>max-*</Code> variant for <em>every</em> screen — <Code>max-hud:</Code> and its
+            siblings silently disappear. Add future non-width variants the same way.
           </p>
         </Card>
       </Section>
@@ -406,8 +404,8 @@ export function StyleGuide() {
             ))}
           </div>
           <p className="mt-2 text-sm font-medium text-ink-muted">
-            <Code>z-drawer</Code> is reserved for the phone-portrait HUD drawer: over panels, under
-            toasts.
+            <Code>z-drawer</Code> is a reserved layer for a sheet or drawer: over panels, under
+            toasts. Nothing claims it today.
           </p>
         </Card>
       </Section>

@@ -18,7 +18,6 @@ import { Board } from '@/features/game/Board/Board.js'
 import { DebtPanel } from '@/features/game/DebtPanel/DebtPanel.js'
 import { EventLog } from '@/features/game/EventLog/EventLog.js'
 import { GameHeader } from '@/features/game/GameHeader/GameHeader.js'
-import { HudDrawer, HUD_PEEK_PX } from '@/features/game/HudDrawer/HudDrawer.js'
 import { MetaActionBar, type MetaActionDef } from '@/features/game/MetaActionBar/MetaActionBar.js'
 import { JudolModal } from '@/features/game/JudolModal/JudolModal.js'
 import { KantorHukumModal } from '@/features/game/KantorHukumModal/KantorHukumModal.js'
@@ -83,10 +82,6 @@ export function Game() {
   // dice where attention already is, leaving a lighter sidebar. On phones the
   // board center is too cramped, so they stay in the sidebar (previous layout).
   const actionsOnBoard = useMediaQuery('(min-width: 768px)')
-  // Phone portrait: below the `hud` breakpoint the sidebar stops being a column
-  // beside/under the board and becomes a swipe-up drawer over it. Kept in sync
-  // with Tailwind's `max-hud:` (which compiles to `not (min-width: 600px)`).
-  const phoneHud = useMediaQuery('(max-width: 599.98px)')
 
   const metaActionsLeft = META_ACTIONS_PER_LAP - (me?.metaActionsUsed.length ?? 0)
   // Clear any in-progress target selection when it's no longer actionable.
@@ -334,9 +329,8 @@ export function Game() {
           ? 'status'
           : 'actions'
 
-  // Everything that isn't the board. Rendered once and placed either in the
-  // desktop/tablet sidebar column or inside the phone-portrait drawer — the
-  // content is identical, only its container differs.
+  // Everything that isn't the board: the sidebar column's contents, beside the
+  // board from `lg` up and stacked beneath it below that.
   const sidebarBody = (
     <>
       <AfkCountdown />
@@ -390,62 +384,36 @@ export function Game() {
     </>
   )
 
-  // Status line on the closed drawer handle, so a phone player can follow the
-  // game without opening it.
-  const hudTitle = myDebt
-    ? t('debt.title')
-    : phase === 'ended'
-      ? t('game.gameOver.title')
-      : isMyTurn
-        ? t('turnBanner.yourTurn')
-        : `${t('game.waitingFor')} ${current?.name ?? t('common.dash')}…`
-
   return (
     /*
-     * Three layouts, one tree:
-     *   phone portrait (max-hud) — fixed-height shell, board on top, drawer over it
+     * Two layouts, one tree:
      *   short landscape (hud+short) — fixed-height shell, board beside the panels
-     *   everything else — the original scrolling page
-     * The two fixed-height shells stop the page itself from scrolling so the
-     * board can't be pushed off screen; their inner regions scroll instead.
+     *   everything else — a scrolling page: board on top with the sidebar beside
+     *     it (`lg`) or stacked beneath it (below `lg`), phones included
+     * The fixed-height shell stops the page itself from scrolling so the board
+     * can't be pushed off screen; its inner regions scroll instead.
      */
-    <div className="mx-auto flex max-w-[1400px] flex-col gap-4 p-4 max-hud:h-[100dvh] max-hud:gap-2 max-hud:overflow-hidden max-hud:p-3 hud:short:h-[100dvh] hud:short:gap-2 hud:short:overflow-hidden hud:short:p-3">
+    <div className="mx-auto flex max-w-[1400px] flex-col gap-4 p-4 hud:short:h-[100dvh] hud:short:gap-2 hud:short:overflow-hidden hud:short:p-3">
       {/* Full-width page header */}
       <div className="shrink-0">
         <GameHeader />
       </div>
 
-      <div className="flex flex-col gap-4 lg:flex-row max-hud:min-h-0 max-hud:flex-1 max-hud:overflow-y-auto hud:short:min-h-0 hud:short:flex-1 hud:short:flex-row">
+      <div className="flex flex-col gap-4 lg:flex-row hud:short:min-h-0 hud:short:flex-1 hud:short:flex-row">
         {/* Board. Its own container-query geometry is untouched — it just gets
-          the width it's given. The phone-portrait bottom padding keeps it clear
-          of the closed drawer; short landscape caps it by viewport height so the
+          the width it's given. Short landscape caps it by viewport height so the
           square never outgrows the screen. */}
-        <div
-          className="flex flex-1 items-start justify-center hud:short:min-w-0 hud:short:max-w-[calc(100dvh-5rem)]"
-          style={phoneHud ? { paddingBottom: HUD_PEEK_PX } : undefined}
-        >
+        <div className="flex flex-1 items-start justify-center hud:short:min-w-0 hud:short:max-w-[calc(100dvh-5rem)]">
           <Board state={state} onSelectTile={handleTileClick} centerSlot={boardActions} />
         </div>
 
-        {/* Sidebar — replaced by the drawer on phone portrait. */}
-        {!phoneHud && (
-          <aside className="flex w-full flex-col gap-4 lg:w-80 hud:short:w-80 hud:short:min-h-0 hud:short:overflow-y-auto">
-            {sidebarBody}
-          </aside>
-        )}
-      </div>
-
-      {phoneHud && (
-        <HudDrawer
-          title={hudTitle}
-          // Open itself when the player has to act, and get out of the way when
-          // they've been asked to tap a tile on the board.
-          demandsAttention={Boolean(turnActive || myDebt)}
-          yieldToBoard={pendingMeta?.target === 'tile'}
-        >
+        {/* Sidebar. On phones the turn controls live in its Actions tab — the
+          board center is too cramped for them — so it must stay directly under
+          the board rather than behind any disclosure. */}
+        <aside className="flex w-full flex-col gap-4 lg:w-80 hud:short:w-80 hud:short:min-h-0 hud:short:overflow-y-auto">
           {sidebarBody}
-        </HudDrawer>
-      )}
+        </aside>
+      </div>
 
       <PinjolModal open={showPinjol} onClose={() => setShowPinjol(false)} />
       <ForcePinjolModal open={showForcePinjol} onClose={() => setShowForcePinjol(false)} />

@@ -35,7 +35,7 @@ describe('StyleGuide', () => {
     }
   })
 
-  it('documents the phone-portrait HUD breakpoint', () => {
+  it('documents the phone-portrait breakpoint and its landscape companion', () => {
     render(
       <MemoryRouter>
         <StyleGuide />
@@ -47,7 +47,7 @@ describe('StyleGuide', () => {
     expect(screen.getByText('landscape ≤540px tall')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /short.*companion to.*hud/i })).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: /hud.*phone-portrait HUD switch/i }),
+      screen.getByRole('heading', { name: /hud.*phone-portrait width guard/i }),
     ).toBeInTheDocument()
   })
 })

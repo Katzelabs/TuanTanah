@@ -20,8 +20,8 @@ export default {
      * that width and up; `max-*` variants (e.g. `max-hud:`) apply below it.
      *
      *   xs   480  Large-phone portrait. Room for a second column of chips.
-     *   hud  600  ★ THE HUD SWITCH. See the note below — this is the one
-     *             breakpoint with layout meaning, not just a sizing step.
+     *   hud  600  The phone-portrait width guard. Not a sizing step: its only
+     *             job is to floor `short` — see the note below.
      *   sm   640  Generic "not a phone" content step (grid columns, gaps).
      *   md   768  Tablet portrait. Headers go horizontal, icon buttons regain
      *             their labels (`RoomActions`).
@@ -31,22 +31,27 @@ export default {
      *   xl  1280  Comfortable desktop.
      *   2xl 1536  Wide desktop; the page is capped at max-w-[1400px] anyway.
      *
-     * ── `hud` (600px): the phone-portrait HUD switch ──────────────────────
-     * BELOW `hud` (`max-hud:`) the game screen is phone-portrait: the board
-     * sits on top at full width and the player panel / action bar / event log
-     * move into a swipe-up bottom drawer.
-     * AT `hud` AND UP the current layout stands: board with panels beside it
-     * (`lg`) or stacked beneath it (below `lg`).
+     * ── `hud` (600px): the phone-portrait width guard ─────────────────────
+     * It draws the line between "a phone in portrait" and everything else.
+     * Nothing keys on it alone: the game screen is one scrolling page at every
+     * width — board on top, panels beside it (`lg`) or stacked beneath it —
+     * and the turn controls stay under the board on phones rather than behind
+     * any disclosure. Its live use is as the width floor of `short`, stacked
+     * as `hud:short:` (see the plugin at the bottom of this file).
+     *
+     * (A phone-portrait HUD drawer used to hang off `max-hud:`. It was removed
+     * — hiding the roll button behind a swipe cost a tap on the game's most
+     * repeated action. Don't reintroduce a disclosure here.)
      *
      * Why 600 and not `sm`:
      *   - It clears every mainstream phone-portrait width with headroom — the
      *     widest is ~430px (iPhone Pro Max / S Ultra) — so all of them, plus
-     *     future/foldable portrait, get the drawer.
+     *     future/foldable portrait, count as phone portrait.
      *   - It sits below the narrowest phone *landscape* width (667px) and
      *     below every tablet-portrait width (744px+), so neither is dragged
-     *     into a drawer layout that assumes a tall viewport.
+     *     into a layout that assumes a tall viewport.
      *   - It is deliberately NOT an alias of `sm` (640): `sm` is a content
-     *     step used for grid/gap tuning across the app, and retuning the HUD
+     *     step used for grid/gap tuning across the app, and retuning this
      *     threshold must not reflow unrelated grids.
      * Tailwind's built-in `portrait:` / `landscape:` variants are available if
      * a rule needs orientation on top of width.
@@ -217,7 +222,7 @@ export default {
       zIndex: {
         board: '0',
         panel: '10',
-        drawer: '30', // phone-portrait HUD drawer (below hud) — over panels, under toasts
+        drawer: '30', // reserved: a sheet/drawer over the panels, under toasts
         toast: '40',
         modal: '50',
         tooltip: '60',
@@ -243,8 +248,8 @@ export default {
      *
      * Why a plugin and not a `raw` entry in `screens`: a single `raw` screen
      * makes Tailwind stop emitting the `max-*` variant for *every* screen, so
-     * `max-hud:` — which the phone-portrait HUD depends on — silently vanishes.
-     * Registering the variant here leaves the `screens` ladder untouched.
+     * `max-hud:` and its siblings silently vanish. Registering the variant here
+     * leaves the `screens` ladder untouched.
      */
     plugin(({ addVariant }) => {
       addVariant('short', '@media (orientation: landscape) and (max-height: 540px)')
