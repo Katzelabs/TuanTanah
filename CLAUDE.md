@@ -128,6 +128,31 @@ Remaining gaps are balance/content TODOs, not missing systems — search for `TO
 - TypeScript is strict (`noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`). Use `import type` for type-only imports.
 - Server runs via `tsx` (no build step for dev or prod `start`); only the client is bundled.
 
+## Versioning and the changelog — a player-visible change is not done without an entry
+
+**If a change alters anything a player can see, add a line to `shared/data/changelog.ts` in the same
+change.** Not later, not at release time. A changelog kept as a separate chore goes stale within two
+releases, and a page saying the game stopped moving six months ago reads as an abandoned product —
+which is worse than having no page.
+
+- **One release number**, in `shared/version.ts` (`APP_VERSION`) and the root `package.json`.
+  `server/test/version.test.ts` fails if they disagree. `BUILD_SHA` (the commit) is injected by
+  `make deploy`, not stored in `.env`.
+- **The top entry in `shared/data/changelog.ts` is the release being built.** Its `version` must equal
+  `APP_VERSION` — `server/test/changelog.test.ts` enforces that. So:
+  - Working toward an unreleased version → **add your line to the top entry**.
+  - The top entry is already deployed → **bump `APP_VERSION` + root `package.json`, add a new top
+    entry**, then put your line in it.
+- **Write both `en` and `id`** — a test fails on a missing one. Write for a player, not for us:
+  "Fixed players being kicked out of their room after losing connection", never "refactor socket
+  session keying".
+- **What does _not_ belong here:** refactors, test changes, dependency bumps, infra, anything a
+  player cannot observe. An honest short entry beats a padded one.
+- `docs/changelog/` is a **different thing** — long-form engineering write-ups for us. Don't confuse
+  the two; see the README table and `docs/changelog/README.md`.
+
+Full checklist for cutting a release is in the README ("Cutting a release").
+
 ## Project management — ClickUp is the source of truth
 
 This project is managed in ClickUp via the connected ClickUp MCP (`mcp__clickup__*`). Tasks and design docs live there, not in the repo. Use ClickUp for PM; use the repo for code.
