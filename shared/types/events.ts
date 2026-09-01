@@ -41,7 +41,9 @@ export interface ClientToServerEvents {
   // rejoin so a known playerId alone can't be used to hijack someone's seat.
   rejoin: (
     payload: { roomId: string; playerId: string; token: string },
-    ack: (res: AckResult<{ roomId: string; playerId: string; token: string }>) => void,
+    ack: (
+      res: AckResult<{ roomId: string; playerId: string; token: string }, RejoinFailure>,
+    ) => void,
   ) => void
   // Deliberate exit: leave the lobby (removed) or forfeit an in-progress game
   // (eliminated). Distinct from a socket disconnect, which keeps the seat.
@@ -156,5 +158,18 @@ export interface ServerToClientEvents {
   room_invite: (payload: RoomInvite) => void
 }
 
-// Generic ack envelope for request/response style events.
-export type AckResult<T> = { ok: true; data: T } | { ok: false; error: string }
+// Generic ack envelope for request/response style events. `reason` is an optional
+// machine-readable code on the failure branch, for the callers that must react to
+// *why* something failed rather than just showing `error` (see `RejoinFailure`).
+export type AckResult<T, E extends string = never> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; reason?: E }
+
+/**
+ * Why a rejoin was refused, when the answer is "this seat is unrecoverable":
+ * the room is gone (TTL, or emptied), or the seat is no longer in it / the token
+ * doesn't match. Anything else — a transport error, a timeout, a server fault —
+ * carries no reason, and the client must keep the saved seat and try again on the
+ * next reconnect instead of evicting the player from their own game.
+ */
+export type RejoinFailure = 'room_gone' | 'seat_gone'

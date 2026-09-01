@@ -4,6 +4,7 @@ import {
   ALL_ROLES,
   BANK_STARTING,
   BOARD_SIZE,
+  DISCONNECT_GRACE_MS,
   GO_TILE_ID,
   HOUSE_TIERS,
   HUSTLE_CARDS,
@@ -144,6 +145,7 @@ export function addPlayer(state: GameState, name: string): Player {
     isEliminated: false,
     isRoomMaster: state.players.length === 0,
     isConnected: true,
+    disconnectedAt: null,
     forcedLoanRound: 0,
     metaActionsUsed: [],
     roleBonusThisLap: 0,
@@ -161,9 +163,22 @@ export function getPlayer(state: GameState, playerId: string): Player {
   return p
 }
 
-export function setConnected(state: GameState, playerId: string, connected: boolean): void {
+/**
+ * Mark a seat present or dropped. `now` stamps when a disconnect started, which
+ * is what the grace period counts from — see `applyDisconnectGrace`. Reconnecting
+ * clears the stamp, so a player who makes it back inside the window is simply
+ * present again.
+ */
+export function setConnected(
+  state: GameState,
+  playerId: string,
+  connected: boolean,
+  now: number = Date.now(),
+): void {
   const p = state.players.find((x) => x.id === playerId)
-  if (p) p.isConnected = connected
+  if (!p) return
+  p.isConnected = connected
+  p.disconnectedAt = connected ? null : now
 }
 
 export function removePlayer(state: GameState, playerId: string): void {
@@ -171,8 +186,83 @@ export function removePlayer(state: GameState, playerId: string): void {
   if (idx === -1) return
   const [removed] = state.players.splice(idx, 1)
   if (removed) logKey(state, 'core.leftRoom', { name: removed.name })
-  // Reassign room master if needed.
-  if (removed?.isRoomMaster && state.players[0]) state.players[0].isRoomMaster = true
+  // The seat is gone, so its reconnect credential is dead weight — drop it rather
+  // than leaving stale secrets in the room for as long as the room lives.
+  if (state.reconnectTokens) delete state.reconnectTokens[playerId]
+  if (removed?.isRoomMaster) reassignRoomMaster(state)
+}
+
+/** Can this player act as room master — i.e. are they actually here to host? */
+function canHost(p: Player): boolean {
+  return p.isConnected && !p.isEliminated
+}
+
+/**
+ * Make sure the room master is someone who can actually host, moving the role if
+ * they can't. Oldest remaining candidate by join order (`players` is append-only,
+ * so index order is join order) — predictable, and stable across repeated calls.
+ *
+ * Returns the new master's id when the role moved, else null.
+ *
+ * Deliberately does NOT hand the role back when the original host reconnects:
+ * once it has moved, it stays moved, so a flaky connection can't bounce the role
+ * around mid-lobby.
+ */
+export function reassignRoomMaster(state: GameState): string | null {
+  const current = state.players.find((p) => p.isRoomMaster)
+  if (current && canHost(current)) return null
+
+  const next = state.players.find(canHost)
+  // Nobody can host (everyone dropped or is out). Leave the flag where it is so
+  // the role comes back with them, rather than stranding it on nobody.
+  if (!next) return null
+
+  if (current) current.isRoomMaster = false
+  next.isRoomMaster = true
+  logKey(state, 'core.roomMasterHandover', { name: next.name }, next.id)
+  return next.id
+}
+
+/**
+ * Act on one player's expired disconnect grace. No-op while they're connected or
+ * still inside the window, so it's safe to call from both the per-player timer and
+ * the lazy sweep, and safe to call twice.
+ *
+ * In the lobby the seat is released — holding it would block the room at
+ * MAX_PLAYERS and deal a role-less ghost into the game. In a live game the seat is
+ * kept: removing a player mid-game would tear a hole in turn order and tile
+ * ownership, and an absent player is already handled by the AFK clock (fines, then
+ * a kick). Either way the room master role moves on if the dropped player held it.
+ */
+export function applyDisconnectGrace(
+  state: GameState,
+  playerId: string,
+  now: number = Date.now(),
+): void {
+  const p = state.players.find((x) => x.id === playerId)
+  if (!p || p.isConnected) return
+  if (p.disconnectedAt == null || now < p.disconnectedAt + DISCONNECT_GRACE_MS) return
+
+  if (state.phase === 'lobby') {
+    removePlayer(state, playerId)
+    return
+  }
+  // Keep the seat, but don't re-run the grace on every later sweep.
+  p.disconnectedAt = null
+  reassignRoomMaster(state)
+}
+
+/**
+ * Apply every expired grace period in the room.
+ *
+ * The per-player timers live in the server process, so a restart loses them while
+ * `disconnectedAt` survives in Redis — without this, a seat dropped just before a
+ * deploy would sit there until the room's TTL. Cheap enough to run on the lobby
+ * write paths.
+ */
+export function sweepExpiredGrace(state: GameState, now: number = Date.now()): void {
+  // Snapshot the ids: applying a grace can splice `players` mid-iteration.
+  for (const id of state.players.map((p) => p.id)) applyDisconnectGrace(state, id, now)
 }
 
 export function pickRole(state: GameState, playerId: string, role: Role | null): void {
@@ -231,6 +321,11 @@ export function startGame(state: GameState, playerId: string, rng: Rng = default
   const active = state.players.filter((p) => p.isConnected)
   if (active.length < MIN_PLAYERS) throw new EngineError('core.needMorePlayers')
   if (active.some((p) => p.role === null)) throw new EngineError('core.playersNeedRole')
+
+  // Drop anyone still disconnected at the whistle. The checks above only look at
+  // connected players, so without this a seat dropped inside its grace window
+  // would be dealt in anyway — with no role, and nobody behind it.
+  for (const p of state.players.filter((x) => !x.isConnected)) removePlayer(state, p.id)
 
   state.phase = 'playing'
   state.round = 1

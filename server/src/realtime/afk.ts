@@ -20,6 +20,19 @@ import { concludeIfWon } from './gameOver.js'
 // game pauses (debt/vote) so an idle clock can't fire on a paused table.
 const roomAfkTimers = new Map<string, NodeJS.Timeout>()
 
+/**
+ * Timers count elapsed time; every deadline here is a `Date.now()` stamp. The two
+ * disagree — a wall clock that steps backward (or plain scheduling jitter) can
+ * land a timer just short of the deadline it exists to enforce. Arm slightly long,
+ * and re-arm rather than shrug if a fire still turns out to be early.
+ */
+export const TIMER_SLACK_MS = 250
+
+/** Milliseconds left on a deadline stamp; 0 once it has passed. */
+function remainingOn(deadline: number): number {
+  return Math.max(0, deadline - Date.now())
+}
+
 export function clearAfkTimer(roomId: string): void {
   const timer = roomAfkTimers.get(roomId)
   if (timer) {
@@ -60,13 +73,23 @@ export async function armAfk(io: TTServer, store: GameStore, roomId: string): Pr
 
   clearAfkTimer(roomId)
   if (!eligible) return
+  scheduleAfk(io, store, roomId, AFK_TIMEOUT_MS)
+}
+
+/**
+ * Schedule the room's AFK wakeup without touching the deadline. Kept separate from
+ * `armAfk` because a re-arm after a premature fire must NOT push the deadline
+ * forward — that would hand the idle player a whole extra turn clock.
+ */
+function scheduleAfk(io: TTServer, store: GameStore, roomId: string, delayMs: number): void {
+  clearAfkTimer(roomId)
   const timer = setTimeout(() => {
     // A timer fires with no socket handler above it, so nothing else would catch
     // this. Unhandled, it would reach the process-level handler in bootstrap/.
     void resolveAfk(io, store, roomId).catch((err) =>
       reportError(err, { at: 'resolveAfk', roomId }),
     )
-  }, AFK_TIMEOUT_MS)
+  }, delayMs + TIMER_SLACK_MS)
   timer.unref?.()
   roomAfkTimers.set(roomId, timer)
 }
@@ -110,11 +133,17 @@ export async function armAuction(io: TTServer, store: GameStore, roomId: string)
 
   clearAuctionTimer(roomId)
   if (!armed) return
+  scheduleAuction(io, store, roomId, AUCTION_TIMEOUT_MS)
+}
+
+/** Schedule the auction wakeup without touching its deadline (see `scheduleAfk`). */
+function scheduleAuction(io: TTServer, store: GameStore, roomId: string, delayMs: number): void {
+  clearAuctionTimer(roomId)
   const timer = setTimeout(() => {
     void resolveAuctionAfk(io, store, roomId).catch((err) =>
       reportError(err, { at: 'resolveAuctionAfk', roomId }),
     )
-  }, AUCTION_TIMEOUT_MS)
+  }, delayMs + TIMER_SLACK_MS)
   timer.unref?.()
   roomAuctionTimers.set(roomId, timer)
 }
@@ -124,12 +153,30 @@ export async function armAuction(io: TTServer, store: GameStore, roomId: string)
  * (a bid may have re-armed it → no-op), resolves the auction for the high bidder,
  * then re-arms the normal turn clock and resolves any win condition.
  */
-async function resolveAuctionAfk(io: TTServer, store: GameStore, roomId: string): Promise<void> {
-  await mutateRoom(store, roomId, (state) => {
+export async function resolveAuctionAfk(
+  io: TTServer,
+  store: GameStore,
+  roomId: string,
+): Promise<void> {
+  const retryIn = await mutateRoom(store, roomId, (state) => {
     const auction = state.pendingAuction
-    if (!auction || auction.deadline === null || Date.now() < auction.deadline) return
+    if (!auction || auction.deadline === null) return 0
+    const remaining = remainingOn(auction.deadline)
+    if (remaining > 0) return remaining
     resolveAuctionTimeout(state)
-  }).catch((err) => reportError(err, { at: 'resolveAuctionAfk.mutate', roomId }))
+    return 0
+  }).catch((err) => {
+    reportError(err, { at: 'resolveAuctionAfk.mutate', roomId })
+    return 0
+  })
+
+  // Fired early. This one cannot be shrugged off: a live auction makes the turn
+  // clock ineligible, and nothing but a bid re-arms the auction clock — so
+  // dropping it here would freeze the table until someone happened to bid.
+  if (retryIn > 0) {
+    scheduleAuction(io, store, roomId, retryIn)
+    return
+  }
 
   clearAuctionTimer(roomId)
   await broadcastAndArm(io, store, roomId)
@@ -142,22 +189,39 @@ async function resolveAuctionAfk(io: TTServer, store: GameStore, roomId: string)
  * player, then re-arms for the next player and resolves any win condition.
  */
 export async function resolveAfk(io: TTServer, store: GameStore, roomId: string): Promise<void> {
-  const eliminated = await mutateRoom(store, roomId, (state) => {
-    if (!afkEligible(state)) return [] as string[]
-    if (state.turn.deadline === null || Date.now() < state.turn.deadline) return [] as string[]
+  const nothing = { eliminated: [] as string[], retryIn: 0 }
+  const outcome = await mutateRoom(store, roomId, (state) => {
+    if (!afkEligible(state)) return nothing
+    const { deadline } = state.turn
+    if (deadline === null) return nothing
+    const remaining = remainingOn(deadline)
+    if (remaining > 0) return { eliminated: [] as string[], retryIn: remaining }
     const current = state.players[state.currentPlayerIndex]
-    if (!current) return [] as string[]
+    if (!current) return nothing
     const before = state.players.filter((p) => p.isEliminated).map((p) => p.id)
     applyAfkTimeout(state, current.id)
-    return state.players.filter((p) => p.isEliminated && !before.includes(p.id)).map((p) => p.id)
+    return {
+      eliminated: state.players
+        .filter((p) => p.isEliminated && !before.includes(p.id))
+        .map((p) => p.id),
+      retryIn: 0,
+    }
   }).catch((err) => {
     // The skip did not happen. The table is about to be re-broadcast as if it
     // had, so this is the one report that explains a stuck turn.
     reportError(err, { at: 'resolveAfk.mutate', roomId })
-    return [] as string[]
+    return nothing
   })
 
+  // Fired early: wait out what's left rather than falling through to
+  // `broadcastAndArm`, which would reset the deadline and quietly gift the idle
+  // player a second full turn clock.
+  if (outcome.retryIn > 0) {
+    scheduleAfk(io, store, roomId, outcome.retryIn)
+    return
+  }
+
   await broadcastAndArm(io, store, roomId)
-  for (const id of eliminated) io.to(roomId).emit('player_eliminated', { playerId: id })
+  for (const id of outcome.eliminated) io.to(roomId).emit('player_eliminated', { playerId: id })
   await concludeIfWon(io, store, roomId)
 }

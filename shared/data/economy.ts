@@ -36,6 +36,14 @@ export const AFK_FINE_STEP: RupiahAmount = jt(1)
 // Strikes 1..AFK_MAX_STRIKES are fined; the next AFK turn kicks the player.
 export const AFK_MAX_STRIKES = 3
 
+// ---- Disconnect grace ----
+// How long a dropped player keeps their seat before the room acts on their
+// absence. Long enough to survive the ordinary mobile blip (backgrounded app,
+// tunnel, handover), short enough that a lobby seat isn't held hostage. On
+// expiry a lobby seat is released; a seat in a live game is kept (leaving mid-game
+// is the AFK system's job) and only the room-master role moves on.
+export const DISCONNECT_GRACE_MS = 45_000
+
 // ---- Pinjol ----
 export const PINJOL_AMOUNTS: RupiahAmount[] = [jt(2), jt(5), jt(10)]
 export const PINJOL_INTEREST_RATE = 0.2 // 20% per lap (charged when the borrower passes GO)

@@ -14,6 +14,8 @@ import type {
 } from '@tuan-tanah/shared'
 import { addPlayer, createGameState } from '../src/engine/index.js'
 import type { Rng } from '../src/engine/util.js'
+import type { TTServer } from '../src/realtime/common.js'
+import type { GameStore } from '../src/rooms/store.js'
 
 interface MakeGameOpts {
   /** Role per player (by join order); omitted entries stay null. */
@@ -107,4 +109,34 @@ export function addDebt(
 export function seqRng(values: number[]): Rng {
   let i = 0
   return () => values[i++ % values.length]!
+}
+
+/**
+ * A store that actually persists, so `mutateRoom`'s read-modify-write round trip
+ * is real — the timer paths under test read state back after mutating it.
+ */
+export function liveStore(state: GameState): GameStore {
+  let held = state
+  return {
+    backend: 'memory',
+    get: async () => held,
+    set: async (_id, next) => {
+      held = next
+    },
+    del: async () => undefined,
+    has: async () => true,
+    ping: async () => true,
+  }
+}
+
+/** A socket server that counts broadcasts instead of sending them. */
+export function recordingIo(): { io: TTServer; readonly broadcasts: number } {
+  const box = { broadcasts: 0 }
+  const io = { to: () => ({ emit: () => box.broadcasts++ }) } as unknown as TTServer
+  return {
+    io,
+    get broadcasts() {
+      return box.broadcasts
+    },
+  }
 }

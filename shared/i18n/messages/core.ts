@@ -4,6 +4,7 @@ export const log: MessageMap = {
   en: {
     'core.joinedRoom': '{{name}} joined the room',
     'core.leftRoom': '{{name}} left the room',
+    'core.roomMasterHandover': '{{name}} is now the room master',
     'core.gameStarted': 'Game started!',
     'core.rolled': '{{name}} rolled {{d1}} + {{d2}} = {{total}}',
     'core.rolledDoubles': '{{name}} rolled {{d1}} + {{d2}} = {{total}} (doubles!)',
@@ -49,6 +50,7 @@ export const log: MessageMap = {
   id: {
     'core.joinedRoom': '{{name}} bergabung ke ruangan',
     'core.leftRoom': '{{name}} meninggalkan ruangan',
+    'core.roomMasterHandover': '{{name}} sekarang menjadi tuan ruang',
     'core.gameStarted': 'Permainan dimulai!',
     'core.rolled': '{{name}} melempar dadu {{d1}} + {{d2}} = {{total}}',
     'core.rolledDoubles': '{{name}} melempar dadu {{d1}} + {{d2}} = {{total}} (ganda!)',

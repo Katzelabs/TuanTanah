@@ -6,12 +6,19 @@ import {
   removePlayer,
   setConnected,
   startGame,
+  sweepExpiredGrace,
   updateSettings,
 } from '../engine/index.js'
 import { createRoom, mutateRoom } from '../rooms/rooms.js'
 import { clearSession, setSession } from '../rooms/sessions.js'
 import type { GameStore } from '../rooms/store.js'
 import { broadcastAndArm } from './afk.js'
+import {
+  armDisconnectGrace,
+  clearDisconnectGrace,
+  clearRoomGraceTimers,
+  deleteRoom,
+} from './presence.js'
 import {
   broadcastState,
   guard,
@@ -36,6 +43,9 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
       }
 
       const { player, token } = await mutateRoom(store, roomId, (state) => {
+        // Timers are in-process, so a restart can leave expired seats still
+        // sitting there. Clear them before counting the room as full.
+        sweepExpiredGrace(state)
         const player = addPlayer(state, payload.playerName)
         const token = randomUUID()
         state.reconnectTokens ??= {}
@@ -59,11 +69,14 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
     try {
       const roomId = payload.roomId?.trim().toUpperCase()
       if (!roomId || !(await store.has(roomId))) {
-        ack?.({ ok: false, error: 'Room not found' })
+        ack?.({ ok: false, error: 'Room not found', reason: 'room_gone' })
         return
       }
 
       const found = await mutateRoom(store, roomId, (state) => {
+        // Same lazy sweep as join_room: if this seat's own grace ran out while the
+        // server was down, it expires here rather than being silently revived.
+        sweepExpiredGrace(state)
         if (!state.players.some((p) => p.id === payload.playerId)) return false
         // Require the secret token — a known playerId alone (it's broadcast to
         // every client) must not be enough to reclaim a seat.
@@ -72,10 +85,14 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
         return true
       })
       if (!found) {
-        ack?.({ ok: false, error: 'Could not restore session' })
+        // The seat is unrecoverable, not merely unreachable — tell the client so,
+        // so it drops the saved session instead of retrying forever.
+        ack?.({ ok: false, error: 'Could not restore session', reason: 'seat_gone' })
         return
       }
 
+      // Back inside the window: cancel the pending expiry for this seat.
+      clearDisconnectGrace(roomId, payload.playerId)
       setSession(socket.id, { roomId, playerId: payload.playerId, userId: socket.data.userId })
       await socket.join(roomId)
       ack?.({ ok: true, data: { roomId, playerId: payload.playerId, token: payload.token } })
@@ -114,7 +131,13 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
   socket.on('start_game', () =>
     guard(socket, async () => {
       const { roomId, playerId } = requireSession(socket)
-      await mutateRoom(store, roomId, (state) => startGame(state, playerId))
+      await mutateRoom(store, roomId, (state) => {
+        sweepExpiredGrace(state)
+        startGame(state, playerId)
+      })
+      // `startGame` drops any seat still disconnected, and everyone left is
+      // present — so no grace countdown from the lobby should outlive the whistle.
+      clearRoomGraceTimers(roomId)
       await scheduleTimeLimit(io, store, roomId)
       // Arm the AFK clock for the first turn (also broadcasts the fresh deadline).
       await broadcastAndArm(io, store, roomId)
@@ -127,15 +150,22 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
       // Lobby leave removes the seat; leaving a live game forfeits (eliminates)
       // so the rest can keep playing. Once the game has ended there's nothing to
       // forfeit — just release the seat's token.
-      const wasPlaying = await mutateRoom(store, roomId, (state) => {
+      const { wasPlaying, empty } = await mutateRoom(store, roomId, (state) => {
         const playing = state.phase === 'playing'
         if (state.phase === 'lobby') removePlayer(state, playerId)
         else if (playing) forfeit(state, playerId)
         if (state.reconnectTokens) delete state.reconnectTokens[playerId]
-        return playing
+        return { wasPlaying: playing, empty: state.players.length === 0 }
       })
+      clearDisconnectGrace(roomId, playerId)
       clearSession(socket.id)
       await socket.leave(roomId)
+      // Last one out: drop the room instead of leaving an empty lobby (and its
+      // timers) alive until the TTL.
+      if (empty) {
+        await deleteRoom(store, roomId)
+        return
+      }
       await broadcastAndArm(io, store, roomId)
       if (wasPlaying) {
         io.to(roomId).emit('player_eliminated', { playerId })
@@ -168,11 +198,16 @@ export function registerLobbyHandlers(io: TTServer, socket: TTSocket, store: Gam
       const session = getSessionSafe(socket)
       if (!session) return
       const { roomId, playerId } = session
-      await mutateRoom(store, roomId, (state) => {
-        const p = state.players.find((x) => x.id === playerId)
-        if (p) p.isConnected = false
-      }).catch(() => undefined)
+      // The seat is kept, not released: the player has DISCONNECT_GRACE_MS to come
+      // back to it. Only when that runs out does `presence.ts` act on the absence.
+      const marked = await mutateRoom(store, roomId, (state) => {
+        setConnected(state, playerId, false)
+        return true
+      }).catch(() => false)
       clearSession(socket.id)
+      // Don't arm a countdown against a room we couldn't even write to (gone, or
+      // mid-failure) — it would only fire into nothing 45s later.
+      if (marked) armDisconnectGrace(io, store, roomId, playerId)
       await broadcastState(io, store, roomId)
     })
   })

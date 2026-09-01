@@ -40,8 +40,18 @@ const KEJADIAN_NAME = new Map(KEJADIAN_CARDS.map((c) => [c.id, c.name]))
 // the next player exactly once per turn change (not on every broadcast).
 let lastCurrentPlayerId: string | null = null
 
+// Pending rejoin retry, so overlapping reconnects can't stack up attempts.
+let rejoinRetry: ReturnType<typeof setTimeout> | null = null
+
 // Persist the player's seat so a refresh / brief disconnect can rejoin it.
 const SESSION_KEY = 'tuan-tanah:session'
+
+// How long to wait for the server's rejoin ack, and how hard to keep trying.
+// Without a bound a lost ack leaves the UI stuck on "reconnecting" forever; with
+// only one attempt, a single unlucky packet costs the player their seat.
+const REJOIN_ACK_TIMEOUT_MS = 5_000
+const REJOIN_MAX_ATTEMPTS = 3
+const REJOIN_RETRY_DELAY_MS = 1_000
 
 interface StoredSession {
   roomId: string
@@ -213,22 +223,49 @@ export const useGame = create<GameStore>((set, get) => ({
 
     // Reclaim a persisted seat after a refresh or reconnect. Fires on the initial
     // connect and on every socket.io auto-reconnect; rejoin is idempotent server-side.
-    const attemptRejoin = () => {
+    //
+    // The seat is only thrown away when the server says it is genuinely gone. A
+    // timeout, a transport error or an unexplained failure keeps it and retries —
+    // dropping it on any failure is how a server blip evicts a player from a game
+    // they are still in.
+    const attemptRejoin = (attempt = 1) => {
+      if (rejoinRetry !== null) clearTimeout(rejoinRetry)
+      rejoinRetry = null
+
       const saved = loadSession()
       if (!saved) {
         set({ rejoining: false })
         return
       }
       set({ rejoining: true })
+
+      const giveUpOrRetry = () => {
+        if (attempt < REJOIN_MAX_ATTEMPTS) {
+          rejoinRetry = setTimeout(() => attemptRejoin(attempt + 1), REJOIN_RETRY_DELAY_MS)
+          return
+        }
+        // Out of attempts, but the seat is still ours as far as we know: keep it
+        // stored so the next reconnect can pick it up again.
+        set({ rejoining: false })
+      }
+
       // Always on the primary socket — it owns the persisted (seat-1) session.
-      socket.emit('rejoin', saved, (res) => {
+      socket.timeout(REJOIN_ACK_TIMEOUT_MS).emit('rejoin', saved, (err, res) => {
+        if (err || !res) {
+          giveUpOrRetry()
+          return
+        }
         if (res.ok) {
           saveSession(res.data.roomId, res.data.playerId, res.data.token)
           set({ roomId: res.data.roomId, playerId: res.data.playerId, rejoining: false })
-        } else {
+          return
+        }
+        if (res.reason === 'room_gone' || res.reason === 'seat_gone') {
           clearStoredSession()
           set({ roomId: null, playerId: null, state: null, rejoining: false })
+          return
         }
+        giveUpOrRetry()
       })
     }
 
@@ -324,6 +361,8 @@ export const useGame = create<GameStore>((set, get) => ({
     // Deliberate exit — tell the server (removes our seat in lobby, forfeits
     // in-game), then drop the local session so we don't auto-rejoin.
     getActiveSocket().emit('leave_room')
+    if (rejoinRetry !== null) clearTimeout(rejoinRetry)
+    rejoinRetry = null
     clearStoredSession()
     resetRollAnim()
     set({ roomId: null, playerId: null, state: null, finalStandings: null, rejoining: false })

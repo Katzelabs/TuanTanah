@@ -82,6 +82,11 @@ export interface Player {
   isEliminated: boolean
   isRoomMaster: boolean
   isConnected: boolean
+  // When this player dropped (epoch ms), or null while connected. The grace
+  // period ends DISCONNECT_GRACE_MS later. Kept in state rather than only in the
+  // server's timer so it survives a restart (the timer doesn't) and so clients can
+  // show the countdown.
+  disconnectedAt?: number | null
   // Round in which the Rentenir last forced a loan on a rival (their once-per-round
   // loanshark power). 0 = never used. Compared against state.round to gate reuse.
   forcedLoanRound: number
