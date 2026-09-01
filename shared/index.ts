@@ -3,6 +3,7 @@ export * from './types/game.js'
 export * from './types/events.js'
 export * from './types/auth.js'
 export * from './types/feedback.js'
+export * from './types/changelog.js'
 // Release version + build identity, read by both tiers (see version.ts).
 export * from './version.js'
 // Game data — split into content modules under data/ (see docs/REFACTORING_PLAN.md).
@@ -14,5 +15,7 @@ export * from './data/roles.js'
 export * from './data/boards/classic.js'
 export * from './data/cards/kejadian.js'
 export * from './data/cards/hustle.js'
+// Player-facing release notes (NOT docs/changelog/, which is engineering notes).
+export * from './data/changelog.js'
 export * from './rulesets/classic.js'
 export * from './i18n/index.js'

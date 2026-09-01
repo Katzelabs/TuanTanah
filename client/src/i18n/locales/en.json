@@ -224,7 +224,12 @@
     },
     "pinjolDesc": "Take a quick loan for cash now — repay it later with steep interest.",
     "forcePinjolDesc": "Loanshark power (once per round): force a rival to take a pinjol you fund and collect the interest on.",
-    "negotiateDesc": "Propose a deal to another player: swap properties, trade cash, rent immunity, or revenue share."
+    "negotiateDesc": "Propose a deal to another player: swap properties, trade cash, rent immunity, or revenue share.",
+    "rollDiceDesc": "Roll two dice and move that many tiles.",
+    "rollForDoublesDesc": "Roll doubles to get out of jail early.",
+    "buyDesc": "Buy this tile from the bank. Rivals who land here then pay you rent.",
+    "endTurnDesc": "Finish your turn and pass the dice on.",
+    "payBailDesc": "Pay to leave jail now instead of sitting out {{turns}} turns."
   },
   "board": {
     "title": "Tuan Tanah",
@@ -932,6 +937,61 @@
       "rate_limited": "That's a lot of reports in a short time. Please try again in a few minutes.",
       "unavailable": "We couldn't send that right now. Please try again in a moment.",
       "network": "No connection. Check your internet and try again."
+    }
+  },
+  "changelog": {
+    "title": "What's new",
+    "intro": "Everything that changed, newest first.",
+    "read": "What's new",
+    "current": "You're on this",
+    "kind": {
+      "new": "New",
+      "improved": "Improved",
+      "fixed": "Fixed"
+    },
+    "whatsNew": {
+      "title": "New in v{{version}}",
+      "readMore": "See {{count}} more",
+      "dismiss": "Dismiss"
+    }
+  },
+  "help": {
+    "open": "How to play",
+    "title": "How to play",
+    "intro": "Buy up Indonesia, charge rent, and stay solvent longer than everyone else.",
+    "goal": {
+      "title": "The goal",
+      "win": "Be the richest player when the clock runs out.",
+      "early": "Or win early: everyone else going broke ends it on the spot.",
+      "setup": "{{minPlayers}}–{{maxPlayers}} players, {{clock}} minutes, {{startingCash}} each to start."
+    },
+    "turn": {
+      "title": "Your turn",
+      "roll": "Roll the dice and move that many tiles.",
+      "resolve": "Resolve where you land — buy it, pay the rent, draw a card, or pay tax.",
+      "act": "Optionally use one action (below).",
+      "end": "End your turn. Rolled doubles? Take another roll first."
+    },
+    "money": {
+      "title": "Making money",
+      "salary": "Pass GO to collect your salary — the amount depends on the role you picked.",
+      "rent": "Own a tile and every rival landing on it pays you rent.",
+      "upgrade": "Upgrade a tile through its tiers to raise what that rent is worth."
+    },
+    "actions": {
+      "title": "Your actions",
+      "meta": "{{metaPerLap}} actions per lap of the board — work, hustle, judol, lobi, sabotase, korupsi — each usable once per lap.",
+      "negotiate": "Negotiate a deal with any player at any time, even when it isn't your turn.",
+      "pinjol": "Take a pinjol loan when you're short: {{pinjolRate}}% interest for every lap you carry it, {{pinjolMax}} loans maximum."
+    },
+    "trouble": {
+      "title": "When it goes wrong",
+      "debt": "Can't pay? Sell a tile back to the bank, deal with a rival, or borrow.",
+      "jail": "Jail costs you {{jailTurns}} turns — or {{jailFee}} to walk straight out.",
+      "out": "Owe more than you can raise and you're eliminated."
+    },
+    "board": {
+      "title": "Board symbols"
     }
   }
 }

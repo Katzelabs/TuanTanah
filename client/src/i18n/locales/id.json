@@ -224,7 +224,12 @@
     },
     "pinjolDesc": "Ambil pinjaman cepat untuk uang tunai sekarang — bayar kembali dengan bunga tinggi.",
     "forcePinjolDesc": "Kekuatan rentenir (sekali per putaran): paksa lawan mengambil pinjol yang kamu danai dan tarik bunganya.",
-    "negotiateDesc": "Ajukan kesepakatan ke pemain lain: tukar properti, jual-beli tunai, imunitas sewa, atau bagi hasil."
+    "negotiateDesc": "Ajukan kesepakatan ke pemain lain: tukar properti, jual-beli tunai, imunitas sewa, atau bagi hasil.",
+    "rollDiceDesc": "Lempar dua dadu dan maju sebanyak angkanya.",
+    "rollForDoublesDesc": "Dapat dadu kembar untuk keluar penjara lebih cepat.",
+    "buyDesc": "Beli petak ini dari bank. Lawan yang mendarat di sini bayar sewa ke kamu.",
+    "endTurnDesc": "Selesaikan giliranmu dan oper dadunya.",
+    "payBailDesc": "Bayar untuk keluar penjara sekarang, tanpa menunggu {{turns}} giliran."
   },
   "board": {
     "title": "Tuan Tanah",
@@ -932,6 +937,61 @@
       "rate_limited": "Terlalu banyak laporan dalam waktu singkat. Coba lagi beberapa menit lagi.",
       "unavailable": "Laporan belum bisa dikirim sekarang. Coba sebentar lagi.",
       "network": "Tidak ada koneksi. Periksa internetmu lalu coba lagi."
+    }
+  },
+  "changelog": {
+    "title": "Apa yang baru",
+    "intro": "Semua yang berubah, terbaru di atas.",
+    "read": "Apa yang baru",
+    "current": "Versi kamu",
+    "kind": {
+      "new": "Baru",
+      "improved": "Ditingkatkan",
+      "fixed": "Diperbaiki"
+    },
+    "whatsNew": {
+      "title": "Baru di v{{version}}",
+      "readMore": "Lihat {{count}} lainnya",
+      "dismiss": "Tutup"
+    }
+  },
+  "help": {
+    "open": "Cara main",
+    "title": "Cara main",
+    "intro": "Borong Indonesia, tarik sewa, dan bertahan lebih lama dari yang lain.",
+    "goal": {
+      "title": "Tujuannya",
+      "win": "Jadi pemain terkaya saat waktu habis.",
+      "early": "Atau menang lebih cepat: kalau semua lawan bangkrut, selesai saat itu juga.",
+      "setup": "{{minPlayers}}–{{maxPlayers}} pemain, {{clock}} menit, modal awal {{startingCash}} per orang."
+    },
+    "turn": {
+      "title": "Giliranmu",
+      "roll": "Lempar dadu dan maju sebanyak angkanya.",
+      "resolve": "Selesaikan petak tempatmu mendarat — beli, bayar sewa, ambil kartu, atau bayar pajak.",
+      "act": "Boleh pakai satu aksi (lihat di bawah).",
+      "end": "Akhiri giliran. Dapat dadu kembar? Lempar sekali lagi dulu."
+    },
+    "money": {
+      "title": "Cari cuan",
+      "salary": "Lewati GO untuk terima gaji — besarnya tergantung peran yang kamu pilih.",
+      "rent": "Punya petak, dan tiap lawan yang mendarat di situ bayar sewa ke kamu.",
+      "upgrade": "Naikkan tier petakmu supaya sewanya makin mahal."
+    },
+    "actions": {
+      "title": "Aksimu",
+      "meta": "{{metaPerLap}} aksi tiap satu putaran papan — work, hustle, judol, lobi, sabotase, korupsi — masing-masing sekali per putaran.",
+      "negotiate": "Nego dengan pemain mana pun kapan saja, bahkan di luar giliranmu.",
+      "pinjol": "Ambil pinjol kalau lagi seret: bunga {{pinjolRate}}% tiap putaran selama belum lunas, maksimal {{pinjolMax}} pinjaman."
+    },
+    "trouble": {
+      "title": "Kalau lagi apes",
+      "debt": "Nggak sanggup bayar? Jual petak ke bank, nego sama lawan, atau pinjam.",
+      "jail": "Penjara menahanmu {{jailTurns}} giliran — atau bayar {{jailFee}} biar langsung keluar.",
+      "out": "Utangmu melebihi yang bisa kamu kumpulkan, kamu tersingkir."
+    },
+    "board": {
+      "title": "Simbol papan"
     }
   }
 }

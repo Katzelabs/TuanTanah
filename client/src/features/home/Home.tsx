@@ -7,7 +7,9 @@ import { AppVersion } from '@/components/AppVersion.js'
 import { ControlCluster } from '@/components/ControlCluster.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
+import { WhatsNew } from '@/features/changelog/index.js'
 import { FeedbackButton } from '@/features/feedback/index.js'
+import { HelpButton, useHelp } from '@/features/help/index.js'
 import { FriendsButton } from '@/features/social/index.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { AuthMenu, Avatar, SignInButton, useAuth } from '@/features/auth/index.js'
@@ -73,6 +75,7 @@ export function Home() {
             <>
               <SoundToggle />
               <LanguageSwitcher />
+              <HelpButton />
               <FeedbackButton />
             </>
           }
@@ -109,6 +112,8 @@ export function Home() {
           </div>
         </div>
 
+        <WhatsNew />
+
         <HowItWorks />
       </main>
 
@@ -124,9 +129,18 @@ export function Home() {
  * in a fixed, findable place rather than behind a menu.
  */
 function SiteFooter() {
+  const { t } = useTranslation()
   return (
-    <footer className="mt-10 flex justify-center border-t-2 border-ink/10 pt-5">
+    <footer className="mt-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t-2 border-ink/10 pt-5">
       <AppVersion />
+      {/* Next to the version on purpose: the version number is what makes
+          someone wonder what changed, so the answer belongs beside it. */}
+      <Link
+        to="/changelog"
+        className="text-2xs font-bold uppercase tracking-wide text-ink-muted underline underline-offset-4 hover:text-ink"
+      >
+        {t('changelog.read')}
+      </Link>
     </footer>
   )
 }
@@ -365,6 +379,7 @@ function Perk({ children }: { children: ReactNode }) {
  */
 function HowItWorks() {
   const { t } = useTranslation()
+  const openHelp = useHelp((s) => s.openHelp)
   const regions = Object.values(REGIONS)
 
   return (
@@ -387,6 +402,15 @@ function HowItWorks() {
           title={t('home.how.deals.title')}
           body={t('home.how.deals.body')}
         />
+      </div>
+
+      {/* The `?` in the corner cluster is the always-available route in; this is
+          the discoverable one. Someone who just read three paragraphs of summary
+          and wants the actual rules looks here, not in an overflow menu. */}
+      <div className="mt-5 flex justify-center">
+        <Button variant="secondary" size="sm" onClick={openHelp}>
+          {t('help.open')}
+        </Button>
       </div>
 
       <div className="mt-6 border-t-2 border-ink/15 pt-5">

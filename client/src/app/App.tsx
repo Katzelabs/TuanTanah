@@ -9,7 +9,9 @@ import { VotingModal } from '@/features/game/VotingModal/VotingModal.js'
 import { Account } from '@/features/account/Account.js'
 import { DevMultiplayer } from '@/app/DevMultiplayer.js'
 import { useAuth } from '@/features/auth/index.js'
+import { Changelog } from '@/features/changelog/index.js'
 import { FeedbackModal, useFeedback } from '@/features/feedback/index.js'
+import { HelpModal, HelpPage } from '@/features/help/index.js'
 import { Home } from '@/features/home/Home.js'
 import { MatchHistory } from '@/features/history/MatchHistory.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
@@ -49,6 +51,11 @@ export function App() {
         <Route path="/" element={roomId ? <Navigate to={`/room/${roomId}`} replace /> : <Home />} />
         <Route path="/room/:roomId" element={<RoomGate />} />
         <Route path="/history" element={<MatchHistory />} />
+        {/* Public: release notes are for everyone, signed in or not. */}
+        <Route path="/changelog" element={<Changelog />} />
+        {/* Public, and deliberately a real URL: the rules are the thing you send
+            someone before they've joined anything. */}
+        <Route path="/help" element={<HelpPage />} />
         {/* Signed-in only; the page itself bounces guests home. */}
         <Route path="/account" element={<Account />} />
         <Route path="/design" element={<StyleGuide />} />
@@ -63,6 +70,9 @@ export function App() {
       <AuctionModal />
       <IncomingDealModal />
       <RoomInviteToast />
+      {/* Same reason as the feedback modal below: the rules have to be readable
+          mid-turn, and a route would unmount the match to show them. */}
+      <HelpModal />
       {/* Mounted here, not in a route: a report must be fileable from inside a
           live game, and navigating to a page would unmount the match. */}
       <FeedbackModal />

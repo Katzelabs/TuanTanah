@@ -1,3 +1,4 @@
+import { Sparkles } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -279,6 +280,12 @@ function AboutCard() {
         <span className="text-sm font-bold text-ink">{t('version.label')}</span>
         <AppVersion className="text-xs" />
       </div>
+      <Link to="/changelog" className="mt-3 block">
+        <Button variant="secondary" block className="justify-start">
+          <Sparkles size={16} aria-hidden />
+          {t('changelog.read')}
+        </Button>
+      </Link>
     </SectionCard>
   )
 }

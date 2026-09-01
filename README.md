@@ -111,4 +111,33 @@ Where it surfaces:
 - `GET /api/health` → `version` + `buildSha`
 - the server's startup log line
 
-**To cut a release:** bump `APP_VERSION` and the root `package.json` together, then `make deploy`.
+## Changelog
+
+Two different things share the word, so keep them apart:
+
+| Where                      | Audience    | Contains                                                               |
+| -------------------------- | ----------- | ---------------------------------------------------------------------- |
+| `shared/data/changelog.ts` | **players** | Release notes rendered at `/changelog`, in English **and** Indonesian. |
+| `docs/changelog/`          | **us**      | Engineering write-ups — constants, tables, ClickUp links.              |
+
+The player-facing one is written for someone who plays the game, not someone who reads the diff:
+"Fixed players being kicked out of their room after losing connection", never "refactor socket
+session keying".
+
+**Write the entry in the same PR as the change it describes.** That is the whole mechanism. A
+changelog maintained as a separate chore goes stale within two releases, and a page saying the game
+stopped moving six months ago is worse than no page — it reads as an abandoned product.
+`server/test/changelog.test.ts` enforces the half that can be enforced: the newest entry's version
+must equal `APP_VERSION`, so bumping the version without writing the entry fails CI.
+
+## Cutting a release
+
+1. Add the release object to the top of `shared/data/changelog.ts` — newest first, both languages,
+   lines grouped by `new` / `improved` / `fixed`.
+2. Bump `APP_VERSION` in `shared/version.ts` **and** the root `package.json` to the same number.
+3. `pnpm check && pnpm test` — the version-match and changelog tests fail if step 1 or 2 was skipped.
+4. `make deploy` on the VPS. It stamps both images with the commit SHA and runs migrations before the
+   new backend serves.
+
+Returning players see a one-time, dismissible "what's new" card on the home page; it is keyed off a
+per-browser `tuan-tanah:lastSeenVersion` and never shown to a first-time player.
