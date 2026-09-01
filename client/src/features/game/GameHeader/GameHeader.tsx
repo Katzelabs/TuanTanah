@@ -2,6 +2,7 @@ import { Flag, House, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useGame } from '@/store/gameStore.js'
 import { GameTimer } from '@/features/game/GameTimer/GameTimer.js'
+import { FeedbackButton } from '@/features/feedback/index.js'
 import { LeaveButton, SurrenderButton } from '@/components/RoomActions.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 
@@ -38,6 +39,9 @@ export function GameHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {/* The whole point of the modal: reporting mid-game costs the player
+            nothing, because nothing here navigates away from the match. */}
+        <FeedbackButton />
         <SoundToggle className="h-8 w-8 text-sm" />
         {phase === 'ended' ? (
           <LeaveButton label={t('common.backHome')} icon={<House size={16} strokeWidth={2.5} />} />

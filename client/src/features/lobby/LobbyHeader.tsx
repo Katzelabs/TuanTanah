@@ -1,6 +1,7 @@
 import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ControlCluster } from '@/components/ControlCluster.js'
+import { FeedbackButton } from '@/features/feedback/index.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { LeaveButton } from '@/components/RoomActions.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
@@ -37,6 +38,7 @@ export function LobbyHeader({ roomId, onInvite }: { roomId: string; onInvite: ()
             <>
               <SoundToggle />
               <LanguageSwitcher />
+              <FeedbackButton />
             </>
           }
         >

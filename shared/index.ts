@@ -2,6 +2,7 @@
 export * from './types/game.js'
 export * from './types/events.js'
 export * from './types/auth.js'
+export * from './types/feedback.js'
 // Release version + build identity, read by both tiers (see version.ts).
 export * from './version.js'
 // Game data — split into content modules under data/ (see docs/REFACTORING_PLAN.md).

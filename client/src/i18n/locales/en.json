@@ -900,5 +900,38 @@
     "label": "Version",
     "about": "About",
     "aboutHint": "The build you're running. Include it when you report a problem."
+  },
+  "feedback": {
+    "open": "Report a problem",
+    "title": "Report a problem",
+    "intro": "Tell us what went wrong or what would make the game better. We read everything.",
+    "type": {
+      "label": "What is this?",
+      "bug": "Bug",
+      "suggestion": "Idea",
+      "other": "Other"
+    },
+    "field": {
+      "title": "Summary",
+      "titlePlaceholder": "Dice roll did nothing",
+      "description": "What happened?",
+      "descriptionPlaceholder": "What you were doing, what you expected, and what happened instead.",
+      "contact": "Contact (optional)",
+      "contactPlaceholder": "Email, Discord, or IG",
+      "contactHint": "Only so we can follow up. Leave it blank if you'd rather not."
+    },
+    "attached": "Your device, screen size, and current game are attached automatically — you don't need to type them.",
+    "send": "Send report",
+    "sending": "Sending…",
+    "sent": {
+      "title": "Report sent",
+      "body": "Thanks — it's with the team. Fixes show up in the game as they ship."
+    },
+    "errors": {
+      "invalid": "Please add a summary and a description.",
+      "rate_limited": "That's a lot of reports in a short time. Please try again in a few minutes.",
+      "unavailable": "We couldn't send that right now. Please try again in a moment.",
+      "network": "No connection. Check your internet and try again."
+    }
   }
 }

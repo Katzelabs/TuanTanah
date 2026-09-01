@@ -7,6 +7,7 @@ import { AppVersion } from '@/components/AppVersion.js'
 import { ControlCluster } from '@/components/ControlCluster.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
+import { FeedbackButton } from '@/features/feedback/index.js'
 import { FriendsButton } from '@/features/social/index.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { AuthMenu, Avatar, SignInButton, useAuth } from '@/features/auth/index.js'
@@ -72,6 +73,7 @@ export function Home() {
             <>
               <SoundToggle />
               <LanguageSwitcher />
+              <FeedbackButton />
             </>
           }
         >

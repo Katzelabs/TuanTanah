@@ -900,5 +900,38 @@
     "label": "Versi",
     "about": "Tentang",
     "aboutHint": "Versi yang sedang kamu jalankan. Sertakan saat melaporkan masalah."
+  },
+  "feedback": {
+    "open": "Laporkan masalah",
+    "title": "Laporkan masalah",
+    "intro": "Ceritakan apa yang bermasalah atau apa yang bisa membuat game ini lebih baik. Semua kami baca.",
+    "type": {
+      "label": "Ini tentang apa?",
+      "bug": "Bug",
+      "suggestion": "Ide",
+      "other": "Lainnya"
+    },
+    "field": {
+      "title": "Ringkasan",
+      "titlePlaceholder": "Dadu dilempar tapi tidak jalan",
+      "description": "Apa yang terjadi?",
+      "descriptionPlaceholder": "Apa yang kamu lakukan, apa yang kamu harapkan, dan apa yang terjadi.",
+      "contact": "Kontak (opsional)",
+      "contactPlaceholder": "Email, Discord, atau IG",
+      "contactHint": "Hanya supaya kami bisa menghubungi kamu. Boleh dikosongkan."
+    },
+    "attached": "Perangkat, ukuran layar, dan kondisi permainanmu ikut terkirim otomatis — tidak perlu kamu ketik.",
+    "send": "Kirim laporan",
+    "sending": "Mengirim…",
+    "sent": {
+      "title": "Laporan terkirim",
+      "body": "Terima kasih — sudah sampai ke tim. Perbaikannya akan muncul di game setelah rilis."
+    },
+    "errors": {
+      "invalid": "Mohon isi ringkasan dan penjelasannya.",
+      "rate_limited": "Terlalu banyak laporan dalam waktu singkat. Coba lagi beberapa menit lagi.",
+      "unavailable": "Laporan belum bisa dikirim sekarang. Coba sebentar lagi.",
+      "network": "Tidak ada koneksi. Periksa internetmu lalu coba lagi."
+    }
   }
 }

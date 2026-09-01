@@ -9,6 +9,7 @@ import { VotingModal } from '@/features/game/VotingModal/VotingModal.js'
 import { Account } from '@/features/account/Account.js'
 import { DevMultiplayer } from '@/app/DevMultiplayer.js'
 import { useAuth } from '@/features/auth/index.js'
+import { FeedbackModal, useFeedback } from '@/features/feedback/index.js'
 import { Home } from '@/features/home/Home.js'
 import { MatchHistory } from '@/features/history/MatchHistory.js'
 import { RoomGate } from '@/features/game/RoomGate.js'
@@ -21,11 +22,18 @@ export function App() {
   const initInvites = useInvites((s) => s.init)
   const roomId = useGame((s) => s.roomId)
   const refreshAuth = useAuth((s) => s.refresh)
+  const initFeedback = useFeedback((s) => s.init)
 
   useEffect(() => {
     init()
     initInvites()
   }, [init, initInvites])
+
+  // Asks once whether this deployment has anywhere to send reports. Until it
+  // answers, every feedback entry point stays hidden.
+  useEffect(() => {
+    void initFeedback()
+  }, [initFeedback])
 
   // Hydrate the session once on boot. Also the return path from the Google
   // redirect: that comes back as a full page load, so this reads the new cookie.
@@ -55,6 +63,9 @@ export function App() {
       <AuctionModal />
       <IncomingDealModal />
       <RoomInviteToast />
+      {/* Mounted here, not in a route: a report must be fileable from inside a
+          live game, and navigating to a page would unmount the match. */}
+      <FeedbackModal />
     </div>
   )
 }

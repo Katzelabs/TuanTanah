@@ -10,6 +10,7 @@ import { registerAccountRoutes } from '../modules/auth/accountRoutes.js'
 import { authEnabled, destroySession, resolveSession } from '../modules/auth/index.js'
 import { registerAuthRoutes } from '../modules/auth/routes.js'
 import { authGate } from '../modules/auth/socket.js'
+import { registerFeedbackRoutes } from '../modules/feedback/index.js'
 import { registerHistoryRoutes } from '../modules/history/index.js'
 import type { TTServer } from '../realtime/common.js'
 import { registerFriendHandlers } from '../realtime/friends.js'
@@ -65,6 +66,10 @@ async function main() {
   // because they belong to a feature, not to the bootstrap.
   registerHistoryRoutes(app)
   registerRoomRoutes(app, store)
+  // Unconditional, unlike the account routes below: reporting a bug must work
+  // for guests, and on a deployment with no sink configured the route reports
+  // itself unavailable rather than not existing.
+  registerFeedbackRoutes(app)
 
   // Account settings mutations. Accounts are opt-in — blank Google credentials
   // leave the game fully guest-playable — so these only mount when configured.

@@ -57,10 +57,30 @@ export interface FriendshipsTable {
   created_at: Generated<Date>
 }
 
+// ---- In-app feedback (ClickUp 86eyr3xtu, migration 0005_feedback) ----
+
+export interface FeedbackTable {
+  id: Generated<number>
+  type: string
+  title: string
+  description: string
+  contact: string | null
+  /** Resolved from the session cookie, never from the payload. Null for guests. */
+  user_id: string | null
+  room_id: string | null
+  app_version: string
+  build_sha: string
+  user_agent: string | null
+  /** Viewport, language, and the compact game snapshot — see FeedbackContext. */
+  context: unknown
+  created_at: Generated<Date>
+}
+
 export interface Database {
   games: GamesTable
   game_players: GamePlayersTable
   users: UsersTable
   auth_identities: AuthIdentitiesTable
   friendships: FriendshipsTable
+  feedback: FeedbackTable
 }

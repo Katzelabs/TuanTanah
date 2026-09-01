@@ -23,18 +23,30 @@ const connectionsByIp = new Map<string, number>()
 let totalConnections = 0
 
 /**
- * Best-effort client IP. Behind the bundled nginx the direct peer is the proxy,
- * so we honour the first `X-Forwarded-For` hop it sets; with no proxy we fall
- * back to the socket's own address. (XFF is only trustworthy when a trusted
- * proxy sets it — that's the documented deployment.)
+ * Best-effort client IP from a raw `X-Forwarded-For` header plus the direct peer
+ * address.
+ *
+ * Behind the platform edge the direct peer is the proxy, so without this every
+ * player shares one address — which turns any per-IP limit into a global one.
+ * We honour the first XFF hop the edge sets and fall back to the peer when there
+ * is no proxy. (XFF is only trustworthy when a trusted proxy sets it — that's the
+ * documented deployment.)
+ *
+ * Exported because the HTTP side needs exactly the same answer: `security.ts`
+ * owns this decision so the socket limiter and the feedback route's rate limit
+ * cannot key on two different notions of "who is this".
  */
-function clientIp(socket: Socket): string {
-  const xff = socket.handshake.headers['x-forwarded-for']
-  if (typeof xff === 'string' && xff.length > 0) {
-    const first = xff.split(',')[0]?.trim()
+export function clientIpFrom(xff: string | string[] | undefined, peer: string | undefined): string {
+  const header = Array.isArray(xff) ? xff[0] : xff
+  if (typeof header === 'string' && header.length > 0) {
+    const first = header.split(',')[0]?.trim()
     if (first) return first
   }
-  return socket.handshake.address || 'unknown'
+  return peer || 'unknown'
+}
+
+function clientIp(socket: Socket): string {
+  return clientIpFrom(socket.handshake.headers['x-forwarded-for'], socket.handshake.address)
 }
 
 /**

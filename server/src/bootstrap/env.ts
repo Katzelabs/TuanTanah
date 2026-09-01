@@ -27,6 +27,10 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL?.trim() || '',
   // Sentry error tracking. Blank = disabled, same opt-in shape as databaseUrl.
   sentryDsn: process.env.SENTRY_DSN?.trim() || '',
+  // Discord webhook that in-app feedback is posted to. Blank = that sink is off;
+  // with DATABASE_URL also blank the feedback form has nowhere to send reports
+  // and the client hides its entry points entirely.
+  feedbackWebhookUrl: process.env.FEEDBACK_DISCORD_WEBHOOK?.trim() || '',
   // Google OAuth for player accounts. Blank = accounts disabled and the game stays
   // fully guest-playable, the same opt-in shape as sentryDsn / databaseUrl.
   googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() || '',
