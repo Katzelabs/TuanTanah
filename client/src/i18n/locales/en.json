@@ -899,5 +899,10 @@
   "hud": {
     "showPanel": "Show game panel",
     "hidePanel": "Hide game panel"
+  },
+  "version": {
+    "label": "Version",
+    "about": "About",
+    "aboutHint": "The build you're running. Include it when you report a problem."
   }
 }

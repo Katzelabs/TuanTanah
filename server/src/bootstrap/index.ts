@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
 import Fastify from 'fastify'
 import { Server } from 'socket.io'
+import { APP_VERSION, versionLabel } from '@tuan-tanah/shared'
 import { assertSafeCors, env, isDev } from './env.js'
 import { flushSentry, initSentry } from './sentry.js'
 import { registerAccountRoutes } from '../modules/auth/accountRoutes.js'
@@ -52,6 +53,11 @@ async function main() {
       store: store.backend,
       storeReachable,
       uptime: process.uptime(),
+      // Which build is actually serving. The deploy path is `git pull` + rebuild
+      // on the box, so "did my change ship?" has until now been answerable only
+      // by reading container logs; these two fields answer it over HTTP.
+      version: APP_VERSION,
+      buildSha: env.buildSha,
     }
   })
 
@@ -91,7 +97,7 @@ async function main() {
   })
 
   await app.listen({ port: env.port, host: '0.0.0.0' })
-  app.log.info(`Tuan Tanah server ready (store: ${store.backend})`)
+  app.log.info(`Tuan Tanah ${versionLabel(env.buildSha)} ready (store: ${store.backend})`)
   // Worth one line at startup: blank credentials are a supported state, so an
   // accounts feature that is simply switched off looks identical to one that is
   // broken. Say which it is instead of leaving it to be discovered.

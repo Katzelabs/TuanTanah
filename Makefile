@@ -5,6 +5,12 @@
 
 .PHONY: deploy up down logs restart ps health migrate net
 
+# Commit being deployed, stamped into both images so `/api/health` and the UI can
+# say which build is actually running. `export` puts it in every recipe's shell,
+# where compose interpolates it into the `args:` blocks. Falls back to `dev` in a
+# tarball checkout with no .git.
+export BUILD_SHA := $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
+
 # One-step redeploy: pull latest, rebuild images, apply migrations, restart.
 deploy:
 	git pull --ff-only
@@ -13,6 +19,7 @@ deploy:
 # Bring the stack up. Migrations run against the freshly built image BEFORE the
 # new backend starts serving, so the schema is never behind the code.
 up: net
+	@echo "[build] BUILD_SHA=$(BUILD_SHA)"
 	docker compose build
 	$(MAKE) migrate
 	docker compose up -d

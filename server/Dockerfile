@@ -19,6 +19,13 @@ COPY tsconfig.base.json ./
 COPY shared ./shared
 COPY server ./server
 
+# Which commit this image came from. Unlike the client's, this one is only read
+# at boot (bootstrap/env.ts), so it could have been a runtime variable — it is a
+# build arg anyway so the two tiers report the same SHA for one `make deploy`,
+# and so a container can never claim a build it wasn't made from.
+ARG BUILD_SHA=""
+ENV BUILD_SHA=$BUILD_SHA
+
 ENV NODE_ENV=production
 EXPOSE 3000
 

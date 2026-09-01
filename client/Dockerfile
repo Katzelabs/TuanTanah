@@ -23,6 +23,12 @@ COPY client ./client
 # This is also why prod and staging need separate image builds.
 ARG VITE_PUBLIC_URL=""
 ENV VITE_PUBLIC_URL=$VITE_PUBLIC_URL
+# Which commit this bundle came from, shown in-app and quoted in bug reports.
+# Same build-arg reasoning as VITE_PUBLIC_URL above: Vite substitutes VITE_* at
+# build time, so a runtime `environment:` entry would never reach the bundle.
+# Left blank when unset, which `lib/version.ts` renders as `dev`.
+ARG VITE_BUILD_SHA=""
+ENV VITE_BUILD_SHA=$VITE_BUILD_SHA
 RUN pnpm --filter @tuan-tanah/client build
 
 FROM caddy:2-alpine

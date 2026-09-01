@@ -1,6 +1,7 @@
 // Environment configuration with sensible local-dev defaults.
 import { fileURLToPath } from 'node:url'
 import { config } from 'dotenv'
+import { DEV_BUILD_SHA } from '@tuan-tanah/shared'
 
 // Load the repo-root .env before anything reads process.env.
 //
@@ -17,6 +18,10 @@ config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) })
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
+  // Short git SHA of the image this process was built from, injected as a build
+  // arg by server/Dockerfile. Blank when running from source, which is the honest
+  // answer for `pnpm dev` — see DEV_BUILD_SHA in shared/version.ts.
+  buildSha: process.env.BUILD_SHA?.trim() || DEV_BUILD_SHA,
   redisUrl: process.env.REDIS_URL?.trim() || '',
   // Postgres for durable game-history archival. Blank = persistence no-ops.
   databaseUrl: process.env.DATABASE_URL?.trim() || '',

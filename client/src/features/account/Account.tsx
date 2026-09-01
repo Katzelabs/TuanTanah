@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import type { AuthUser } from '@tuan-tanah/shared'
+import { AppVersion } from '@/components/AppVersion.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
 import { Button, Card, Modal, Toast } from '@/components/ui/index.js'
@@ -67,6 +68,7 @@ function AccountSettings({ user }: { user: AuthUser }) {
         <FriendCodeCard friendCode={user.friendCode} />
         <ConnectedAccountCard user={user} />
         <PreferencesCard />
+        <AboutCard />
 
         <Card
           pad="lg"
@@ -257,6 +259,25 @@ function PreferencesCard() {
           <span className="text-sm font-bold text-ink">{t('account.preferences.sound')}</span>
           <SoundToggle />
         </div>
+      </div>
+    </SectionCard>
+  )
+}
+
+/**
+ * Build identity, on the page a player is already on when something is wrong.
+ *
+ * Sits under Preferences rather than in the danger zone because it is reference
+ * information, not a setting — nothing here is adjustable, and the hint says
+ * what it is *for* so a reporter knows to include it.
+ */
+function AboutCard() {
+  const { t } = useTranslation()
+  return (
+    <SectionCard heading={t('version.about')} hint={t('version.aboutHint')}>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-sm font-bold text-ink">{t('version.label')}</span>
+        <AppVersion className="text-xs" />
       </div>
     </SectionCard>
   )

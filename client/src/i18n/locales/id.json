@@ -899,5 +899,10 @@
   "hud": {
     "showPanel": "Tampilkan panel permainan",
     "hidePanel": "Sembunyikan panel permainan"
+  },
+  "version": {
+    "label": "Versi",
+    "about": "Tentang",
+    "aboutHint": "Versi yang sedang kamu jalankan. Sertakan saat melaporkan masalah."
   }
 }

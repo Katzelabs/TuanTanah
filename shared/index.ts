@@ -2,6 +2,8 @@
 export * from './types/game.js'
 export * from './types/events.js'
 export * from './types/auth.js'
+// Release version + build identity, read by both tiers (see version.ts).
+export * from './version.js'
 // Game data — split into content modules under data/ (see docs/REFACTORING_PLAN.md).
 // Re-exported flat here so `@tuan-tanah/shared` keeps a single import surface.
 export * from './data/economy.js'

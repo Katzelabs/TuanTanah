@@ -20,6 +20,10 @@ services:
         # Vite bakes VITE_* at build time, so this must be a build arg — setting it
         # only in `environment:` would have no effect on the shipped bundle.
         VITE_PUBLIC_URL: ${VITE_PUBLIC_URL:-}
+        # Comes from the Makefile (`git rev-parse --short HEAD`), not from .env —
+        # it identifies the commit being built, so pinning it in a file would make
+        # it a lie the moment anything else is deployed. Blank renders as `dev`.
+        VITE_BUILD_SHA: ${BUILD_SHA:-}
     # No `ports:`. The edge owns :80/:443 for the whole box (PLATFORM.md rule 1).
     # This container is reachable only over the `platform` network.
     environment:
@@ -62,6 +66,10 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
+      args:
+        # Same source and reasoning as the web tier's VITE_BUILD_SHA above, so
+        # one `make deploy` stamps both images with the same commit.
+        BUILD_SHA: ${BUILD_SHA:-}
     # DATABASE_URL, CORS_ORIGINS, ROOM_TTL_HOURS come from .env — deliberately not
     # overridden here so the shared-Postgres connection string stays in one place.
     env_file: .env

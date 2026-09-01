@@ -3,6 +3,7 @@ import { Crown, Handshake, History, MapPin, Settings, type LucideIcon } from 'lu
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
+import { AppVersion } from '@/components/AppVersion.js'
 import { ControlCluster } from '@/components/ControlCluster.js'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher.js'
 import { SoundToggle } from '@/components/SoundToggle.js'
@@ -108,7 +109,23 @@ export function Home() {
 
         <HowItWorks />
       </main>
+
+      <SiteFooter />
     </div>
+  )
+}
+
+/**
+ * The page's one persistent piece of build identity. Home is the only screen
+ * every player passes through, and the foot of it is where a version number is
+ * conventionally looked for — out of the way of the hero and the play card, but
+ * in a fixed, findable place rather than behind a menu.
+ */
+function SiteFooter() {
+  return (
+    <footer className="mt-10 flex justify-center border-t-2 border-ink/10 pt-5">
+      <AppVersion />
+    </footer>
   )
 }
 

@@ -87,3 +87,28 @@ See [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full runbook (DNS, firewall, veri
 ## Environment
 
 Copy `.env.example` to `.env`. Postgres (game-history archive) is optional — set `DATABASE_URL` and run `pnpm --filter server migrate` to enable it; leave it blank to disable (live state lives in Redis/memory regardless). For local dev, `docker compose -f docker-compose.dev.yml up -d` brings up both Redis and Postgres.
+
+## Versioning
+
+One release number, in two places that a test keeps in agreement:
+
+- `shared/version.ts` → `APP_VERSION`, imported by both tiers (`shared/` has no build step).
+- the root `package.json` `version` field — what a human bumps.
+
+`server/test/version.test.ts` fails if they disagree, so a half-finished bump can't ship. The
+per-workspace manifests (`client/`, `server/`, `shared/`) are private and never published; their
+`version` fields are meaningless and stay put.
+
+Alongside it, `BUILD_SHA` identifies the _commit_ an image came from. `make deploy` resolves it with
+`git rev-parse --short HEAD` and passes it to both images as a build arg — `VITE_BUILD_SHA` is baked
+into the client bundle by Vite, `BUILD_SHA` is read by the server at boot. It is not in `.env`: a
+value pinned in a file would be wrong the moment anything else is deployed. Running from source, both
+tiers report `dev`.
+
+Where it surfaces:
+
+- foot of the home page, and the "About" card on `/account` — as `v0.2.0` or `v0.2.0 · 1a2b3c4`
+- `GET /api/health` → `version` + `buildSha`
+- the server's startup log line
+
+**To cut a release:** bump `APP_VERSION` and the root `package.json` together, then `make deploy`.
