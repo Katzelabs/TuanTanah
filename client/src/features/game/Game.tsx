@@ -542,7 +542,7 @@ function GameOverScreen({
         <div className="mt-5 flex justify-center">
           <LeaveButton label={t('common.backHomeIcon')} />
         </div>
-        <div className="mt-4 text-center">
+        <div className="mt-5">
           <SupportLink variant="gameOver" />
         </div>
       </div>

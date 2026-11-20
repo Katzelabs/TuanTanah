@@ -1000,6 +1000,10 @@
   },
   "support": {
     "footer": "Dukung game ini",
-    "gameOver": "Suka permainannya? Dukung game ini di Tako"
+    "cta": "Dukung di Tako",
+    "gameOver": {
+      "title": "Suka permainannya?",
+      "body": "Tip kecil di Tako membantu Tuan Tanah tetap gratis dan terus berkembang."
+    }
   }
 }
