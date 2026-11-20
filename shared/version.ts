@@ -12,7 +12,7 @@
 //
 // Bumping this is part of cutting a release, alongside its changelog entry — see
 // the release checklist in README.md.
-export const APP_VERSION = '0.2.0'
+export const APP_VERSION = '0.2.1'
 
 /**
  * Placeholder used by both tiers when no build SHA was injected — i.e. running

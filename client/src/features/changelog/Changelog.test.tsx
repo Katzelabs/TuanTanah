@@ -29,10 +29,12 @@ describe('Changelog', () => {
 
   it('groups changes under New / Improved / Fixed', () => {
     renderPage()
-    const kinds = new Set(CHANGELOG[0]!.changes.map((c) => c.kind))
-    for (const kind of kinds) {
-      const label = { new: /^New$/, improved: /^Improved$/, fixed: /^Fixed$/ }[kind]
-      expect(screen.getByText(label)).toBeInTheDocument()
+    // One heading per kind per release — counted across every release on the
+    // page, so the test holds once the changelog has more than one entry.
+    const labels = { new: /^New$/, improved: /^Improved$/, fixed: /^Fixed$/ } as const
+    for (const kind of Object.keys(labels) as (keyof typeof labels)[]) {
+      const releasesWithKind = CHANGELOG.filter((r) => r.changes.some((c) => c.kind === kind))
+      expect(screen.queryAllByText(labels[kind])).toHaveLength(releasesWithKind.length)
     }
   })
 
