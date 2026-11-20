@@ -1,5 +1,7 @@
 # Tuan Tanah 🇮🇩
 
+[![Support on Tako](https://img.shields.io/badge/Support-Tako-ff5f5f?style=flat)](https://tako.id/ridwanhoffmann)
+
 A real-time multiplayer web-based Monopoly game with an Indonesian theme. 2–8 players, two property tracks, role passives, a pinjol (loan) system, themed cards, and structured negotiation.
 
 See [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) and [`docs/TECHNICAL_REQUIREMENT.md`](docs/TECHNICAL_REQUIREMENT.md) for the full design and architecture.

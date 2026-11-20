@@ -28,6 +28,7 @@ import { PinjolModal } from '@/features/game/PinjolModal/PinjolModal.js'
 import { PlayerPanel } from '@/features/game/PlayerPanel/PlayerPanel.js'
 import { PlayerStatus } from '@/features/game/PlayerStatus/PlayerStatus.js'
 import { PropertyModal } from '@/features/game/PropertyModal/PropertyModal.js'
+import { SupportLink } from '@/features/support/index.js'
 import { LeaveButton } from '@/components/RoomActions.js'
 import { Badge, Button, Card, Tabs, Tooltip } from '@/components/ui/index.js'
 import { useMediaQuery } from '@/hooks/useMediaQuery.js'
@@ -540,6 +541,9 @@ function GameOverScreen({
 
         <div className="mt-5 flex justify-center">
           <LeaveButton label={t('common.backHomeIcon')} />
+        </div>
+        <div className="mt-5">
+          <SupportLink variant="gameOver" />
         </div>
       </div>
     </div>

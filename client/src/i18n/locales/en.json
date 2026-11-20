@@ -997,5 +997,13 @@
     "board": {
       "title": "Board symbols"
     }
+  },
+  "support": {
+    "footer": "Support the game",
+    "cta": "Support on Tako",
+    "gameOver": {
+      "title": "Enjoyed the game?",
+      "body": "A small tip on Tako helps keep Tuan Tanah free and growing."
+    }
   }
 }

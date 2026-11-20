@@ -11,6 +11,7 @@ import { WhatsNew } from '@/features/changelog/index.js'
 import { FeedbackButton } from '@/features/feedback/index.js'
 import { HelpButton, useHelp } from '@/features/help/index.js'
 import { FriendsButton } from '@/features/social/index.js'
+import { SupportLink } from '@/features/support/index.js'
 import { Badge, Button, Card } from '@/components/ui/index.js'
 import { AuthMenu, Avatar, SignInButton, useAuth } from '@/features/auth/index.js'
 import { useAuthUser } from '@/hooks/useAuthUser.js'
@@ -141,6 +142,7 @@ function SiteFooter() {
       >
         {t('changelog.read')}
       </Link>
+      <SupportLink />
     </footer>
   )
 }

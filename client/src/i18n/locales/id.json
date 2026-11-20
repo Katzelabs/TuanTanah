@@ -997,5 +997,13 @@
     "board": {
       "title": "Simbol papan"
     }
+  },
+  "support": {
+    "footer": "Dukung game ini",
+    "cta": "Dukung di Tako",
+    "gameOver": {
+      "title": "Suka permainannya?",
+      "body": "Tip kecil di Tako membantu Tuan Tanah tetap gratis dan terus berkembang."
+    }
   }
 }
