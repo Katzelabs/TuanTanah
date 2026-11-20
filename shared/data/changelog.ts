@@ -28,6 +28,11 @@ export const CHANGELOG: readonly ChangelogRelease[] = [
     changes: [
       {
         kind: 'new',
+        en: 'Like the game? There is now a "Support the game" link at the bottom of the home page and on the game-over screen. It is a tip jar only — supporting gives no advantage in matches.',
+        id: 'Suka game ini? Sekarang ada tautan "Dukung game ini" di bagian bawah halaman utama dan di layar akhir permainan. Ini hanya untuk tip — mendukung tidak memberi keuntungan apa pun dalam pertandingan.',
+      },
+      {
+        kind: 'new',
         en: 'Rules you can actually reach: what you are trying to win, how a turn works, and what every button does — openable in the middle of a match without leaving it.',
         id: 'Aturan yang benar-benar bisa kamu buka: apa yang harus kamu menangkan, bagaimana satu giliran berjalan, dan fungsi setiap tombol — bisa dibuka di tengah pertandingan tanpa keluar dari permainan.',
       },

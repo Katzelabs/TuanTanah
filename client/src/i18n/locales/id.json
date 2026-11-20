@@ -997,5 +997,9 @@
     "board": {
       "title": "Simbol papan"
     }
+  },
+  "support": {
+    "footer": "Dukung game ini",
+    "gameOver": "Suka permainannya? Dukung game ini di Tako"
   }
 }

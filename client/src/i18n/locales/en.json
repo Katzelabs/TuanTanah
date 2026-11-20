@@ -997,5 +997,9 @@
     "board": {
       "title": "Board symbols"
     }
+  },
+  "support": {
+    "footer": "Support the game",
+    "gameOver": "Enjoyed it? Support the game on Tako"
   }
 }

@@ -17,5 +17,7 @@ export * from './data/cards/kejadian.js'
 export * from './data/cards/hustle.js'
 // Player-facing release notes (NOT docs/changelog/, which is engineering notes).
 export * from './data/changelog.js'
+// Donation link (tip jar; grants nothing in-game).
+export * from './data/support.js'
 export * from './rulesets/classic.js'
 export * from './i18n/index.js'
